@@ -1,0 +1,161 @@
+{
+  "name": "miranum-json-forms",
+  "displayName": "Miranum: Json Forms",
+  "description": "Edit JSON Schema files with an modern easy to use editor.",
+  "license": "Apache License 2.0",
+  "version": "0.3.3",
+  "publisher": "miragon-gmbh",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FlowSquad/miranum-vs-code-forms.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FlowSquad/miranum-vs-code-forms/issues"
+  },
+  "engines": {
+    "vscode": "^1.69.0"
+  },
+  "icon": "images/komet.png",
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "activationEvents": [
+    "onCustomEditor:jsonschema-builder",
+    "onCommand:jsonschema-renderer.togglePreview",
+    "onCommand:jsonschema-builder.toggleTextEditor"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "jsonschema-builder",
+        "id": "jsonschema-builder",
+        "displayName": "JSON Schema Builder",
+        "selector": [
+          {
+            "filenamePattern": "*.form"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "configuration": {
+      "title": "Miranum",
+      "properties": {
+        "jsonSchemaBuilder.toggleTextEditor": {
+          "type": "string",
+          "default": "Tab",
+          "description": "Choose where to open the standard text editor.",
+          "enum": [
+            "Group",
+            "Tab"
+          ],
+          "enumDescription": [
+            "Use Group to open the editor to the side of the currently active one.",
+            "Use Tab to open the editor in a new tab."
+          ]
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "jsonschema-renderer.togglePreview",
+        "title": "Miranum: Toggle Preview",
+        "icon": "$(notebook-render-output)"
+      },
+      {
+        "command": "jsonschema-builder.toggleTextEditor",
+        "title": "Miranum: Toggle Standard Text Editor",
+        "icon": "$(notebook-mimetype)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "jsonschema-renderer.togglePreview",
+          "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+        },
+        {
+          "command": "jsonschema-builder.toggleTextEditor",
+          "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "jsonschema-renderer.togglePreview",
+          "group": "navigation",
+          "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+        },
+        {
+          "command": "jsonschema-builder.toggleTextEditor",
+          "group": "navigation",
+          "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "jsonschema-renderer.togglePreview",
+        "key": "ctrl+shift+p",
+        "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+      },
+      {
+        "command": "jsonschema-builder.toggleTextEditor",
+        "key": "ctrl+shift+t",
+        "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+      }
+    ]
+  },
+  "scripts": {
+    "publish": "vsce publish",
+    "vscode:prepublish": "npm run build",
+    "build": "tsup src/extension.ts --dts --external=vscode && vite build --config src/web/vite.config.js && npm run doc",
+    "web": "vite build --config src/web/vite.config.js",
+    "web-dev": "vite build --config src/web/vite.config.js --watch",
+    "watch": "tsup src/extension.ts --dts --external=vscode --sourcemap",
+    "test": "node ./out/test/runTest.js",
+    "doc": "typedoc --options ./docs/typedoc.json"
+  },
+  "dependencies": {
+    "@koumoul/vjsf": "^2.18.0",
+    "@muenchen/digiwf-form-builder": "^0.21.3",
+    "@muenchen/digiwf-form-builder-settings": "^0.21.3",
+    "@muenchen/digiwf-form-renderer": "^0.21.3",
+    "core-js": "^3.8.3",
+    "vue": "^2.7.10",
+    "vuetify": "^2.6.0"
+  },
+  "devDependencies": {
+    "@mdi/font": "^6.9.96",
+    "@mdi/js": "^7.0.96",
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@types/debounce": "^1.2.1",
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.69.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.6",
+    "@typescript-eslint/parser": "^5.30.6",
+    "@vscode/test-electron": "^2.1.3",
+    "@vue/eslint-config-typescript": "^9.1.0",
+    "debounce": "^1.2.1",
+    "deepmerge": "^4.2.2",
+    "eslint": "^8.19.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "glob": "^7.2.0",
+    "mocha": "^9.2.2",
+    "nodemon": "^2.0.19",
+    "path": "^0.12.7",
+    "sass": "~1.32",
+    "tsup": "^6.2.2",
+    "typedoc": "^0.23.11",
+    "typedoc-plugin-markdown": "^3.13.5",
+    "typescript": "^4.5.5",
+    "unplugin-vue-components": "^0.22.7",
+    "vite": "^3.0.8",
+    "vite-plugin-static-copy": "^0.7.0",
+    "vite-plugin-vue2": "^2.0.2",
+    "vue-template-compiler": "^2.7.10"
+  }
+}

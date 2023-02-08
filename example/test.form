@@ -1,0 +1,72 @@
+{
+    "key": "Form_jw5yok",
+    "schema": {
+        "key": "MyStartForm",
+        "type": "object",
+        "allOf": [
+            {
+                "title": "Section",
+                "description": "",
+                "type": "object",
+                "x-options": {
+                    "sectionsTitlesClasses": [
+                        "d-none"
+                    ]
+                },
+                "allOf": [
+                    {
+                        "containerType": "group",
+                        "title": "Group",
+                        "description": "",
+                        "x-options": {
+                            "childrenClass": "pl-0"
+                        },
+                        "properties": {
+                            "7a87997c-55aa-44f0-b581-cc2833f58576": {
+                                "fieldType": "text",
+                                "title": "Textfield",
+                                "type": "string",
+                                "x-options": {
+                                    "fieldColProps": {
+                                        "cols": 12,
+                                        "sm": 12
+                                    }
+                                },
+                                "x-props": {
+                                    "outlined": true,
+                                    "dense": true
+                                }
+                            },
+                            "3ea21587-bd32-448b-b187-a96ff806b736": {
+                                "fieldType": "file",
+                                "title": "Files",
+                                "x-display": "file",
+                                "type": "object",
+                                "x-options": {
+                                    "fieldColProps": {
+                                        "cols": 12,
+                                        "sm": 12
+                                    }
+                                },
+                                "x-props": {
+                                    "outlined": true,
+                                    "dense": true
+                                },
+                                "properties": {
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "amount": {
+                                        "type": "integer"
+                                    }
+                                }
+                            }
+                        },
+                        "key": "1075b28a-a9a0-4878-9d30-fba45cf40f1a"
+                    }
+                ],
+                "key": "9cfc36d4-1601-443a-8954-5dc7cc5b62c3"
+            }
+        ]
+    }
+}
