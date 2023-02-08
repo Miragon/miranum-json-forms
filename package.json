@@ -3,7 +3,7 @@
   "displayName": "Miranum: Json Forms",
   "description": "Edit JSON Schema files with an modern easy to use editor.",
   "license": "Apache License 2.0",
-  "version": "0.3.3",
+  "version": "0.0.1",
   "publisher": "miragon-gmbh",
   "repository": {
     "type": "git",
@@ -21,51 +21,33 @@
     "Visualization"
   ],
   "activationEvents": [
-    "onCustomEditor:jsonschema-builder",
-    "onCommand:jsonschema-renderer.togglePreview",
-    "onCommand:jsonschema-builder.toggleTextEditor"
+    "onCustomEditor:jsonforms-modeler",
+    "onCommand:jsonforms-renderer.togglePreview",
+    "onCommand:jsonforms-modeler.toggleTextEditor"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "customEditors": [
       {
-        "viewType": "jsonschema-builder",
-        "id": "jsonschema-builder",
-        "displayName": "JSON Schema Builder",
+        "viewType": "jsonforms-modeler",
+        "id": "jsonforms-modeler",
+        "displayName": "Miranum Json Forms",
         "selector": [
           {
-            "filenamePattern": "*.form"
+            "filenamePattern": "*.jsonform"
           }
         ],
         "priority": "default"
       }
     ],
-    "configuration": {
-      "title": "Miranum",
-      "properties": {
-        "jsonSchemaBuilder.toggleTextEditor": {
-          "type": "string",
-          "default": "Tab",
-          "description": "Choose where to open the standard text editor.",
-          "enum": [
-            "Group",
-            "Tab"
-          ],
-          "enumDescription": [
-            "Use Group to open the editor to the side of the currently active one.",
-            "Use Tab to open the editor in a new tab."
-          ]
-        }
-      }
-    },
     "commands": [
       {
-        "command": "jsonschema-renderer.togglePreview",
+        "command": "jsonforms-renderer.togglePreview",
         "title": "Miranum: Toggle Preview",
         "icon": "$(notebook-render-output)"
       },
       {
-        "command": "jsonschema-builder.toggleTextEditor",
+        "command": "jsonforms-modeler.toggleTextEditor",
         "title": "Miranum: Toggle Standard Text Editor",
         "icon": "$(notebook-mimetype)"
       }
@@ -73,37 +55,37 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "jsonschema-renderer.togglePreview",
-          "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+          "command": "jsonforms-renderer.togglePreview",
+          "when": "resourceExtname == .form && jsonforms-modeler.openCustomEditors > 0"
         },
         {
-          "command": "jsonschema-builder.toggleTextEditor",
-          "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+          "command": "jsonforms-modeler.toggleTextEditor",
+          "when": "resourceExtname == .form && jsonforms-modeler.openCustomEditors > 0"
         }
       ],
       "editor/title": [
         {
-          "command": "jsonschema-renderer.togglePreview",
+          "command": "jsonforms-renderer.togglePreview",
           "group": "navigation",
-          "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+          "when": "resourceExtname == .form && jsonforms-modeler.openCustomEditors > 0"
         },
         {
-          "command": "jsonschema-builder.toggleTextEditor",
+          "command": "jsonforms-modeler.toggleTextEditor",
           "group": "navigation",
-          "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+          "when": "resourceExtname == .form && jsonforms-modeler.openCustomEditors > 0"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "jsonschema-renderer.togglePreview",
+        "command": "jsonforms-renderer.togglePreview",
         "key": "ctrl+shift+p",
-        "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+        "when": "resourceExtname == .form && jsonforms-modeler.openCustomEditors > 0"
       },
       {
-        "command": "jsonschema-builder.toggleTextEditor",
+        "command": "jsonforms-modeler.toggleTextEditor",
         "key": "ctrl+shift+t",
-        "when": "resourceExtname == .form && jsonschema-builder.openCustomEditors > 0"
+        "when": "resourceExtname == .form && jsonforms-modeler.openCustomEditors > 0"
       }
     ]
   },

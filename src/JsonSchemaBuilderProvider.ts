@@ -21,7 +21,7 @@ import {ViewState} from "./lib";
 export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvider {
 
     /** Unique identifier for the custom editor provider. */
-    public static readonly viewType = 'jsonschema-builder';
+    public static readonly viewType = 'jsonforms-modeler';
 
     /** Number of currently open custom text editors with the view type `jsonschema-builder`. */
     private static counter = 0;
@@ -112,7 +112,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                         }
                     }, (rejected) => {
                         if (!document.isClosed) {
-                            console.error('JsonSchema Builder', rejected);
+                            console.error('[JsonForms Modeler]', rejected);
                         }
                     });
             }
@@ -207,7 +207,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         // CleanUp after Custom Editor was closed.
         webviewPanel.onDidDispose(() => {
             JsonSchemaBuilderProvider.counter--;
-            vscode.commands.executeCommand('setContext', 'jsonschema-builder.openCustomEditors', JsonSchemaBuilderProvider.counter);
+            vscode.commands.executeCommand('setContext', 'jsonforms-modeler.openCustomEditors', JsonSchemaBuilderProvider.counter);
 
             this.textEditor.close(this.controller.document.fileName);
             this.preview.close();
@@ -224,7 +224,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         // Necessary set up for toggle command
         // only enable the command if a custom editor is open
         JsonSchemaBuilderProvider.counter++;
-        vscode.commands.executeCommand('setContext', 'jsonschema-builder.openCustomEditors', JsonSchemaBuilderProvider.counter);
+        vscode.commands.executeCommand('setContext', 'jsonforms-modeler.openCustomEditors', JsonSchemaBuilderProvider.counter);
 
         // set the document
         try {
