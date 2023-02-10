@@ -4,96 +4,94 @@
  */
 
 import * as vscode from "vscode";
-import {Schema} from "./types";
+import {JsonForm} from "./types";
 
 /**
  * Get minimum form.
  */
-export function getMinimum(): Schema {
-    const key = 'Form_' + getNonce(6).toLowerCase();
-    return JSON.parse(JSON.stringify({
-        "schema": {
-            "key": "MyStartForm",
-            "type": "object",
-            "x-display": "stepper",
-            "allOf": []
-        },
-        "key": key
-    }))
-}
+//export function getMinimum(): Schema {
+//    const key = 'Form_' + getNonce(6).toLowerCase();
+//    return JSON.parse(JSON.stringify({
+//        "schema": {
+//            "key": "MyStartForm",
+//            "type": "object",
+//            "x-display": "stepper",
+//            "allOf": []
+//        },
+//        "key": key
+//    }))
+//}
 
 /**
  * Get the default content which is displayed when the data model is empty.
  */
-export function getDefault(): Schema {
-    const key = 'Form_' + getNonce(6).toLowerCase();
-    return JSON.parse(JSON.stringify({
-        "schema": {
-            "key": "MyStartForm",
-            "type": "object",
-            "x-display": "stepper",
-            "allOf": [{
-                "key": "sectionKey1",
-                "title": "First Section",
-                "type": "object",
-                "x-options": {"sectionsTitlesClasses": ["d-none"]},
-                "allOf": [{
-                    "key": "group1",
-                    "title": "First Group",
-                    "type": "object",
-                    "x-options": {"childrenClass": "pl-0"},
-                    "properties": {
-                        "stringProp1": {
-                            "fieldType": "text",
-                            "title": "I am a text",
-                            "type": "string",
-                            "x-options": {"fieldColProps": {"cols": 12, "sm": 6}},
-                            "x-props": {"outlined": true, "dense": true}
-                        },
-                        "numberProp1": {
-                            "fieldType": "integer",
-                            "type": "integer",
-                            "title": "I am a number",
-                            "x-options": {"fieldColProps": {"cols": 12, "sm": 6}},
-                            "x-props": {"outlined": true, "dense": true}
-                        },
-                        "textarea1": {
-                            "fieldType": "textarea",
-                            "type": "string",
-                            "x-display": "textarea",
-                            "title": "I am a textarea",
-                            "x-props": {"outlined": true, "dense": true}
-                        },
-                        "booleanprop": {
-                            "fieldType": "boolean",
-                            "type": "boolean",
-                            "title": "I am a checkbox",
-                            "x-props": {"outlined": true, "dense": true}
-                        },
-                        "dateprop": {
-                            "fieldType": "date",
-                            "type": "string",
-                            "format": "date",
-                            "title": "I am a date",
-                            "x-props": {"outlined": true, "dense": true}
-                        }
-                    }
-                }]
-            }],
-        },
-        "key": key
-    }));
-}
+//export function getDefault(): Schema {
+//    const key = 'Form_' + getNonce(6).toLowerCase();
+//    return JSON.parse(JSON.stringify({
+//        "schema": {
+//            "key": "MyStartForm",
+//            "type": "object",
+//            "x-display": "stepper",
+//            "allOf": [{
+//                "key": "sectionKey1",
+//                "title": "First Section",
+//                "type": "object",
+//                "x-options": {"sectionsTitlesClasses": ["d-none"]},
+//                "allOf": [{
+//                    "key": "group1",
+//                    "title": "First Group",
+//                    "type": "object",
+//                    "x-options": {"childrenClass": "pl-0"},
+//                    "properties": {
+//                        "stringProp1": {
+//                            "fieldType": "text",
+//                            "title": "I am a text",
+//                            "type": "string",
+//                            "x-options": {"fieldColProps": {"cols": 12, "sm": 6}},
+//                            "x-props": {"outlined": true, "dense": true}
+//                        },
+//                        "numberProp1": {
+//                            "fieldType": "integer",
+//                            "type": "integer",
+//                            "title": "I am a number",
+//                            "x-options": {"fieldColProps": {"cols": 12, "sm": 6}},
+//                            "x-props": {"outlined": true, "dense": true}
+//                        },
+//                        "textarea1": {
+//                            "fieldType": "textarea",
+//                            "type": "string",
+//                            "x-display": "textarea",
+//                            "title": "I am a textarea",
+//                            "x-props": {"outlined": true, "dense": true}
+//                        },
+//                        "booleanprop": {
+//                            "fieldType": "boolean",
+//                            "type": "boolean",
+//                            "title": "I am a checkbox",
+//                            "x-props": {"outlined": true, "dense": true}
+//                        },
+//                        "dateprop": {
+//                            "fieldType": "date",
+//                            "type": "string",
+//                            "format": "date",
+//                            "title": "I am a date",
+//                            "x-props": {"outlined": true, "dense": true}
+//                        }
+//                    }
+//                }]
+//            }],
+//        },
+//        "key": key
+//    }));
+//}
 
 /**
  * Get the HTML-Document which display the webview
  * @param webview Webview belonging to the panel
  * @param extensionUri
- * @param initialContent
- * @param mode Says which part of the Vue-App should be displayed
  * @returns a string which represents the html content
  */
-export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri, initialContent: Schema, mode: string): string {
+export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri/*, initialContent: JsonForm, mode: string*/): string {
     const vueAppUri = webview.asWebviewUri(vscode.Uri.joinPath(
         extensionUri, 'dist', 'client', 'client.mjs'
     ));
@@ -106,9 +104,9 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
         extensionUri, 'dist', 'client', 'style.css'
     ));
 
-    const fontAppUri = webview.asWebviewUri(vscode.Uri.joinPath(
-        extensionUri, 'dist', 'client', 'assets', 'css', 'materialdesignicons.min.css'
-    ));
+    //const fontAppUri = webview.asWebviewUri(vscode.Uri.joinPath(
+    //    extensionUri, 'dist', 'client', 'assets', 'css', 'materialdesignicons.min.css'
+    //));
 
     const nonce = getNonce();
 
@@ -131,7 +129,6 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
                 
                 <link href="${styleResetUri}" rel="stylesheet" type="text/css" />
                 <link href="${styleAppUri}" rel="stylesheet" type="text/css" />
-                <link href="${fontAppUri}" rel="stylesheet" type="text/css" />
 
                 <title>Json Schema Builder</title>
             </head>
@@ -141,10 +138,6 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
                     // Store the VsCodeAPI in a global variable, so we can use it inside the Vue-App
                     const vscode = acquireVsCodeApi();
                     // Set the initial state of the webview
-                    vscode.setState({
-                        text: '${JSON.stringify(initialContent)}',
-                        mode: '${mode}'
-                    });
                 </script>
                 <script type="text/javascript" src="${vueAppUri}" nonce="${nonce}"></script>
             </body>

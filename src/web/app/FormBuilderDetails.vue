@@ -54,7 +54,7 @@ import { ref, watch} from 'vue'
 import { onMounted } from 'vue'
 import {JsonForms} from "@jsonforms/vue";
 import {createAjv} from "@jsonforms/core";
-import {jsonFormRenderes, emitter, createI18nTranslate} from "@backoffice-plus/formbuilder/src/index";
+import {jsonFormRenderes, emitter, createI18nTranslate} from "@backoffice-plus/formbuilder/src";
 import SchemaCode from './SchemaCode.vue'
 import ResizeArea from "./ResizeArea.vue";
 import {translationsErrors as localeCatalogue} from "@backoffice-plus/formbuilder/src/translations/de";

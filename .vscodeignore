@@ -11,5 +11,5 @@ node_modules/
 example/
 
 **/tsconfig*.json
-**/.eslintrc.js
+**/.disable-eslintrc.js
 **/babel.config.js

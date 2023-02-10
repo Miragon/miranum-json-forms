@@ -1,6 +1,7 @@
-import {Form} from "@muenchen/digiwf-form-renderer";
+import { JsonSchema, UISchemaElement } from '@jsonforms/core'
 
-export type Schema  = {
-    schema: Form
-    key: string
+export type JsonForm  = {
+    schema: JsonSchema,
+    uischema: UISchemaElement
+    data: any
 }
