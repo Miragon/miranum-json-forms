@@ -5,18 +5,18 @@
     "strict": true,
     "jsx": "preserve",
     "moduleResolution": "node",
+    "experimentalDecorators": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": true,
     "sourceMap": true,
-    "baseUrl": "./",
-    "types": [
-    ],
+    "baseUrl": ".",
+    "types": [],
     "paths": {
       "@/*": [
-        "web/*"
+        "app/*"
       ]
     },
     "lib": [
@@ -27,12 +27,13 @@
     ]
   },
   "include": [
-    "./**/*.ts",
-    "./**/*.tsx",
-    "./**/*.vue",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "app/**/*.vue",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
   ],
   "exclude": [
-    "../../node_modules",
-    "../src"
+    "node_modules"
   ]
 }

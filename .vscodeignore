@@ -12,4 +12,3 @@ example/
 
 **/tsconfig*.json
 **/.disable-eslintrc.js
-**/babel.config.js

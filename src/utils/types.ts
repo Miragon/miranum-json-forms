@@ -1,4 +1,4 @@
-import { JsonSchema, UISchemaElement } from '@jsonforms/core'
+import { JsonSchema, UISchemaElement } from '../web/node_modules/@jsonforms/core'
 
 export type JsonForm  = {
     schema: JsonSchema,

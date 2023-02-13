@@ -13,42 +13,58 @@
     </div>
 
     <FormBuilder
-      :jsonForms="jsonForms"
-      :schemaReadOnly="schemaReadOnly"
-      :key="example + (schemaReadOnly?1:0)"
-      v-if="!disableFormbuilder"
+        :jsonForms="jsonForms"
+        :schemaReadOnly="schemaReadOnly"
+        :tools="tools"
+        v-if="!disableFormbuilder"
+        :key="example + (schemaReadOnly?1:0)"
     />
-
-    <FormBuilderDetails  :jsonForms="jsonForms" :key="(disableFormbuilder?1:0)" />
-
+    <FormBuilderDetails :jsonForms="jsonFormsResolved" :key="(disableFormbuilder?1:0)" />
   </div>
 
 </template>
 
 <script setup lang="ts">
-
-import {FormBuilder} from "@backoffice-plus/formbuilder/src/index.ts";
+import {defaultTools, FormBuilder} from "@backoffice-plus/formbuilder";
 import FormBuilderDetails from "./FormBuilderDetails.vue";
-import {computed, ref} from "vue";
-import * as ownExamples from "./jsonForms/index";
+import {computed, onMounted, ref, unref, watch} from "vue";
 import {getExamples} from '@jsonforms/examples/src'
+import {generateDefaultUISchema} from "@jsonforms/core";
+import {resolveSchema} from "@backoffice-plus/formbuilder";
 
-const oe = ownExamples;//import own examples
+const tools = [
+  ...defaultTools,
+]
+
+const oe = [];//import own examples
 
 const examples = computed(() => getExamples().sort((a,b)=>a.label.toLowerCase()>b.label.toLowerCase()?1:-1));
 const example = ref('');
 const schemaReadOnly = ref(false);
 const disableFormbuilder = ref(false);
+const jsonFormsResolved = ref({});
 
 const jsonForms = computed(() => {
   const exampleData = getExamples().find(item => item.label===example.value);
 
-  if(exampleData?.uischema && schemaReadOnly.value) {
-    exampleData.uischema = {};
+  if(exampleData) {
+    if(exampleData?.uischema && schemaReadOnly.value) {
+      exampleData.uischema = {};
+    }
+    if(!exampleData?.uischema && !schemaReadOnly.value) {
+      console.log("sandbox app","UiSschema generated because example is empty");
+      exampleData.uischema = generateDefaultUISchema(exampleData.schema)
+    }
   }
 
   return exampleData
 });
+
+
+watch(() => jsonForms.value, async () => {
+  jsonFormsResolved.value = unref(jsonForms.value);
+  //jsonFormsResolved.value.schema = await resolveSchema(jsonFormsResolved.value.schema);
+})
 
 </script>
 

@@ -93,7 +93,7 @@ import {JsonForm} from "./types";
  */
 export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri/*, initialContent: JsonForm, mode: string*/): string {
     const vueAppUri = webview.asWebviewUri(vscode.Uri.joinPath(
-        extensionUri, 'dist', 'client', 'client.mjs'
+        extensionUri, 'dist', 'client', 'webview.mjs'
     ));
 
     const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(
@@ -110,8 +110,8 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
 
     const nonce = getNonce();
 
-    //TODO
-    // Is there a better way to allow inline styling created by vuetify?
+    // todo
+    //  unsafe-eval in script-src?
 
     return `
             <!DOCTYPE html>
@@ -122,8 +122,9 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
                 <meta http-equiv="Content-Security-Policy" content="default-src 'none';
                     style-src ${webview.cspSource} 'unsafe-inline';
                     font-src ${webview.cspSource};
-                    img-src ${webview.cspSource};
-                    script-src 'nonce-${nonce}';">
+                    img-src ${webview.cspSource} data:;
+                    connect-src ${webview.cspSource} https://api.iconify.design/mdi.json;
+                    script-src 'nonce-${nonce}' 'unsafe-eval';">
 
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 
