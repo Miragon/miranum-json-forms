@@ -15,4 +15,5 @@ npm run build
 code .
 ```
 
-Use `F5` to open the `Extension Host`
+Use `F5` to open the `Extension Host` and `cmd/ctrl + O` 
+to open the examples folder.
