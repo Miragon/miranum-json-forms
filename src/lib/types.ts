@@ -27,5 +27,4 @@ type VscMessage = {
 
 type VscState = {
     text: string;
-    mode: string;
 }

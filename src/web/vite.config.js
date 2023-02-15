@@ -19,7 +19,7 @@ export default defineConfig({
     build: {
         target: 'es2021',
         commonjsOptions: {
-            transformMixedEsModules: true,
+            transformMixedEsModules: true
         },
         lib: {
             entry: 'src/web/app/main.ts',
@@ -27,11 +27,7 @@ export default defineConfig({
             fileName: 'webview',
         },
         outDir: 'dist/client',
-        rollupOptions: {
-            external: [
-                'node_modules/@jsonforms/examples/src/examples/i18n.ts'
-            ],
-        },
+        rollupOptions: {},
         minify: 'esbuild',
     },
     define: {

@@ -89,9 +89,10 @@ import {JsonForm} from "./types";
  * Get the HTML-Document which display the webview
  * @param webview Webview belonging to the panel
  * @param extensionUri
+ * @param initialContent
  * @returns a string which represents the html content
  */
-export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri/*, initialContent: JsonForm, mode: string*/): string {
+export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri, initialContent: JsonForm): string {
     const vueAppUri = webview.asWebviewUri(vscode.Uri.joinPath(
         extensionUri, 'dist', 'client', 'webview.mjs'
     ));
@@ -139,6 +140,9 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
                     // Store the VsCodeAPI in a global variable, so we can use it inside the Vue-App
                     const vscode = acquireVsCodeApi();
                     // Set the initial state of the webview
+                    vscode.setState({
+                        text: '${JSON.stringify(initialContent)}'
+                    });
                 </script>
                 <script type="text/javascript" src="${vueAppUri}" nonce="${nonce}"></script>
             </body>
