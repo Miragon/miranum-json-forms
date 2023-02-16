@@ -2,8 +2,6 @@ import {defineConfig} from 'vite'
 import path from 'path';
 import vue from '@vitejs/plugin-vue'
 
-console.log('path', `${path.resolve(__dirname, './web')}/`);
-
 export default defineConfig({
     resolve: {
         alias: [

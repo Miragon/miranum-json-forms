@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (associations) {
         if (!('*.jsonform' in associations)) {
             const newAssociation = associations;
-            newAssociation['*.form'] = 'json';
+            newAssociation['*.jsonform'] = 'json';
             vscode.workspace.getConfiguration('files').update('associations', newAssociation, true);
         }
     } else {

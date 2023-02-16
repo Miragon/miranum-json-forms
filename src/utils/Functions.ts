@@ -9,90 +9,153 @@ import {JsonForm} from "./types";
 /**
  * Get minimum form.
  */
-//export function getMinimum(): Schema {
-//    const key = 'Form_' + getNonce(6).toLowerCase();
-//    return JSON.parse(JSON.stringify({
-//        "schema": {
-//            "key": "MyStartForm",
-//            "type": "object",
-//            "x-display": "stepper",
-//            "allOf": []
-//        },
-//        "key": key
-//    }))
-//}
+export function getMinimum(): JsonForm {
+    // todo: What is the minimum json object?
+    return JSON.parse(JSON.stringify({
+        "schema": {
+            "type": "object",
+            "properties": {}
+        },
+        "uischema": {
+            "type": "VerticalLayout",
+            "elements": []
+        },
+        "data": {}
+    }))
+}
 
 /**
  * Get the default content which is displayed when the data model is empty.
  */
-//export function getDefault(): Schema {
-//    const key = 'Form_' + getNonce(6).toLowerCase();
-//    return JSON.parse(JSON.stringify({
-//        "schema": {
-//            "key": "MyStartForm",
-//            "type": "object",
-//            "x-display": "stepper",
-//            "allOf": [{
-//                "key": "sectionKey1",
-//                "title": "First Section",
-//                "type": "object",
-//                "x-options": {"sectionsTitlesClasses": ["d-none"]},
-//                "allOf": [{
-//                    "key": "group1",
-//                    "title": "First Group",
-//                    "type": "object",
-//                    "x-options": {"childrenClass": "pl-0"},
-//                    "properties": {
-//                        "stringProp1": {
-//                            "fieldType": "text",
-//                            "title": "I am a text",
-//                            "type": "string",
-//                            "x-options": {"fieldColProps": {"cols": 12, "sm": 6}},
-//                            "x-props": {"outlined": true, "dense": true}
-//                        },
-//                        "numberProp1": {
-//                            "fieldType": "integer",
-//                            "type": "integer",
-//                            "title": "I am a number",
-//                            "x-options": {"fieldColProps": {"cols": 12, "sm": 6}},
-//                            "x-props": {"outlined": true, "dense": true}
-//                        },
-//                        "textarea1": {
-//                            "fieldType": "textarea",
-//                            "type": "string",
-//                            "x-display": "textarea",
-//                            "title": "I am a textarea",
-//                            "x-props": {"outlined": true, "dense": true}
-//                        },
-//                        "booleanprop": {
-//                            "fieldType": "boolean",
-//                            "type": "boolean",
-//                            "title": "I am a checkbox",
-//                            "x-props": {"outlined": true, "dense": true}
-//                        },
-//                        "dateprop": {
-//                            "fieldType": "date",
-//                            "type": "string",
-//                            "format": "date",
-//                            "title": "I am a date",
-//                            "x-props": {"outlined": true, "dense": true}
-//                        }
-//                    }
-//                }]
-//            }],
-//        },
-//        "key": key
-//    }));
-//}
+export function getDefault(): JsonForm {
+    return JSON.parse(JSON.stringify({
+        "schema": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "description": "Please enter your name"
+                },
+                "vegetarian": {
+                    "type": "boolean"
+                },
+                "birthDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Please enter your birth date."
+                },
+                "nationality": {
+                    "type": "string",
+                    "enum": [
+                        "DE",
+                        "IT",
+                        "JP",
+                        "US",
+                        "RU",
+                        "Other"
+                    ]
+                },
+                "personalData": {
+                    "type": "object",
+                    "properties": {
+                        "age": {
+                            "type": "integer",
+                            "description": "Please enter your age."
+                        },
+                        "height": {
+                            "type": "number"
+                        },
+                        "drivingSkill": {
+                            "type": "number",
+                            "maximum": 10,
+                            "minimum": 1,
+                            "default": 7
+                        }
+                    },
+                    "required": [
+                        "age",
+                        "height"
+                    ]
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string",
+                    "maxLength": 5
+                }
+            },
+            "required": [
+                "occupation",
+                "nationality"
+            ]
+        },
+        "uischema": {
+            "type": "VerticalLayout",
+            "elements": [
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/name"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/personalData/properties/age"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/birthDate"
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "text": "Additional Information"
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/personalData/properties/height"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/nationality"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/occupation",
+                            "suggestion": [
+                                "Accountant",
+                                "Engineer",
+                                "Freelancer",
+                                "Journalism",
+                                "Physician",
+                                "Student",
+                                "Teacher",
+                                "Other"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }));
+}
 
 /**
  * Get the HTML-Document which display the webview
  * @param webview Webview belonging to the panel
  * @param extensionUri
  * @param initialContent
+ * @param mode
  * @returns a string which represents the html content
  */
-export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri, initialContent: JsonForm): string {
+export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri, initialContent: JsonForm, mode: string): string {
     const vueAppUri = webview.asWebviewUri(vscode.Uri.joinPath(
         extensionUri, 'dist', 'client', 'webview.mjs'
     ));
@@ -141,7 +204,8 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
                     const vscode = acquireVsCodeApi();
                     // Set the initial state of the webview
                     vscode.setState({
-                        text: '${JSON.stringify(initialContent)}'
+                        text: '${JSON.stringify(initialContent)}',
+                        mode: '${mode}'
                     });
                 </script>
                 <script type="text/javascript" src="${vueAppUri}" nonce="${nonce}"></script>
@@ -154,7 +218,7 @@ export function getNonce(length = 32): string {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const charactersLength = characters.length;
-    for ( let i = 0; i < length; i++ ) {
+    for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;

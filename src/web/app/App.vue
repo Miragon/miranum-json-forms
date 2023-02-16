@@ -2,19 +2,22 @@
 
   <div class="container max-w-screen-lg mx-auto p-4 flex flex-col gap-4">
 
-    <div>
+    <div v-if="mode === 'modeler'">
       Disable Formbuilder: <input type="checkbox" v-model="disableFormbuilder" /><br>
       Schema ReadOnly: <input type="checkbox" v-model="schemaReadOnly" /><br>
     </div>
 
     <FormBuilder
+        :key="key + (schemaReadOnly?1:0)"
         :jsonForms="jsonForms"
         :schemaReadOnly="schemaReadOnly"
         :tools="tools"
-        v-if="!disableFormbuilder"
-        :key="key + (schemaReadOnly?1:0)"
+        v-if="!disableFormbuilder && mode === 'modeler'"
     />
-    <FormBuilderDetails :jsonForms="jsonFormsResolved" :key="(disableFormbuilder?1:0)" />
+    <FormBuilderDetails
+        :key="(disableFormbuilder?1:0)"
+        :jsonForms="jsonFormsResolved"
+    />
   </div>
 
 </template>
@@ -30,7 +33,8 @@ import {ExampleDescription} from "@jsonforms/examples";
 // VS Code stuff
 declare const vscode: VsCode
 const state = vscode.getState();
-const form: JsonForm = JSON.parse(state.text);
+const data: JsonForm = JSON.parse(state.text);
+const mode = ref(state.mode);
 
 const tools = [
   ...defaultTools,
@@ -44,30 +48,31 @@ const jsonFormsResolved = ref({});
 const jsonForms = ref<ExampleDescription>({
   name: 'test',
   label: 'test',
-  data: form.data,
-  schema: form.schema,
-  uischema: form.uischema,
+  data: data.data,
+  schema: data.schema,
+  uischema: data.uischema,
 });
-const key = 1234;
+const key = ref(0);
 
-function updateForm(newForm: JsonForm): void {
+function updateForm(newData: JsonForm): void {
   vscode.setState({
-    text: JSON.stringify(newForm)
+    ...vscode.getState(),
+    text: JSON.stringify(newData)
   });
-
-  if (jsonForms.value) {
-    console.log('updateForm() in', newForm);
-    jsonForms.value.schema = newForm.schema
-    jsonForms.value.uischema = newForm.uischema
-    jsonForms.value.data = newForm.data
+  jsonForms.value = {
+    name: 'test',
+    label: 'test',
+    data: newData.data,
+    schema: newData.schema,
+    uischema: newData.uischema,
   }
+  // todo: Is there a better way to reload the component?
+  key.value++;
 }
 
 function getDataFromExtension(msg: MessageEvent): void {
   const message = msg.data;
   const newForm: JsonForm = message.text;
-
-  console.log('getDataFromExtension()', message.type, newForm);
 
   switch (message.type) {
     case 'jsonform-modeler.updateFromExtension': {
@@ -87,10 +92,6 @@ function getDataFromExtension(msg: MessageEvent): void {
 watch(() => jsonForms.value, async () => {
   jsonFormsResolved.value = unref(jsonForms.value);
   //jsonFormsResolved.value.schema = await resolveSchema(jsonFormsResolved.value.schema);
-})
-
-watch(jsonForms.value.schema, () => {
-  console.log('watch()', jsonForms);
 })
 
 onMounted(() => {
