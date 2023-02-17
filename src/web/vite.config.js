@@ -32,7 +32,7 @@ export default defineConfig({
         "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
     },
     css: {
-        postcss: 'src/web/'
+        postcss: 'src/web'
     }
 })
 
