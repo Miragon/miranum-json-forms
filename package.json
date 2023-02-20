@@ -1,7 +1,7 @@
 {
   "name": "miranum-json-forms",
   "displayName": "Miranum: Json Forms",
-  "description": "Edit JSON Schema files with an modern easy to use editor.",
+  "description": "Create and edit JsonForms with an modern easy to use editor.",
   "license": "Apache License 2.0",
   "version": "0.0.1",
   "publisher": "miragon-gmbh",

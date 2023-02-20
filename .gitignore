@@ -1,7 +1,5 @@
-out
 dist
 **/node_modules
-.vscode-test/
 
 **/.idea
 **/.DS_Store
