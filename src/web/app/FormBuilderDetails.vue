@@ -36,6 +36,11 @@
         </div>
       </ResizeArea>
 
+      <template  v-if="jsonFormsUpdated?.errors?.length">
+        Errors
+        <textarea class="w-full h-60 p-4 bg-white text-red-500 rounded" readonly disabled>{{ jsonFormsUpdated?.errors }}</textarea>
+      </template>
+
       Data
       <textarea class="w-full h-60 p-4 bg-white rounded" readonly disabled>{{ jsonFormsUpdated?.data }}</textarea>
 
@@ -50,23 +55,18 @@
 </style>
 
 
-<script setup>
+<script setup lang="ts">
 import {computed, ref, watch} from 'vue'
-import { onMounted, onBeforeUnmount } from 'vue'
+import { onMounted } from 'vue'
 import {JsonForms} from "@jsonforms/vue";
 import {createAjv} from "@jsonforms/core";
-import {jsonFormRenderes, emitter, createI18nTranslate, useJsonforms} from "@backoffice-plus/formbuilder";
+import {createI18nTranslate, useJsonforms} from "@backoffice-plus/formbuilder";
 import SchemaCode from './SchemaCode.vue'
 import ResizeArea from "./ResizeArea.vue";
+import {vanillaRenderers} from "@jsonforms/vue-vanilla";
+import {boplusVueVanillaRenderers} from "@backoffice-plus/formbuilder";
 
-const localeCatalogue = {
-  'error.minLength': 'Die Eingabe muss mindestens ${limit} Zeichen haben.',
-  'error.maxLength': 'Die Eingabe darf nicht mehr ${limit} Zeichen haben.',
-  'error.pattern': 'Die Eingabe muss folgendem Pattern entsprechen: ${pattern}',
-  'error.minimum': 'Die Eingabe muss größer als ${limit} sein.',
-  'error.maximum': 'Die Eingabe muss kleiner als ${limit} sein.',
-  'error.required': 'Die Eingabe muss ausgefüllt sein.',
-}
+const localeCatalogue = {}
 
 const props = defineProps({
   jsonForms: Object, //read from store
@@ -81,7 +81,8 @@ const jsonFormsUpdated = ref({});
 const newKey = computed(() => JSON.stringify([schema.value,uischema.value]));
 
 const jsonFormRenderesMore = Object.freeze([
-  ...jsonFormRenderes,
+    ...vanillaRenderers,
+    ...boplusVueVanillaRenderers,
 ]);
 
 watch(() => props.jsonForms, () => {

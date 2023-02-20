@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 import {DocumentController} from "./controller";
 import {PreviewComponent, TextEditorComponent} from "./components";
-import {getHtmlForWebview, getMinimum, JsonForm} from './utils';
+import {getHtmlForWebview, getMinimum} from './utils';
 import {ViewState} from "./lib";
 
 /**
@@ -96,7 +96,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         // Setup webview
         webviewPanel.webview.options = {enableScripts: true};
         webviewPanel.webview.html = getHtmlForWebview(
-            webviewPanel.webview, this.context.extensionUri, this.getStringAsJsonForm(this.controller.document.getText()), 'modeler'
+            webviewPanel.webview, this.context.extensionUri, this.controller.content, 'modeler'
         );
 
         // Send content from the extension to the webview
@@ -241,18 +241,6 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         }
 
         return Promise.resolve(true);
-    }
-
-    private getStringAsJsonForm(data: string): JsonForm {
-        if (data.trim().length === 0) {
-            return JSON.parse('{}');
-        }
-
-        try {
-            return JSON.parse(data);
-        } catch {
-            throw new Error('[Controller] Could not parse text!');
-        }
     }
 
     /** @hidden */

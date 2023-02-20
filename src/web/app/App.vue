@@ -10,13 +10,16 @@
     <FormBuilder
         :key="key + (schemaReadOnly?1:0)"
         :jsonForms="jsonForms"
+        :jsonFormsRenderers="jsonFormsRenderers"
         :schemaReadOnly="schemaReadOnly"
         :tools="tools"
-        v-if="!disableFormbuilder && mode === 'modeler'"
+        v-if="!disableFormbuilder"
+        v-show="mode === 'modeler'"
     />
     <FormBuilderDetails
         :key="(disableFormbuilder?1:0)"
-        :jsonForms="jsonFormsResolved"
+        :jsonForms="jsonForms"
+        v-show="mode === 'renderer'"
     />
   </div>
 
@@ -25,10 +28,11 @@
 <script setup lang="ts">
 import {defaultTools, FormBuilder} from "@backoffice-plus/formbuilder";
 import FormBuilderDetails from "./FormBuilderDetails.vue";
-import {onMounted, onUnmounted, ref, unref, watch} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
+import {vanillaRenderers} from "@jsonforms/vue-vanilla";
+import {boplusVueVanillaRenderers} from "@backoffice-plus/formbuilder";
 import {VsCode} from "../../lib";
 import {JsonForm} from "../../utils";
-import {ExampleDescription} from "@jsonforms/examples";
 
 // VS Code stuff
 declare const vscode: VsCode
@@ -38,16 +42,17 @@ const mode = ref(state.mode);
 
 const tools = [
   ...defaultTools,
-]
+];
 
-const oe = [];//import own examples
+const jsonFormsRenderers = Object.freeze([
+    ...vanillaRenderers,
+    ...boplusVueVanillaRenderers,
+]);
 
 const schemaReadOnly = ref(false);
 const disableFormbuilder = ref(false);
-const jsonFormsResolved = ref({});
-const jsonForms = ref<ExampleDescription>({
-  name: 'test',
-  label: 'test',
+//const jsonFormsResolved = ref({});
+const jsonForms = ref<JsonForm>({
   data: data.data,
   schema: data.schema,
   uischema: data.uischema,
@@ -60,8 +65,6 @@ function updateForm(newData: JsonForm): void {
     text: JSON.stringify(newData)
   });
   jsonForms.value = {
-    name: 'test',
-    label: 'test',
     data: newData.data,
     schema: newData.schema,
     uischema: newData.uischema,
@@ -89,10 +92,17 @@ function getDataFromExtension(msg: MessageEvent): void {
   }
 }
 
-watch(() => jsonForms.value, async () => {
-  jsonFormsResolved.value = unref(jsonForms.value);
-  //jsonFormsResolved.value.schema = await resolveSchema(jsonFormsResolved.value.schema);
-})
+// todo: need a way to listen for updates to jsonForms in order to
+//  * save the changes
+//  * update the preview
+
+// todo: delete button not working because vscode intentionally blocks modals in webviews
+//  * override window.confirm() ???
+
+//watch(() => jsonForms.value, async () => {
+//  jsonFormsResolved.value = unref(jsonForms.value);
+//  //jsonFormsResolved.value.schema = await resolveSchema(jsonFormsResolved.value.schema);
+//})
 
 onMounted(() => {
   window.addEventListener('message', getDataFromExtension);
