@@ -230,7 +230,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         try {
             await this.controller.setInitialDocument(document);
 
-        //  if we open a second editor beside one with an open preview window we have to close it and create a new one.
+            // if we open a second editor beside one with an open preview window we have to close it and create a new one.
             if (this.preview.isOpen) {
                 this.preview.close();
             }

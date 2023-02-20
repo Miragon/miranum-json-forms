@@ -19,7 +19,6 @@
     <FormBuilderDetails
         :key="(disableFormbuilder?1:0)"
         :jsonForms="jsonForms"
-        v-show="mode === 'renderer'"
     />
   </div>
 
