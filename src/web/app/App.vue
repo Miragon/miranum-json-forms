@@ -96,8 +96,6 @@ function getDataFromExtension(msg: MessageEvent): void {
 //  * save the changes
 //  * update the preview
 
-// todo: delete button not working because vscode intentionally blocks modals in webviews
-//  * override window.confirm() ???
 let confirm: any = null;
 function confirmed() {
   // this promise resolves when confirm() is called!
@@ -114,22 +112,6 @@ window.confirm = async function (message: string | undefined) {
    content: msg
   })
   return await confirmed();
-  //return new Promise((resolve) => {
-  //  window.addEventListener('message', (event) => {
-  //    if (event.data.type === 'jsonform-modeler.onDelete') {
-  //      console.log('resolve', event.data.text);
-  //      resolve(event.data.text);
-  //    }
-  //  })
-  //  switch (message) {
-  //    case "Wirklich löschen?": {
-  //      vscode.postMessage({
-  //        type: 'jsonform-modeler.onDelete',
-  //        content: message
-  //      })
-  //    }
-  //  }
-  //})
 }
 
 //watch(() => jsonForms.value, async () => {
