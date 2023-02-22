@@ -50,7 +50,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
      * Get the content of the active document.
      **/
     public get content(): JsonForm {
-        return this.getStringAsJson(this.document.getText());
+        return this.getJsonFormFromString(this.document.getText());
     }
 
     /**
@@ -74,7 +74,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
             try {
                 switch (true) {
                     case observer instanceof Preview: {
-                        const content = this.getStringAsJson(this.document.getText());
+                        const content = this.getJsonFormFromString(this.document.getText());
                         observer.update(content);
                         break;
                     }
@@ -94,7 +94,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
      * @param text
      * @private
      */
-    private getStringAsJson(text: string): JsonForm {
+    public getJsonFormFromString(text: string): JsonForm {
         if (text.trim().length === 0) {
             return JSON.parse('{}');
         }
@@ -127,7 +127,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
             try {
                 switch (true) {
                     case observer instanceof Preview: {
-                        const content = this.getStringAsJson(this.document.getText());
+                        const content = this.getJsonFormFromString(this.document.getText());
                         observer.update(content);
                         break;
                     }
