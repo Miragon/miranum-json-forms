@@ -1,0 +1,94 @@
+diff --git a/node_modules/@backoffice-plus/formbuilder/dist/formbuilder.es.js b/node_modules/@backoffice-plus/formbuilder/dist/formbuilder.es.js
+index 442c5e4..600e126 100644
+--- a/node_modules/@backoffice-plus/formbuilder/dist/formbuilder.es.js
++++ b/node_modules/@backoffice-plus/formbuilder/dist/formbuilder.es.js
+@@ -10029,7 +10029,7 @@ const TX = { class: "labelTool" }, PX = { key: 0 }, IX = {
+     const n = e;
+     t({ tool: n.tool });
+     const i = () => {
+-      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
++      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
+     };
+     return (s, u) => (me(), Ae("div", TX, [
+       It(wi, {
+@@ -14106,7 +14106,7 @@ const qX = { class: "unknownTool" }, GX = { key: 0 }, HX = {
+     const n = e;
+     t({ tool: n.tool });
+     const i = () => {
+-      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
++      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
+     };
+     return (s, u) => (me(), Ae("div", qX, [
+       Ta(" UNKNOWN " + yt(e.tool.propertyName) + " ", 1),
+@@ -20502,7 +20502,7 @@ const kee = { class: "combinatorTool" }, Uee = { key: 0 }, zee = {
+       const $ = O.index;
+       s.value.splice($, 1), Nr.emit("formBuilderUpdated");
+     }, y = () => {
+-      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
++      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) {r("deleteByIndex", { index: n.index }); }});
+     };
+     return (O, $) => (me(), Ae("div", kee, [
+       It(wi, {
+@@ -20680,7 +20680,7 @@ const Hee = {
+       const O = y.index;
+       s.value.splice(O, 1), Nr.emit("formBuilderUpdated");
+     }, g = () => {
+-      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
++      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
+     };
+     return (y, O) => (me(), Ae("div", {
+       class: ze(["objectTool", [{ root: e.isRoot }]])
+@@ -21080,7 +21080,7 @@ const ste = {
+     }, p = (y) => {
+       Nr.emit("formBuilderUpdated", y);
+     }, g = () => {
+-      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
++      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
+     };
+     return (y, O) => (me(), Ae("div", {
+       class: ze(["flexAreaTool", ["group/itemF"]]),
+@@ -21312,7 +21312,7 @@ const hte = {
+       const _ = S.index;
+       s.value.splice(_, 1), Nr.emit("formBuilderUpdated");
+     }, $ = () => {
+-      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
++      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
+     };
+     return (S, _) => (me(), Ae("div", {
+       class: ze(["categorizationTool", ["group/itemC"]])
+@@ -21415,7 +21415,7 @@ const $te = { class: "font-bold" }, wte = { key: 0 }, Ote = { key: 0 }, Ste = {
+     const i = n.tool.schema;
+     n.tool.uischema;
+     const s = Ot(() => MX(n.tool.schema, n.tool.uischema)), u = () => {
+-      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
++      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
+     };
+     return (l, f) => (me(), Ae("div", {
+       class: ze(["formInputByTypeTool", ["group/item"]])
+@@ -21782,7 +21782,7 @@ const Rte = { class: "referenceTool" }, Dte = { class: "bg-gray-200 inline p-0.5
+     const n = e;
+     t({ tool: n.tool });
+     const i = () => {
+-      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
++      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
+     };
+     return (s, u) => (me(), Ae("div", Rte, [
+       It(wi, {
+@@ -22344,7 +22344,7 @@ const zte = ["title"], Bte = { key: 0 }, Wte = { key: 1 }, qte = { key: 0 }, Gte
+       const E = w.index;
+       s.value.splice(E, 1), Nr.emit("formBuilderUpdated");
+     }, _ = () => {
+-      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
++      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
+     };
+     return (w, E) => (me(), Ae("div", {
+       class: ze(["arrayTool", { isInlineType: K(f) }]),
+@@ -24878,7 +24878,7 @@ const Eoe = { key: 0 }, aS = /* @__PURE__ */ Ft({
+     )), f = () => {
+       r.addItem(r.control.value.path, Ks(r.control.value.schema))(), !r.appliedOptions.collapseNewItems && s && (i.value = s.value - 1);
+     }, d = (p) => {
+-      confirm("Delete Element: " + r.childLabelForIndex(p)) && (r == null || r.removeItems(r.control.value.path, [p])());
++      confirm("Delete Element: " + r.childLabelForIndex(p)).then((confirmed) => { if(confirmed) { (r == null || r.removeItems(r.control.value.path, [p])()); } });
+     };
+     return (p, g) => (me(), Ae("div", {
+       class: ze(K(r).styles.arrayList.root)
