@@ -15,10 +15,12 @@
         :tools="tools"
         v-if="!disableFormbuilder"
         v-show="mode === 'modeler'"
+        @schemaUpdated="sendChangesToExtension"
     />
     <FormBuilderDetails
         :key="(disableFormbuilder?1:0)"
         :jsonForms="jsonForms"
+        v-if="mode === 'renderer'"
     />
   </div>
 
@@ -32,6 +34,7 @@ import {vanillaRenderers} from "@jsonforms/vue-vanilla";
 import {boplusVueVanillaRenderers} from "@backoffice-plus/formbuilder";
 import {VsCode} from "../../lib";
 import {JsonForm} from "../../utils";
+import {debounce} from "debounce";
 
 // VS Code stuff
 declare const vscode: VsCode
@@ -72,17 +75,22 @@ function updateForm(newData: JsonForm): void {
   key.value++;
 }
 
-function getDataFromExtension(msg: MessageEvent): void {
-  const message = msg.data;
-  const newForm: JsonForm = message.text;
+function getDataFromExtension(message: MessageEvent): void {
+  const msg = message.data;
+  const newForm: JsonForm = JSON.parse(msg.text);
 
-  switch (message.type) {
+  switch (msg.type) {
     case 'jsonform-modeler.updateFromExtension': {
       updateForm(newForm);
       break;
     }
     case 'jsonform-modeler.undo':
     case 'jsonform-modeler.redo': {
+      console.log('undo/redo');
+      updateForm(newForm);
+      break;
+    }
+    case 'jsonform-renderer.updateFromExtension': {
       updateForm(newForm);
       break;
     }
@@ -94,6 +102,20 @@ function getDataFromExtension(msg: MessageEvent): void {
 // todo: need a way to listen for updates to jsonForms in order to
 //  * save the changes
 //  * update the preview
+const sendChangesToExtension = debounce(postMessage, 200);
+function postMessage(jsonForm: JsonForm) {
+  const serialize = JSON.stringify(jsonForm);
+
+  vscode.setState({
+    ...vscode.getState(),
+    text: serialize,
+  });
+
+  vscode.postMessage({
+    type: 'jsonform-modeler.updateFromWebview',
+    content: serialize
+  });
+}
 
 // todo: delete button not working because vscode intentionally blocks modals in webviews
 //  * override window.confirm() ???
