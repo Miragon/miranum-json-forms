@@ -20,12 +20,12 @@ export type VsCode = {
     setState(state: VscState): void;
 };
 
-type VscMessage = {
+export type VscMessage = {
     type: string;
-    content: JSON;
+    content: JSON | string;
 }
 
-type VscState = {
+export type VscState = {
     text: string;
     mode: string;
 }

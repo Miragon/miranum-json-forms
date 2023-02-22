@@ -100,6 +100,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         );
 
         // Send content from the extension to the webview
+        // todo: change signature to (message: VscMessage)
         const updateWebview = (msgType: string) => {
             if (webviewPanel.visible) {
                 webviewPanel.webview.postMessage({
@@ -125,6 +126,23 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                     isUpdateFromWebview = true;
                     this.controller.writeData(document.uri, event.content);
                     break;
+                }
+                case JsonSchemaBuilderProvider.viewType + '.conformation': {
+                    vscode.window.showInformationMessage(
+                        event.content,
+                        ...['Yes', 'No']
+                    ).then((input) => {
+                        const response = (input === "Yes");
+                        webviewPanel.webview.postMessage({
+                            type: JsonSchemaBuilderProvider.viewType + '.conformation',
+                            text: response
+                        });
+                    }, () => {
+                        webviewPanel.webview.postMessage({
+                            type: JsonSchemaBuilderProvider.viewType + '.conformation',
+                            text: false
+                        });
+                    });
                 }
             }
         }, null, disposables);
