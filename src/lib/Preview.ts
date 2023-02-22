@@ -113,7 +113,7 @@ export abstract class Preview<ContentType> implements Updatable<ContentType> {
         try {
             this.webviewObject[0].webviewPanel.webview.postMessage({
                 type: this.webviewOptions.msgType,
-                text: JSON.parse(JSON.stringify(content))
+                text: JSON.stringify(content)
             });
         } catch (error) {
             this.isBuffer = true;
