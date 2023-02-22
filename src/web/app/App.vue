@@ -97,6 +97,10 @@ function getDataFromExtension(msg: MessageEvent): void {
 
 // todo: delete button not working because vscode intentionally blocks modals in webviews
 //  * override window.confirm() ???
+window.confirm = function (message) {
+  console.log(message);
+  return true;
+}
 
 //watch(() => jsonForms.value, async () => {
 //  jsonFormsResolved.value = unref(jsonForms.value);
