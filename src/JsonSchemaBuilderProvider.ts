@@ -127,19 +127,19 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                     this.controller.writeData(document.uri, event.content);
                     break;
                 }
-                case JsonSchemaBuilderProvider.viewType + '.conformation': {
+                case JsonSchemaBuilderProvider.viewType + '.confirmation': {
                     vscode.window.showInformationMessage(
                         event.content,
                         ...['Yes', 'No']
                     ).then((input) => {
                         const response = (input === "Yes");
                         webviewPanel.webview.postMessage({
-                            type: JsonSchemaBuilderProvider.viewType + '.conformation',
+                            type: JsonSchemaBuilderProvider.viewType + '.confirmation',
                             text: response
                         });
                     }, () => {
                         webviewPanel.webview.postMessage({
-                            type: JsonSchemaBuilderProvider.viewType + '.conformation',
+                            type: JsonSchemaBuilderProvider.viewType + '.confirmation',
                             text: false
                         });
                     });

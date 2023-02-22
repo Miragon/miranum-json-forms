@@ -1,5 +1,5 @@
 diff --git a/node_modules/@backoffice-plus/formbuilder/dist/formbuilder.es.js b/node_modules/@backoffice-plus/formbuilder/dist/formbuilder.es.js
-index 442c5e4..600e126 100644
+index 442c5e4..0ed86a2 100644
 --- a/node_modules/@backoffice-plus/formbuilder/dist/formbuilder.es.js
 +++ b/node_modules/@backoffice-plus/formbuilder/dist/formbuilder.es.js
 @@ -10029,7 +10029,7 @@ const TX = { class: "labelTool" }, PX = { key: 0 }, IX = {
@@ -7,7 +7,7 @@ index 442c5e4..600e126 100644
      t({ tool: n.tool });
      const i = () => {
 -      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
-+      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
++      Promise.resolve(confirm("Wirklich löschen?")).then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
      };
      return (s, u) => (me(), Ae("div", TX, [
        It(wi, {
@@ -16,7 +16,7 @@ index 442c5e4..600e126 100644
      t({ tool: n.tool });
      const i = () => {
 -      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
-+      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
++      Promise.resolve(confirm("Wirklich löschen?")).then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
      };
      return (s, u) => (me(), Ae("div", qX, [
        Ta(" UNKNOWN " + yt(e.tool.propertyName) + " ", 1),
@@ -25,7 +25,7 @@ index 442c5e4..600e126 100644
        s.value.splice($, 1), Nr.emit("formBuilderUpdated");
      }, y = () => {
 -      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
-+      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) {r("deleteByIndex", { index: n.index }); }});
++      Promise.resolve(confirm("Wirklich löschen?")).then((confirmed) => { if(confirmed) {r("deleteByIndex", { index: n.index }); }});
      };
      return (O, $) => (me(), Ae("div", kee, [
        It(wi, {
@@ -34,7 +34,7 @@ index 442c5e4..600e126 100644
        s.value.splice(O, 1), Nr.emit("formBuilderUpdated");
      }, g = () => {
 -      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
-+      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
++      Promise.resolve(confirm("Wirklich löschen?")).then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
      };
      return (y, O) => (me(), Ae("div", {
        class: ze(["objectTool", [{ root: e.isRoot }]])
@@ -43,7 +43,7 @@ index 442c5e4..600e126 100644
        Nr.emit("formBuilderUpdated", y);
      }, g = () => {
 -      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
-+      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
++      Promise.resolve(confirm("Wirklich löschen?")).then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
      };
      return (y, O) => (me(), Ae("div", {
        class: ze(["flexAreaTool", ["group/itemF"]]),
@@ -52,7 +52,7 @@ index 442c5e4..600e126 100644
        s.value.splice(_, 1), Nr.emit("formBuilderUpdated");
      }, $ = () => {
 -      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
-+      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
++      Promise.resolve(confirm("Wirklich löschen?")).then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
      };
      return (S, _) => (me(), Ae("div", {
        class: ze(["categorizationTool", ["group/itemC"]])
@@ -61,7 +61,7 @@ index 442c5e4..600e126 100644
      n.tool.uischema;
      const s = Ot(() => MX(n.tool.schema, n.tool.uischema)), u = () => {
 -      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
-+      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
++      Promise.resolve(confirm("Wirklich löschen?")).then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
      };
      return (l, f) => (me(), Ae("div", {
        class: ze(["formInputByTypeTool", ["group/item"]])
@@ -70,7 +70,7 @@ index 442c5e4..600e126 100644
      t({ tool: n.tool });
      const i = () => {
 -      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
-+      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
++      Promise.resolve(confirm("Wirklich löschen?")).then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
      };
      return (s, u) => (me(), Ae("div", Rte, [
        It(wi, {
@@ -79,7 +79,7 @@ index 442c5e4..600e126 100644
        s.value.splice(E, 1), Nr.emit("formBuilderUpdated");
      }, _ = () => {
 -      confirm("Wirklich löschen?") && r("deleteByIndex", { index: n.index });
-+      confirm("Wirklich löschen?").then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
++      Promise.resolve(confirm("Wirklich löschen?")).then((confirmed) => { if(confirmed) { r("deleteByIndex", { index: n.index }); }});
      };
      return (w, E) => (me(), Ae("div", {
        class: ze(["arrayTool", { isInlineType: K(f) }]),
@@ -88,7 +88,7 @@ index 442c5e4..600e126 100644
        r.addItem(r.control.value.path, Ks(r.control.value.schema))(), !r.appliedOptions.collapseNewItems && s && (i.value = s.value - 1);
      }, d = (p) => {
 -      confirm("Delete Element: " + r.childLabelForIndex(p)) && (r == null || r.removeItems(r.control.value.path, [p])());
-+      confirm("Delete Element: " + r.childLabelForIndex(p)).then((confirmed) => { if(confirmed) { (r == null || r.removeItems(r.control.value.path, [p])()); } });
++      Promise.resolve(confirm("Delete Element: " + r.childLabelForIndex(p))).then((confirmed) => { if(confirmed) { (r == null || r.removeItems(r.control.value.path, [p])()); } });
      };
      return (p, g) => (me(), Ae("div", {
        class: ze(K(r).styles.arrayList.root)

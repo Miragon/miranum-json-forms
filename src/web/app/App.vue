@@ -84,7 +84,7 @@ function getDataFromExtension(msg: MessageEvent): void {
       updateForm(message.text);
       break;
     }
-    case 'jsonform-modeler.conformation': {
+    case 'jsonform-modeler.confirmation': {
       confirm(message.text);
     }
     default:
