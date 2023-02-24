@@ -50,7 +50,13 @@
 
 </template>
 
-<style>
+<style scoped>
+body,
+details,
+textarea {
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
 
 </style>
 

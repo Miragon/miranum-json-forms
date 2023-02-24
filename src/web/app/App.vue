@@ -2,7 +2,7 @@
 
   <div class="container max-w-screen-lg mx-auto p-4 flex flex-col gap-4">
 
-    <div v-if="mode === 'modeler'">
+    <div class="checkboxes" v-if="mode === 'modeler'">
       Disable Formbuilder: <input type="checkbox" v-model="disableFormbuilder" /><br>
       Schema ReadOnly: <input type="checkbox" v-model="schemaReadOnly" /><br>
     </div>
@@ -142,11 +142,22 @@ onUnmounted(() => {
 
 <style>
 body {
-  background-color: #f3f4f5;
+  background-color: var(--vscode-editor-background);
+}
+
+div.checkboxes,
+div.checkboxes input {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-editor-foreground);
+}
+
+div.tabs {
+  color: var(--vscode-editor-foreground);
 }
 
 .card {
   @apply
-  bg-white rounded shadow
+  rounded shadow
 }
 </style>
