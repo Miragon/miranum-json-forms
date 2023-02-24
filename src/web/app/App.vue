@@ -41,6 +41,7 @@ declare const vscode: VsCode
 const state = vscode.getState();
 const data: JsonForm = JSON.parse(state.text);
 const mode = ref(state.mode);
+let isUpdateFromExtension = false;
 
 const tools = [
   ...defaultTools,
@@ -78,6 +79,7 @@ function updateForm(newData: JsonForm): void {
 function getDataFromExtension(message: MessageEvent): void {
   const msg = message.data;
   const newForm: JsonForm = JSON.parse(msg.text);
+  isUpdateFromExtension = true;
 
   switch (msg.type) {
     case 'jsonform-modeler.updateFromExtension': {
@@ -86,7 +88,6 @@ function getDataFromExtension(message: MessageEvent): void {
     }
     case 'jsonform-modeler.undo':
     case 'jsonform-modeler.redo': {
-      console.log('undo/redo');
       updateForm(newForm);
       break;
     }
@@ -102,22 +103,22 @@ function getDataFromExtension(message: MessageEvent): void {
   }
 }
 
-// todo: need a way to listen for updates to jsonForms in order to
-//  * save the changes
-//  * update the preview
 const sendChangesToExtension = debounce(postMessage, 200);
 function postMessage(jsonForm: JsonForm) {
-  const serialize = JSON.stringify(jsonForm);
+  if (!isUpdateFromExtension) {
+    const serialize = JSON.stringify(jsonForm);
 
-  vscode.setState({
-    ...vscode.getState(),
-    text: serialize,
-  });
+    vscode.setState({
+      ...vscode.getState(),
+      text: serialize,
+    });
 
-  vscode.postMessage({
-    type: 'jsonform-modeler.updateFromWebview',
-    content: serialize
-  });
+    vscode.postMessage({
+      type: 'jsonform-modeler.updateFromWebview',
+      content: serialize
+    });
+  }
+  isUpdateFromExtension = false // reset
 }
 
 let confirm: any = null;
@@ -137,11 +138,6 @@ window.confirm = async function (message: string | undefined) {
   })
   return await confirmed();
 }
-
-//watch(() => jsonForms.value, async () => {
-//  jsonFormsResolved.value = unref(jsonForms.value);
-//  //jsonFormsResolved.value.schema = await resolveSchema(jsonFormsResolved.value.schema);
-//})
 
 onMounted(() => {
   window.addEventListener('message', getDataFromExtension);

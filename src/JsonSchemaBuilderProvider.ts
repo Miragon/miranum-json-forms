@@ -121,29 +121,33 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
 
         // Receive messages from the webview
         webviewPanel.webview.onDidReceiveMessage(event => {
-            switch (event.type) {
-                case JsonSchemaBuilderProvider.viewType + '.updateFromWebview': {
-                    isUpdateFromWebview = true;
-                    this.controller.writeData(document.uri, this.controller.getJsonFormFromString(event.content));
-                    break;
-                }
-                case JsonSchemaBuilderProvider.viewType + '.confirmation': {
-                    vscode.window.showInformationMessage(
-                        event.content,
-                        ...['Yes', 'No']
-                    ).then((input) => {
-                        const response = (input === "Yes");
-                        webviewPanel.webview.postMessage({
-                            type: JsonSchemaBuilderProvider.viewType + '.confirmation',
-                            text: response
+            try {
+                switch (event.type) {
+                    case JsonSchemaBuilderProvider.viewType + '.updateFromWebview': {
+                        isUpdateFromWebview = true;
+                        this.controller.writeData(document.uri, this.controller.getJsonFormFromString(event.content));
+                        break;
+                    }
+                    case JsonSchemaBuilderProvider.viewType + '.confirmation': {
+                        vscode.window.showInformationMessage(
+                            event.content,
+                            ...['Yes', 'No']
+                        ).then((input) => {
+                            const response = (input === "Yes");
+                            webviewPanel.webview.postMessage({
+                                type: JsonSchemaBuilderProvider.viewType + '.confirmation',
+                                text: response
+                            });
+                        }, () => {
+                            webviewPanel.webview.postMessage({
+                                type: JsonSchemaBuilderProvider.viewType + '.confirmation',
+                                text: false
+                            });
                         });
-                    }, () => {
-                        webviewPanel.webview.postMessage({
-                            type: JsonSchemaBuilderProvider.viewType + '.confirmation',
-                            text: false
-                        });
-                    });
+                    }
                 }
+            } catch (error) {
+                console.error(error);
             }
         }, null, disposables);
 

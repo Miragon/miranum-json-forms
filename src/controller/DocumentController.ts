@@ -146,7 +146,9 @@ export class DocumentController implements IContentController<TextDocument | Jso
      */
     public writeChangesToDocument(uri: Uri, content: JsonForm): Promise<boolean> {
         if (this._document && this.document.uri != uri) {
-            return Promise.reject('Inconsistent document!');
+            return Promise.reject('[DocumentController] Inconsistent document!');
+        } else if (JSON.stringify(this.content) === JSON.stringify(content)) {
+            return Promise.reject('[DocumentController] No changes to apply!');
         }
 
         const edit = new vscode.WorkspaceEdit();
