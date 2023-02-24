@@ -79,24 +79,26 @@ function updateForm(newData: JsonForm): void {
 function getDataFromExtension(message: MessageEvent): void {
   const msg = message.data;
   const newForm: JsonForm = JSON.parse(msg.text);
-  isUpdateFromExtension = true;
 
   switch (msg.type) {
     case 'jsonform-modeler.updateFromExtension': {
+      isUpdateFromExtension = true;
       updateForm(newForm);
       break;
     }
     case 'jsonform-modeler.undo':
     case 'jsonform-modeler.redo': {
-      updateForm(newForm);
-      break;
-    }
-    case 'jsonform-renderer.updateFromExtension': {
+      isUpdateFromExtension = true;
       updateForm(newForm);
       break;
     }
     case 'jsonform-modeler.confirmation': {
       confirm(msg.text);
+      break;
+    }
+    case 'jsonform-renderer.updateFromExtension': {
+      updateForm(newForm);
+      break;
     }
     default:
       break;
