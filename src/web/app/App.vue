@@ -94,6 +94,9 @@ function getDataFromExtension(message: MessageEvent): void {
       updateForm(newForm);
       break;
     }
+    case 'jsonform-modeler.confirmation': {
+      confirm(msg.text);
+    }
     default:
       break;
   }
@@ -117,11 +120,22 @@ function postMessage(jsonForm: JsonForm) {
   });
 }
 
-// todo: delete button not working because vscode intentionally blocks modals in webviews
-//  * override window.confirm() ???
-window.confirm = function (message) {
-  console.log(message);
-  return true;
+let confirm: any = null;
+function confirmed() {
+  // this promise resolves when confirm() is called!
+  return new Promise((resolve) => {
+    confirm = (response: boolean) => { resolve(response) }
+  })
+}
+
+// @ts-ignore
+window.confirm = async function (message: string | undefined) {
+  const msg = (message) ? message : "";
+  vscode.postMessage({
+   type: 'jsonform-modeler.confirmation',
+   content: msg
+  })
+  return await confirmed();
 }
 
 //watch(() => jsonForms.value, async () => {
