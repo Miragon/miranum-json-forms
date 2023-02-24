@@ -93,8 +93,8 @@
     "publish": "vsce publish",
     "vscode:prepublish": "npm run build",
     "build": "tsup src/extension.ts --dts --external=vscode && npm run web",
-    "web": "vite build --config src/web/vite.config.js",
-    "web-dev": "vite build --config src/web/vite.config.js --watch",
+    "web": "patch-package && vite build --config src/web/vite.config.js",
+    "web-dev": "patch-package && vite build --config src/web/vite.config.js --watch",
     "watch": "tsup src/extension.ts --dts --external=vscode --sourcemap",
     "test": "node ./out/test/runTest.js",
     "doc": "typedoc --options ./docs/typedoc.json"
@@ -118,6 +118,7 @@
     "@vscode/test-electron": "^2.1.3",
     "autoprefixer": "^10.4.13",
     "debounce": "^1.2.1",
+    "patch-package": "^6.5.1",
     "postcss": "^8.4.21",
     "tsup": "^6.2.2",
     "typescript": "^4.5.5",

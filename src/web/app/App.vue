@@ -25,11 +25,10 @@
 </template>
 
 <script setup lang="ts">
-import {defaultTools, FormBuilder} from "@backoffice-plus/formbuilder";
+import {boplusVueVanillaRenderers, defaultTools, FormBuilder} from "@backoffice-plus/formbuilder";
 import FormBuilderDetails from "./FormBuilderDetails.vue";
 import {onMounted, onUnmounted, ref} from "vue";
 import {vanillaRenderers} from "@jsonforms/vue-vanilla";
-import {boplusVueVanillaRenderers} from "@backoffice-plus/formbuilder";
 import {VsCode} from "../../lib";
 import {JsonForm} from "../../utils";
 
@@ -74,17 +73,19 @@ function updateForm(newData: JsonForm): void {
 
 function getDataFromExtension(msg: MessageEvent): void {
   const message = msg.data;
-  const newForm: JsonForm = message.text;
 
   switch (message.type) {
     case 'jsonform-modeler.updateFromExtension': {
-      updateForm(newForm);
+      updateForm(message.text);
       break;
     }
     case 'jsonform-modeler.undo':
     case 'jsonform-modeler.redo': {
-      updateForm(newForm);
+      updateForm(message.text);
       break;
+    }
+    case 'jsonform-modeler.confirmation': {
+      confirm(message.text);
     }
     default:
       break;
@@ -95,11 +96,22 @@ function getDataFromExtension(msg: MessageEvent): void {
 //  * save the changes
 //  * update the preview
 
-// todo: delete button not working because vscode intentionally blocks modals in webviews
-//  * override window.confirm() ???
-window.confirm = function (message) {
-  console.log(message);
-  return true;
+let confirm: any = null;
+function confirmed() {
+  // this promise resolves when confirm() is called!
+  return new Promise((resolve) => {
+    confirm = (response: boolean) => { resolve(response) }
+  })
+}
+
+// @ts-ignore
+window.confirm = async function (message: string | undefined) {
+  const msg = (message) ? message : "";
+  vscode.postMessage({
+   type: 'jsonform-modeler.confirmation',
+   content: msg
+  })
+  return await confirmed();
 }
 
 //watch(() => jsonForms.value, async () => {
