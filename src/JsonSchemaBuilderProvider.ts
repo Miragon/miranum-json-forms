@@ -120,12 +120,14 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         }
 
         // Receive messages from the webview
-        webviewPanel.webview.onDidReceiveMessage(event => {
+        webviewPanel.webview.onDidReceiveMessage(async (event) => {
             try {
                 switch (event.type) {
                     case JsonSchemaBuilderProvider.viewType + '.updateFromWebview': {
                         isUpdateFromWebview = true;
-                        this.controller.writeData(document.uri, this.controller.getJsonFormFromString(event.content));
+                        // todo: check lodash.debounce out
+                        await this.controller.writeData(document.uri, this.controller.getJsonFormFromString(event.content))
+                        isUpdateFromWebview = false // reset
                         break;
                     }
                     case JsonSchemaBuilderProvider.viewType + '.confirmation': {
