@@ -34,7 +34,7 @@ import {vanillaRenderers} from "@jsonforms/vue-vanilla";
 import {boplusVueVanillaRenderers} from "@backoffice-plus/formbuilder";
 import {VsCode} from "../../lib";
 import {JsonForm} from "../../utils";
-import {debounce} from "debounce";
+import debounce from "lodash.debounce";
 
 // VS Code stuff
 declare const vscode: VsCode
@@ -56,7 +56,7 @@ const schemaReadOnly = ref(false);
 const disableFormbuilder = ref(false);
 //const jsonFormsResolved = ref({});
 const jsonForms = ref<JsonForm>({
-  data: data.data,
+  data: data.data ? data.data : JSON.parse('{}'),
   schema: data.schema,
   uischema: data.uischema,
 });
@@ -68,7 +68,7 @@ function updateForm(newData: JsonForm): void {
     text: JSON.stringify(newData)
   });
   jsonForms.value = {
-    data: newData.data,
+    data: newData.data ? newData.data : JSON.parse('{}'),
     schema: newData.schema,
     uischema: newData.uischema,
   }
@@ -76,38 +76,46 @@ function updateForm(newData: JsonForm): void {
   key.value++;
 }
 
-function getDataFromExtension(message: MessageEvent): void {
+const getDataFromExtension = debounce(receiveMessage, 10);
+function receiveMessage(message: MessageEvent): void {
   const msg = message.data;
-  const newForm: JsonForm = JSON.parse(msg.text);
 
-  switch (msg.type) {
-    case 'jsonform-modeler.updateFromExtension': {
-      isUpdateFromExtension = true;
-      updateForm(newForm);
-      break;
+  try {
+    const newForm: JsonForm = JSON.parse(msg.text);
+
+    switch (msg.type) {
+      case 'jsonform-modeler.updateFromExtension': {
+        isUpdateFromExtension = true;
+        updateForm(newForm);
+        break;
+      }
+      case 'jsonform-modeler.undo':
+      case 'jsonform-modeler.redo': {
+        isUpdateFromExtension = true;
+        updateForm(newForm);
+        break;
+      }
+      case 'jsonform-modeler.confirmation': {
+        confirm(msg.text);
+        break;
+      }
+      case 'jsonform-renderer.updateFromExtension': {
+        isUpdateFromExtension = true;
+        updateForm(newForm);
+        break;
+      }
+      default:
+        break;
     }
-    case 'jsonform-modeler.undo':
-    case 'jsonform-modeler.redo': {
-      isUpdateFromExtension = true;
-      updateForm(newForm);
-      break;
-    }
-    case 'jsonform-modeler.confirmation': {
-      confirm(msg.text);
-      break;
-    }
-    case 'jsonform-renderer.updateFromExtension': {
-      updateForm(newForm);
-      break;
-    }
-    default:
-      break;
+  } catch (error) {
+    console.error(`[Miranum.JsonForms.Webview] Could not process incoming message! ${error}`);
   }
 }
 
-const sendChangesToExtension = debounce(postMessage, 200);
+const sendChangesToExtension = debounce(postMessage, 10);
 function postMessage(jsonForm: JsonForm) {
   if (!isUpdateFromExtension) {
+    jsonForm.data = jsonForms.value.data;
     const serialize = JSON.stringify(jsonForm);
 
     vscode.setState({

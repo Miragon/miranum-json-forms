@@ -1,0 +1,224 @@
+{
+    "schema": {
+        "type": "object",
+        "properties": {
+            "firstName": {
+                "type": "string",
+                "minLength": 3,
+                "description": "Please enter your first name"
+            },
+            "secondName": {
+                "type": "string",
+                "minLength": 3,
+                "description": "Please enter your second name"
+            },
+            "birthDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Please enter your birth date."
+            },
+            "nationality": {
+                "enum": [
+                    "DE",
+                    "IT",
+                    "JP",
+                    "US",
+                    "RU",
+                    "Other"
+                ],
+                "type": "string"
+            },
+            "provideAddress": {
+                "type": "boolean"
+            },
+            "vegetarian": {
+                "type": "boolean"
+            },
+            "address": {
+                "properties": {
+                    "street": {
+                        "type": "string"
+                    },
+                    "streetNumber": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "type": "string"
+                    },
+                    "postalCode": {
+                        "type": "string",
+                        "maxLength": 5
+                    }
+                }
+            },
+            "vegetarianOptions": {
+                "properties": {
+                    "vegan": {
+                        "type": "boolean"
+                    },
+                    "favoriteVegetable": {
+                        "enum": [
+                            "Tomato",
+                            "Potato",
+                            "Salad",
+                            "Aubergine",
+                            "Cucumber",
+                            "Other"
+                        ],
+                        "type": "string"
+                    },
+                    "otherFavoriteVegetable": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "uischema": {
+        "type": "Categorization",
+        "elements": [
+            {
+                "type": "Category",
+                "elements": [
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/firstName",
+                                "options": {}
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/secondName",
+                                "options": {}
+                            }
+                        ],
+                        "options": {}
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/birthDate",
+                                "options": {}
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/nationality",
+                                "options": {}
+                            }
+                        ],
+                        "options": {}
+                    },
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/provideAddress",
+                        "options": {}
+                    },
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/vegetarian",
+                        "options": {}
+                    }
+                ],
+                "label": "categoryLabelKey",
+                "options": {}
+            },
+            {
+                "type": "Category",
+                "elements": [
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/address/properties/street",
+                                "options": {}
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/address/properties/streetNumber",
+                                "options": {}
+                            }
+                        ],
+                        "options": {}
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/address/properties/city",
+                                "options": {}
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/address/properties/postalCode",
+                                "options": {}
+                            }
+                        ],
+                        "options": {}
+                    }
+                ],
+                "i18n": "address",
+                "rule": {
+                    "effect": "SHOW",
+                    "condition": {
+                        "scope": "#/properties/provideAddress",
+                        "schema": {
+                            "const": true
+                        }
+                    }
+                },
+                "options": {}
+            },
+            {
+                "type": "Category",
+                "elements": [
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/vegetarianOptions/properties/vegan",
+                        "options": {}
+                    },
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/vegetarianOptions/properties/favoriteVegetable",
+                        "options": {}
+                    },
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/vegetarianOptions/properties/otherFavoriteVegetable",
+                        "rule": {
+                            "effect": "SHOW",
+                            "condition": {
+                                "scope": "#/properties/vegetarianOptions/properties/favoriteVegetable",
+                                "schema": {
+                                    "const": "Other"
+                                }
+                            }
+                        },
+                        "options": {}
+                    }
+                ],
+                "label": "Additional",
+                "rule": {
+                    "effect": "SHOW",
+                    "condition": {
+                        "scope": "#/properties/vegetarian",
+                        "schema": {
+                            "const": true
+                        }
+                    }
+                },
+                "options": {}
+            }
+        ],
+        "options": {}
+    },
+    "data": {
+        "provideAddress": true,
+        "vegetarian": false
+    }
+}

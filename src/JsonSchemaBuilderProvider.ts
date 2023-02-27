@@ -126,8 +126,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                     case JsonSchemaBuilderProvider.viewType + '.updateFromWebview': {
                         isUpdateFromWebview = true;
                         // todo: check lodash.debounce out
-                        await this.controller.writeData(document.uri, this.controller.getJsonFormFromString(event.content))
-                        isUpdateFromWebview = false // reset
+                        await this.controller.writeData(document.uri, this.controller.getJsonFormFromString(event.content));
                         break;
                     }
                     case JsonSchemaBuilderProvider.viewType + '.confirmation': {
@@ -149,6 +148,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                     }
                 }
             } catch (error) {
+                isUpdateFromWebview = false;
                 console.error(error);
             }
         }, null, disposables);
