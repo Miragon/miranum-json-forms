@@ -22,7 +22,7 @@ export type VsCode = {
 
 export type VscMessage = {
     type: string;
-    content: JSON | string;
+    content: string;
 }
 
 export type VscState = {

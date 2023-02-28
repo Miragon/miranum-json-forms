@@ -2,7 +2,7 @@
 
   <div class="formBuilderDetails">
 
-    <details>
+    <details open>
       <summary class="cursor-pointer">JSON</summary>
       <div class="card p-4">
         <SchemaCode
@@ -17,7 +17,7 @@
       </div>
     </details>
 
-    <details>
+    <details open>
       <summary class="cursor-pointer">Preview</summary>
       <ResizeArea>
         <div class="card p-4" style="min-height: 106px">

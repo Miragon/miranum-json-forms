@@ -105,7 +105,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
             if (webviewPanel.visible) {
                 webviewPanel.webview.postMessage({
                     type: msgType,
-                    text: JSON.parse(this.controller.document.getText())
+                    text: this.controller.document.getText()
                 })
                     .then((success) => {
                         if (success) {
@@ -120,30 +120,36 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         }
 
         // Receive messages from the webview
-        webviewPanel.webview.onDidReceiveMessage(event => {
-            switch (event.type) {
-                case JsonSchemaBuilderProvider.viewType + '.updateFromWebview': {
-                    isUpdateFromWebview = true;
-                    this.controller.writeData(document.uri, event.content);
-                    break;
-                }
-                case JsonSchemaBuilderProvider.viewType + '.confirmation': {
-                    vscode.window.showInformationMessage(
-                        event.content,
-                        ...['Yes', 'No']
-                    ).then((input) => {
-                        const response = (input === "Yes");
-                        webviewPanel.webview.postMessage({
-                            type: JsonSchemaBuilderProvider.viewType + '.confirmation',
-                            text: response
+        webviewPanel.webview.onDidReceiveMessage(async (event) => {
+            try {
+                switch (event.type) {
+                    case JsonSchemaBuilderProvider.viewType + '.updateFromWebview': {
+                        isUpdateFromWebview = true;
+                        // todo: check lodash.debounce out
+                        await this.controller.writeData(document.uri, this.controller.getJsonFormFromString(event.content));
+                        break;
+                    }
+                    case JsonSchemaBuilderProvider.viewType + '.confirmation': {
+                        vscode.window.showInformationMessage(
+                            event.content,
+                            ...['Yes', 'No']
+                        ).then((input) => {
+                            const response = (input === "Yes");
+                            webviewPanel.webview.postMessage({
+                                type: JsonSchemaBuilderProvider.viewType + '.confirmation',
+                                text: response
+                            });
+                        }, () => {
+                            webviewPanel.webview.postMessage({
+                                type: JsonSchemaBuilderProvider.viewType + '.confirmation',
+                                text: false
+                            });
                         });
-                    }, () => {
-                        webviewPanel.webview.postMessage({
-                            type: JsonSchemaBuilderProvider.viewType + '.confirmation',
-                            text: false
-                        });
-                    });
+                    }
                 }
+            } catch (error) {
+                isUpdateFromWebview = false;
+                console.error(error);
             }
         }, null, disposables);
 
@@ -157,7 +163,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
          * the webview to synchronize it with the current content of the model.
          */
         vscode.workspace.onDidChangeTextDocument(e => {
-            if (e.document.uri.toString() === this.controller.document.uri.toString() &&
+            if (e.document.uri.toString() === document.uri.toString() &&
                 e.contentChanges.length !== 0 && !isUpdateFromWebview) {
 
                 if (!e.document.getText()) {

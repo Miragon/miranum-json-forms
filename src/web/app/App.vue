@@ -15,28 +15,33 @@
         :tools="tools"
         v-if="!disableFormbuilder"
         v-show="mode === 'modeler'"
+        @schemaUpdated="sendChangesToExtension"
     />
     <FormBuilderDetails
         :key="(disableFormbuilder?1:0)"
         :jsonForms="jsonForms"
+        v-if="mode === 'renderer'"
     />
   </div>
 
 </template>
 
 <script setup lang="ts">
-import {boplusVueVanillaRenderers, defaultTools, FormBuilder} from "@backoffice-plus/formbuilder";
+import {defaultTools, FormBuilder} from "@backoffice-plus/formbuilder";
 import FormBuilderDetails from "./FormBuilderDetails.vue";
 import {onMounted, onUnmounted, ref} from "vue";
 import {vanillaRenderers} from "@jsonforms/vue-vanilla";
+import {boplusVueVanillaRenderers} from "@backoffice-plus/formbuilder";
 import {VsCode} from "../../lib";
 import {JsonForm} from "../../utils";
+import debounce from "lodash.debounce";
 
 // VS Code stuff
 declare const vscode: VsCode
 const state = vscode.getState();
 const data: JsonForm = JSON.parse(state.text);
 const mode = ref(state.mode);
+let isUpdateFromExtension = false;
 
 const tools = [
   ...defaultTools,
@@ -51,7 +56,7 @@ const schemaReadOnly = ref(false);
 const disableFormbuilder = ref(false);
 //const jsonFormsResolved = ref({});
 const jsonForms = ref<JsonForm>({
-  data: data.data,
+  data: data.data ? data.data : JSON.parse('{}'),
   schema: data.schema,
   uischema: data.uischema,
 });
@@ -63,7 +68,7 @@ function updateForm(newData: JsonForm): void {
     text: JSON.stringify(newData)
   });
   jsonForms.value = {
-    data: newData.data,
+    data: newData.data ? newData.data : JSON.parse('{}'),
     schema: newData.schema,
     uischema: newData.uischema,
   }
@@ -71,30 +76,60 @@ function updateForm(newData: JsonForm): void {
   key.value++;
 }
 
-function getDataFromExtension(msg: MessageEvent): void {
-  const message = msg.data;
+const getDataFromExtension = debounce(receiveMessage, 50);
+function receiveMessage(message: MessageEvent): void {
+  const msg = message.data;
 
-  switch (message.type) {
-    case 'jsonform-modeler.updateFromExtension': {
-      updateForm(message.text);
-      break;
+  try {
+    const newForm: JsonForm = JSON.parse(msg.text);
+
+    switch (msg.type) {
+      case 'jsonform-modeler.updateFromExtension': {
+        isUpdateFromExtension = true;
+        updateForm(newForm);
+        break;
+      }
+      case 'jsonform-modeler.undo':
+      case 'jsonform-modeler.redo': {
+        isUpdateFromExtension = true;
+        updateForm(newForm);
+        break;
+      }
+      case 'jsonform-modeler.confirmation': {
+        confirm(msg.text);
+        break;
+      }
+      case 'jsonform-renderer.updateFromExtension': {
+        isUpdateFromExtension = true;
+        updateForm(newForm);
+        break;
+      }
+      default:
+        break;
     }
-    case 'jsonform-modeler.undo':
-    case 'jsonform-modeler.redo': {
-      updateForm(message.text);
-      break;
-    }
-    case 'jsonform-modeler.confirmation': {
-      confirm(message.text);
-    }
-    default:
-      break;
+  } catch (error) {
+    console.error(`[Miranum.JsonForms.Webview] Could not process incoming message! ${error}`);
   }
 }
 
-// todo: need a way to listen for updates to jsonForms in order to
-//  * save the changes
-//  * update the preview
+const sendChangesToExtension = debounce(postMessage, 10);
+function postMessage(jsonForm: JsonForm) {
+  if (!isUpdateFromExtension) {
+    jsonForm.data = jsonForms.value.data;
+    const serialize = JSON.stringify(jsonForm);
+
+    vscode.setState({
+      ...vscode.getState(),
+      text: serialize,
+    });
+
+    vscode.postMessage({
+      type: 'jsonform-modeler.updateFromWebview',
+      content: serialize
+    });
+  }
+  isUpdateFromExtension = false // reset
+}
 
 let confirm: any = null;
 function confirmed() {
@@ -113,11 +148,6 @@ window.confirm = async function (message: string | undefined) {
   })
   return await confirmed();
 }
-
-//watch(() => jsonForms.value, async () => {
-//  jsonFormsResolved.value = unref(jsonForms.value);
-//  //jsonFormsResolved.value.schema = await resolveSchema(jsonFormsResolved.value.schema);
-//})
 
 onMounted(() => {
   window.addEventListener('message', getDataFromExtension);

@@ -168,10 +168,6 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
         extensionUri, 'dist', 'client', 'style.css'
     ));
 
-    //const fontAppUri = webview.asWebviewUri(vscode.Uri.joinPath(
-    //    extensionUri, 'dist', 'client', 'assets', 'css', 'materialdesignicons.min.css'
-    //));
-
     const nonce = getNonce();
 
     // todo
