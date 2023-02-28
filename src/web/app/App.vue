@@ -76,7 +76,7 @@ function updateForm(newData: JsonForm): void {
   key.value++;
 }
 
-const getDataFromExtension = debounce(receiveMessage, 10);
+const getDataFromExtension = debounce(receiveMessage, 50);
 function receiveMessage(message: MessageEvent): void {
   const msg = message.data;
 

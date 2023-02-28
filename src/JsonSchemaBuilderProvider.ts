@@ -163,7 +163,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
          * the webview to synchronize it with the current content of the model.
          */
         vscode.workspace.onDidChangeTextDocument(e => {
-            if (e.document.uri.toString() === this.controller.document.uri.toString() &&
+            if (e.document.uri.toString() === document.uri.toString() &&
                 e.contentChanges.length !== 0 && !isUpdateFromWebview) {
 
                 if (!e.document.getText()) {
