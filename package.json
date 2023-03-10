@@ -50,6 +50,28 @@
         "command": "jsonforms-builder.toggleTextEditor",
         "title": "Miranum: Toggle Standard Text Editor",
         "icon": "$(notebook-mimetype)"
+      },
+      {
+        "command": "jsonforms-builder.toggleLogger",
+        "title": "Miranum: Toggle Logging Information",
+        "icon": "$(callstack-view-session)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "jsonforms-renderer.togglePreview",
+        "key": "ctrl+shift+p",
+        "when": "jsonforms-builder.openCustomEditors > 0"
+      },
+      {
+        "command": "jsonforms-builder.toggleTextEditor",
+        "key": "ctrl+shift+t",
+        "when": "jsonforms-builder.openCustomEditors > 0"
+      },
+      {
+        "command": "jsonforms-builder.toggleLogger",
+        "key": "ctrl+shift+l",
+        "when": "jsonforms-builder.openCustomEditors > 0"
       }
     ],
     "menus": {
@@ -61,33 +83,30 @@
         {
           "command": "jsonforms-builder.toggleTextEditor",
           "when": "jsonforms-builder.openCustomEditors > 0"
+        },
+        {
+          "command": "jsonforms-builder.toggleLogger",
+          "when": "jsonforms-builder.openCustomEditors > 0"
         }
       ],
       "editor/title": [
         {
           "command": "jsonforms-renderer.togglePreview",
           "group": "navigation",
-          "when": "activeWebviewPanelId == 'jsonfors-renderer'"
+          "when": "activeWebviewPanelId == 'jsonforms-renderer'"
         },
         {
           "command": "jsonforms-builder.toggleTextEditor",
           "group": "navigation",
-          "when": "activeWebviewPanelId == 'jsonfors-builder'"
+          "when": "activeWebviewPanelId == 'jsonforms-builder'"
+        },
+        {
+          "command": "jsonforms-builder.toggleLogger",
+          "group": "navigation",
+          "when": "activeWebviewPanelId == 'jsonforms-builder'"
         }
       ]
-    },
-    "keybindings": [
-      {
-        "command": "jsonforms-renderer.togglePreview",
-        "key": "ctrl+shift+p",
-        "when": "jsonforms-builder.openCustomEditors > 0"
-      },
-      {
-        "command": "jsonforms-builder.toggleTextEditor",
-        "key": "ctrl+shift+t",
-        "when": "jsonforms-builder.openCustomEditors > 0"
-      }
-    ]
+    }
   },
   "scripts": {
     "publish": "vsce publish",

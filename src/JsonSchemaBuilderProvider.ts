@@ -69,8 +69,17 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
             () => {
                 this.preview.toggle(this.preview.viewType, this.controller.content);
             });
+        const toggleLogger = vscode.commands.registerCommand(
+            `${JsonSchemaBuilderProvider.VIEWTYPE}.toggleLogger`,
+            () => {
+                if (!Logger.isOpen) {
+                    Logger.show();
+                } else {
+                    Logger.hide();
+                }
+            });
 
-        this.context.subscriptions.push(togglePreview, toggleTextEditor);
+        this.context.subscriptions.push(togglePreview, toggleTextEditor, toggleLogger);
         // <---- Register commands -----
     }
 
