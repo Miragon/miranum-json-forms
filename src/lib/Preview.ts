@@ -3,6 +3,7 @@ import {Updatable, ViewState} from "./types";
 
 export abstract class Preview<ContentType> implements Updatable<ContentType> {
 
+    public abstract readonly viewType: string;
     protected abstract readonly extensionUri: vscode.Uri;
     protected abstract webviewOptions: WebviewOptions;
     private webviewObject: WebviewObject[] = [];
@@ -65,7 +66,7 @@ export abstract class Preview<ContentType> implements Updatable<ContentType> {
                             //  content must be the current content and not the content from the creation of the webview
                             //  How can I get the current file content without a dependency to the documentController?
                             //this.update(content);
-                            this.isBuffer = false;
+                            //this.isBuffer = false;
                         }
                     }
                 }
@@ -105,22 +106,26 @@ export abstract class Preview<ContentType> implements Updatable<ContentType> {
             })
 
         } catch (error) {
-            console.error('[Preview]' + error);
+            throw error;
         }
     }
 
     /**
      * Update the active preview window.
      */
-    public update(content: ContentType): void {
+    public async update(content: ContentType) {
         try {
-            this.webviewObject[0].webviewPanel.webview.postMessage({
+            if (await this.webviewObject[0].webviewPanel.webview.postMessage({
                 type: this.webviewOptions.msgType,
                 text: JSON.stringify(content)
-            });
+            })) {
+                this.isBuffer = false;
+            } else {
+                throw Error(`Couldn't update preview (${this.webviewObject[0].webviewPanel.title}).`);
+            }
         } catch (error) {
             this.isBuffer = true;
-            console.log('[Preview] Can\'t post message!\n' + error);
+            throw error
         }
     }
 
@@ -136,7 +141,7 @@ export abstract class Preview<ContentType> implements Updatable<ContentType> {
             // Trigger onDidDispose-Event
             this.webviewObject[0].webviewPanel.dispose();
         } catch (error) {
-            console.error('[Preview] Unable to close preview!')
+            throw error;
         }
     }
 

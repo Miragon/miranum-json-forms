@@ -7,16 +7,18 @@
 import * as vscode from 'vscode';
 import {TextDocument, Uri} from 'vscode';
 import {IContentController, Preview, TextEditorWrapper, Updatable} from "../lib";
-import {getDefault, JsonForm} from "../utils";
-import debounce from "lodash.debounce";
+import {getDefault} from "../utils";
+import { debounce } from "lodash";
+import {FormBuilderData} from "../web/app/types";
+import {Logger} from "../components";
 
-export class DocumentController implements IContentController<TextDocument | JsonForm> {
+export class DocumentController implements IContentController<TextDocument | FormBuilderData> {
 
     /** @hidden */
     public writeData = this.asyncDebounce(this.writeChangesToDocument, 50);
     private static instance: DocumentController;
     /** Array of all subscribed components. */
-    private observers: Updatable<TextDocument | JsonForm>[] = [];
+    private observers: Updatable<TextDocument | FormBuilderData>[] = [];
     /** @hidden */
     private _document: TextDocument | undefined;
 
@@ -26,6 +28,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
                 this.updatePreview();
             }
         })
+        Logger.info("[Miranum.JsonForms.DocumentContr] DocumentController was created.")
     }
 
     /**
@@ -42,14 +45,22 @@ export class DocumentController implements IContentController<TextDocument | Jso
      * Subscribe to get notified when changes are made to the document.
      * @param observer One or more observers which subscribe for notification.
      */
-    public subscribe(...observer: Updatable<TextDocument | JsonForm>[]): void {
+    public subscribe(...observer: Updatable<TextDocument | FormBuilderData>[]): void {
         this.observers = this.observers.concat(observer);
+
+        const types: string[] = [];
+        if (Array.isArray(observer)) {
+            for (const obs of observer) {
+                types.push(`\n\t\t\t- ${obs.viewType})`);
+            }
+        }
+        Logger.info("[Miranum.JsonForms.DocumentContr]", "Observer subscribed.", types.join())
     }
 
     /**
      * Get the content of the active document.
      **/
-    public get content(): JsonForm {
+    public get content(): FormBuilderData {
         return this.getJsonFormFromString(this.document.getText());
     }
 
@@ -60,7 +71,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
         if (this._document) {
             return this._document;
         } else {
-            throw new Error('[Controller] Document is not initialized!');
+            throw new Error("Document is not initialized!");
         }
     }
 
@@ -84,7 +95,8 @@ export class DocumentController implements IContentController<TextDocument | Jso
                     }
                 }
             } catch (error) {
-                console.error(error);
+                const message = (error instanceof Error) ? error.message : "Couldn't set document.";
+                Logger.error("[Miranum.JsonForms.DocumentContr]", message);
             }
         });
     }
@@ -94,7 +106,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
      * @param text
      * @private
      */
-    public getJsonFormFromString(text: string): JsonForm {
+    public getJsonFormFromString(text: string): FormBuilderData {
         if (text.trim().length === 0) {
             return JSON.parse('{}');
         }
@@ -102,7 +114,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
         try {
             return JSON.parse(text);
         } catch {
-            throw new Error('[Controller] Could not parse text!');
+            throw new Error("Could not parse text!");
         }
     }
 
@@ -117,6 +129,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
                 this.document.save();
             }
         }
+        Logger.info("[Miranum.JsonForms.DocumentContr]", "Initial document was set.")
     }
 
     /**
@@ -133,7 +146,8 @@ export class DocumentController implements IContentController<TextDocument | Jso
                     }
                 }
             } catch (error) {
-                console.error(error);
+                const message = (error instanceof Error) ? error.message : "Couldn't update preview.";
+                Logger.error("[Miranum.JsonForms.DocumentContr]", message);
             }
         });
     }
@@ -144,7 +158,7 @@ export class DocumentController implements IContentController<TextDocument | Jso
      * @param content The data which was sent from the webview.
      * @returns Promise
      */
-    private async writeChangesToDocument(uri: Uri, content: JsonForm): Promise<boolean> {
+    private async writeChangesToDocument(uri: Uri, content: FormBuilderData): Promise<boolean> {
         if (this._document && this.document.uri != uri) {
             return Promise.reject('[DocumentController] Inconsistent document!');
         } else if (JSON.stringify(this.content) === JSON.stringify(content)) {

@@ -7,15 +7,18 @@
 import {TextEditorShowOption, TextEditorWrapper} from "../lib";
 import * as vscode from "vscode";
 import {ConfigurationChangeEvent, ExtensionContext} from "vscode";
+import {Logger} from "./Logger";
 
 export class TextEditorComponent extends TextEditorWrapper {
 
+    public readonly viewType = "jsonforms-textEditor";
     private static instance: TextEditorComponent;
     /** The default option how the text editor will be displayed. */
     protected showOption: TextEditorShowOption = TextEditorShowOption.Tab;
 
     private constructor() {
         super();
+        Logger.info("[Miranum.JsonForms.TextEditor]", "Text editor was created.");
     }
 
     /**

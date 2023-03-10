@@ -27,20 +27,18 @@
 </template>
 
 <script setup lang="ts">
-import {defaultTools, FormBuilder} from "@backoffice-plus/formbuilder";
-import FormBuilderDetails from "./FormBuilderDetails.vue";
 import {onMounted, onUnmounted, ref} from "vue";
+import {boplusVueVanillaRenderers, defaultTools, FormBuilder} from "@backoffice-plus/formbuilder";
+import {JsonSchema, UISchemaElement} from "@jsonforms/core";
 import {vanillaRenderers} from "@jsonforms/vue-vanilla";
-import {boplusVueVanillaRenderers} from "@backoffice-plus/formbuilder";
-import {VsCode} from "../../lib";
-import {JsonForm} from "../../utils";
-import debounce from "lodash.debounce";
+import {debounce} from "lodash";
 
-// VS Code stuff
-declare const vscode: VsCode
-const state = vscode.getState();
-const data: JsonForm = JSON.parse(state.text);
-const mode = ref(state.mode);
+import FormBuilderDetails from "./components/FormBuilderDetails.vue";
+import {confirm, confirmed, initialize, initialized, instanceOfFormBuilderData, StateController} from "@/composables";
+import {FormBuilderData, MessageType, VscMessage} from "@/types";
+
+
+const stateController = new StateController();
 let isUpdateFromExtension = false;
 
 const tools = [
@@ -54,102 +52,122 @@ const jsonFormsRenderers = Object.freeze([
 
 const schemaReadOnly = ref(false);
 const disableFormbuilder = ref(false);
-//const jsonFormsResolved = ref({});
-const jsonForms = ref<JsonForm>({
-  data: data.data ? data.data : JSON.parse('{}'),
-  schema: data.schema,
-  uischema: data.uischema,
-});
+const jsonForms = ref<FormBuilderData>();
+const mode = ref("");
 const key = ref(0);
 
-function updateForm(newData: JsonForm): void {
-  vscode.setState({
-    ...vscode.getState(),
-    text: JSON.stringify(newData)
-  });
+function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
   jsonForms.value = {
-    data: newData.data ? newData.data : JSON.parse('{}'),
-    schema: newData.schema,
-    uischema: newData.uischema,
+    schema: schema,
+    uischema: uischema,
   }
+  stateController.updateState({ data: { schema, uischema } });
+
   // todo: Is there a better way to reload the component?
   key.value++;
 }
 
 const getDataFromExtension = debounce(receiveMessage, 50);
-function receiveMessage(message: MessageEvent): void {
-  const msg = message.data;
-
+function receiveMessage(message: MessageEvent<VscMessage>): void {
   try {
-    const newForm: JsonForm = JSON.parse(msg.text);
+    const type = message.data.type;
+    const data = message.data.data;
 
-    switch (msg.type) {
-      case 'jsonform-modeler.updateFromExtension': {
+    switch (type) {
+      case `jsonforms-builder.${MessageType.initialize}`: {
+        mode.value = message.data.mode;
+        initialize(data);
+        break;
+      }
+      case `jsonforms-builder.${MessageType.restore}`: {
+        initialize(data);
+        break;
+      }
+      case `jsonforms-builder.${MessageType.confirmation}`: {
+        confirm(message.data.confirm ?? false);
+        break
+      }
+      case `jsonforms-builder.${MessageType.undo}`:
+      case `jsonforms-builder.${MessageType.redo}`:
+      case `jsonforms-builder.${MessageType.updateFromExtension}`: {
         isUpdateFromExtension = true;
-        updateForm(newForm);
+        updateForm(data?.schema, data?.uischema);
         break;
       }
-      case 'jsonform-modeler.undo':
-      case 'jsonform-modeler.redo': {
-        isUpdateFromExtension = true;
-        updateForm(newForm);
-        break;
-      }
-      case 'jsonform-modeler.confirmation': {
-        confirm(msg.text);
-        break;
-      }
-      case 'jsonform-renderer.updateFromExtension': {
-        isUpdateFromExtension = true;
-        updateForm(newForm);
-        break;
-      }
+      // todo add logic for renderer
       default:
         break;
     }
   } catch (error) {
-    console.error(`[Miranum.JsonForms.Webview] Could not process incoming message! ${error}`);
+    const message = (error instanceof Error) ? error.message : "Could not handle message";
+    postMessage(MessageType.error, undefined, message);
   }
 }
 
 const sendChangesToExtension = debounce(postMessage, 10);
-function postMessage(jsonForm: JsonForm) {
-  if (!isUpdateFromExtension) {
-    jsonForm.data = jsonForms.value.data;
-    const serialize = JSON.stringify(jsonForm);
-
-    vscode.setState({
-      ...vscode.getState(),
-      text: serialize,
-    });
-
-    vscode.postMessage({
-      type: 'jsonform-modeler.updateFromWebview',
-      content: serialize
-    });
+function postMessage(type: MessageType, data?: FormBuilderData, message?: string): void {
+  if (isUpdateFromExtension) {
+    isUpdateFromExtension = false // reset
+    return;
   }
-  isUpdateFromExtension = false // reset
-}
 
-let confirm: any = null;
-function confirmed() {
-  // this promise resolves when confirm() is called!
-  return new Promise((resolve) => {
-    confirm = (response: boolean) => { resolve(response) }
-  })
+  switch (type) {
+    case MessageType.updateFromWebview: {
+      stateController.postMessage({
+        type: `jsonforms-builder.${type}`,
+        mode: mode.value,
+        data
+      });
+      break;
+    }
+    default: {
+      stateController.postMessage({
+        type: `jsonforms-builder.${type}`,
+        mode: mode.value,
+        message
+      });
+      break;
+    }
+  }
 }
 
 // @ts-ignore
 window.confirm = async function (message: string | undefined) {
   const msg = (message) ? message : "";
-  vscode.postMessage({
-   type: 'jsonform-modeler.confirmation',
-   content: msg
-  })
+  postMessage(MessageType.confirmation, undefined, msg)
   return await confirmed();
 }
 
-onMounted(() => {
+onMounted(async () => {
+  try {
+    const state = stateController.getState();
+    if (state && state.data) {
+      postMessage(MessageType.restore, undefined, "State was restored successfully.");
+      let schema = state.data.schema;
+      let uischema = state.data.uischema;
+      const newData = await initialized();    // await the response form the backend
+      if (instanceOfFormBuilderData(newData)) {
+        // we only get new data when the user made changes while the webview was destroyed
+        if (newData.schema) {
+          schema = newData.schema;
+        }
+        if (newData.uischema) {
+          uischema = newData.uischema;
+        }
+      }
+      return updateForm(schema, uischema);
+    } else {
+      postMessage(MessageType.initialize, undefined, "Webview was loaded successfully.");
+      const data = await initialized();    // await the response form the backend
+      if (instanceOfFormBuilderData(data)) {
+        return updateForm(data.schema, data.uischema);
+      }
+    }
+  } catch (error) {
+    const message = (error instanceof Error) ? error.message : "Failed to initialize webview.";
+    postMessage(MessageType.error, undefined, message);
+  }
+
   window.addEventListener('message', getDataFromExtension);
 })
 

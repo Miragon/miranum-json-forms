@@ -10,6 +10,7 @@ export enum TextEditorShowOption {
 
 export abstract class TextEditorWrapper implements Updatable<TextDocument> {
 
+    abstract readonly viewType: string;
     protected abstract showOption: TextEditorShowOption;
     private _textEditor: TextEditor | undefined;
     private _isOpen = false;
