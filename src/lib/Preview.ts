@@ -1,34 +1,43 @@
 import * as vscode from "vscode";
-import {Updatable, ViewState} from "./types";
+import {DocumentManager, Observer, UIComponent} from "./types";
+import {Disposable, Uri, Webview, WebviewPanel} from "vscode";
 
-export abstract class Preview<ContentType> implements Updatable<ContentType> {
+export enum CloseCaller {
+    'explicit' = 'explicit',
+    'implicit' = 'implicit',
+    'undefined' = ''
+}
+
+export enum ViewState {
+    'open' = 'open',
+    'closed' = 'closed'
+}
+
+interface WebviewObject {
+    webviewPanel: WebviewPanel,
+    disposables: Disposable[]
+}
+
+export interface WebviewOptions {
+    title: string,
+    icon: Uri,
+}
+
+export abstract class Preview implements Observer, UIComponent {
 
     public abstract readonly viewType: string;
-    protected abstract readonly extensionUri: vscode.Uri;
+    protected abstract readonly extensionUri: Uri;
     protected abstract webviewOptions: WebviewOptions;
-    private webviewObject: WebviewObject[] = [];
-    private closeCaller: CloseCaller = CloseCaller.undefined;
-    private isBuffer = false;
+    protected closeCaller: CloseCaller = CloseCaller.undefined;
+    protected isBuffer = false;
+    protected _lastViewState: ViewState = ViewState.open;
+    private webviews: WebviewObject[] = [];
     private _isOpen = false;
-    private _lastViewState: ViewState = ViewState.open;
 
-    protected abstract getHtml(webview: vscode.Webview, extensionUri: vscode.Uri, content: ContentType): string;
+    public abstract update(value: any): void;
+    protected abstract getHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string;
+    protected abstract setEventHandlers(document: DocumentManager, webviewPanel: WebviewPanel): Disposable[]
 
-    public get active(): boolean {
-        const webviewPanel = this.webviewObject[0].webviewPanel;
-        if (webviewPanel) {
-            return webviewPanel.active;
-        }
-        return false;
-    }
-
-    public get visible(): boolean {
-        const webviewPanel = this.webviewObject[0].webviewPanel;
-        if (webviewPanel) {
-            return webviewPanel.visible;
-        }
-        return false;
-    }
 
     public get isOpen(): boolean {
         return this._isOpen;
@@ -38,94 +47,82 @@ export abstract class Preview<ContentType> implements Updatable<ContentType> {
         return this._lastViewState;
     }
 
+    public get active(): boolean {
+        try {
+            return this.webviewPanel.active;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    public get visible(): boolean {
+        try {
+            return this.webviewPanel.visible;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    public get title(): string {
+        try {
+            return this.webviewPanel.title;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    protected get webview(): Webview {
+        try {
+            return this.webviewPanel.webview;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    private get webviewPanel(): WebviewPanel {
+        if (!this.webviews[0]) {
+            throw Error("Webview is not set!");
+        }
+        return this.webviews[0].webviewPanel;
+    }
+
     /**
      * Create a new webview panel.
      */
-    public create(viewType: string, content: ContentType): void {
+    public open(document: DocumentManager): void {
         try {
+            this._lastViewState = ViewState.open;
+            this._isOpen = true;
+
+            // Setup webview
             const webviewPanel = vscode.window.createWebviewPanel(
-                viewType,
+                this.viewType,
                 this.webviewOptions.title,
                 {
                     preserveFocus: true,
                     viewColumn: vscode.ViewColumn.Beside
                 }
             );
-            const disposables: vscode.Disposable[] = []
-            this._lastViewState = ViewState.open;
-
             webviewPanel.iconPath = this.webviewOptions.icon;
             webviewPanel.webview.options = {enableScripts: true};
-            webviewPanel.webview.html = this.getHtml(webviewPanel.webview, this.extensionUri, content);
-
-            webviewPanel.onDidChangeViewState((event) => {
-                switch (true) {
-                    case event.webviewPanel?.visible: {
-                        if (this.isBuffer) {
-                            // todo This makes no sense.
-                            //  content must be the current content and not the content from the creation of the webview
-                            //  How can I get the current file content without a dependency to the documentController?
-                            //this.update(content);
-                            //this.isBuffer = false;
-                        }
-                    }
-                }
-            }, null, disposables);
-
-            webviewPanel.onDidDispose(() => {
-                // update lastViewState
-                switch (this.closeCaller) {
-                    case CloseCaller.undefined:
-                    case CloseCaller.explicit: {
-                        this._lastViewState = ViewState.closed;
-                        break;
-                    }
-                    case CloseCaller.implicit: {
-                        this._lastViewState = ViewState.open;
-                        break;
-                    }
-                }
-                this.closeCaller = CloseCaller.undefined;   // reset
-
-                this.dispose();
-            }, null, disposables);
-
-            this._isOpen = true;
+            webviewPanel.webview.html = this.getHtml(webviewPanel.webview, this.extensionUri);
+            const disposables = this.setEventHandlers(document, webviewPanel);
 
             // Make sure there will never be more than 2 webview panels inside our array
-            while (this.webviewObject.length > 1) {
-                const wp = this.webviewObject.pop();
+            while (this.webviews.length > 1) {
+                const wp = this.webviews.pop();
                 wp?.webviewPanel.dispose();
             }
 
             // add the current webview panel on top of our array
             // so our active preview window is always on index 0
-            this.webviewObject.unshift({
+            this.webviews.unshift({
                 webviewPanel,
                 disposables
             })
 
         } catch (error) {
             throw error;
-        }
-    }
-
-    /**
-     * Update the active preview window.
-     */
-    public async update(content: ContentType) {
-        try {
-            if (await this.webviewObject[0].webviewPanel.webview.postMessage({
-                type: this.webviewOptions.msgType,
-                text: JSON.stringify(content)
-            })) {
-                this.isBuffer = false;
-            } else {
-                throw Error(`Couldn't update preview (${this.webviewObject[0].webviewPanel.title}).`);
-            }
-        } catch (error) {
-            this.isBuffer = true;
-            throw error
         }
     }
 
@@ -139,23 +136,23 @@ export abstract class Preview<ContentType> implements Updatable<ContentType> {
 
         try {
             // Trigger onDidDispose-Event
-            this.webviewObject[0].webviewPanel.dispose();
+            this.webviews[0].webviewPanel.dispose();
         } catch (error) {
             throw error;
         }
     }
 
-    public toggle(viewType: string, content: ContentType): void {
+    public toggle(document: DocumentManager): void {
         if (this.isOpen) {
             this.closeCaller = CloseCaller.explicit;
             this.close();
         } else {
-            this.create(viewType, content);
+            this.open(document);
         }
     }
 
-    private dispose(): void {
-        const wo = this.webviewObject.pop();
+    protected dispose(): void {
+        const wo = this.webviews.pop();
         if (wo) {
             const webviewPanel = wo.webviewPanel;
             const disposables = wo.disposables;
@@ -175,19 +172,3 @@ export abstract class Preview<ContentType> implements Updatable<ContentType> {
     }
 }
 
-enum CloseCaller {
-    'explicit' = 'explicit',
-    'implicit' = 'implicit',
-    'undefined' = ''
-}
-
-export interface WebviewOptions {
-    title: string,
-    icon: vscode.Uri | undefined,
-    msgType: string
-}
-
-interface WebviewObject {
-    webviewPanel: vscode.WebviewPanel,
-    disposables: vscode.Disposable[]
-}

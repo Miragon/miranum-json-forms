@@ -2,7 +2,7 @@
 
   <div class="container max-w-screen-lg mx-auto p-4 flex flex-col gap-4">
 
-    <div v-if="mode === 'modeler'">
+    <div v-if="mode === 'jsonforms-builder'">
       Disable Formbuilder: <input type="checkbox" v-model="disableFormbuilder" /><br>
       Schema ReadOnly: <input type="checkbox" v-model="schemaReadOnly" /><br>
     </div>
@@ -14,20 +14,20 @@
         :schemaReadOnly="schemaReadOnly"
         :tools="tools"
         v-if="!disableFormbuilder"
-        v-show="mode === 'modeler'"
+        v-show="mode === 'jsonforms-builder'"
         @schemaUpdated="sendChangesToExtension"
     />
     <FormBuilderDetails
         :key="(disableFormbuilder?1:0)"
         :jsonForms="jsonForms"
-        v-if="mode === 'renderer'"
+        v-if="mode === 'jsonforms-renderer'"
     />
   </div>
 
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from "vue";
+import {onBeforeMount, onUnmounted, ref} from "vue";
 import {boplusVueVanillaRenderers, defaultTools, FormBuilder} from "@backoffice-plus/formbuilder";
 import {JsonSchema, UISchemaElement} from "@jsonforms/core";
 import {vanillaRenderers} from "@jsonforms/vue-vanilla";
@@ -35,7 +35,8 @@ import {debounce} from "lodash";
 
 import FormBuilderDetails from "./components/FormBuilderDetails.vue";
 import {confirm, confirmed, initialize, initialized, instanceOfFormBuilderData, StateController} from "@/composables";
-import {FormBuilderData, MessageType, VscMessage} from "@/types";
+import {FormBuilderData} from "../../utils";
+import {MessageType, VscMessage} from "../../shared/types";
 
 
 const stateController = new StateController();
@@ -68,18 +69,21 @@ function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
 }
 
 const getDataFromExtension = debounce(receiveMessage, 50);
-function receiveMessage(message: MessageEvent<VscMessage>): void {
+function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): void {
   try {
     const type = message.data.type;
     const data = message.data.data;
 
     switch (type) {
       case `jsonforms-builder.${MessageType.initialize}`: {
-        mode.value = message.data.mode;
+        isUpdateFromExtension = true;
+        mode.value = 'jsonforms-builder';
         initialize(data);
         break;
       }
       case `jsonforms-builder.${MessageType.restore}`: {
+        isUpdateFromExtension = true;
+        mode.value = 'jsonforms-builder';
         initialize(data);
         break;
       }
@@ -94,9 +98,21 @@ function receiveMessage(message: MessageEvent<VscMessage>): void {
         updateForm(data?.schema, data?.uischema);
         break;
       }
-      // todo add logic for renderer
-      default:
+      case `jsonforms-renderer.${MessageType.initialize}`: {
+        mode.value = 'jsonforms-renderer';
+        initialize(data);
         break;
+      }
+      case `jsonforms-renderer.${MessageType.restore}`: {
+        mode.value = 'jsonforms-renderer';
+        initialize(data);
+        break;
+      }
+      case `jsonforms-renderer.${MessageType.updateFromExtension}`: {
+        console.log("[Webview] test");
+        updateForm(data?.schema, data?.uischema);
+        break;
+      }
     }
   } catch (error) {
     const message = (error instanceof Error) ? error.message : "Could not handle message";
@@ -104,26 +120,27 @@ function receiveMessage(message: MessageEvent<VscMessage>): void {
   }
 }
 
-const sendChangesToExtension = debounce(postMessage, 10);
-function postMessage(type: MessageType, data?: FormBuilderData, message?: string): void {
-  if (isUpdateFromExtension) {
-    isUpdateFromExtension = false // reset
+const sendChangesToExtension = debounce(updateFile, 500);
+function updateFile(data: FormBuilderData) {
+  if (isUpdateFromExtension && mode.value === "jsonforms-renderer") {
+    isUpdateFromExtension = false;
     return;
   }
+  postMessage(MessageType.updateFromWebview, data);
+}
 
+function postMessage(type: MessageType, data?: FormBuilderData, message?: string): void {
   switch (type) {
     case MessageType.updateFromWebview: {
       stateController.postMessage({
         type: `jsonforms-builder.${type}`,
-        mode: mode.value,
-        data
+        data: JSON.parse(JSON.stringify(data))
       });
       break;
     }
     default: {
       stateController.postMessage({
         type: `jsonforms-builder.${type}`,
-        mode: mode.value,
         message
       });
       break;
@@ -138,7 +155,8 @@ window.confirm = async function (message: string | undefined) {
   return await confirmed();
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
+  window.addEventListener('message', getDataFromExtension);
   try {
     const state = stateController.getState();
     if (state && state.data) {
@@ -146,7 +164,7 @@ onMounted(async () => {
       let schema = state.data.schema;
       let uischema = state.data.uischema;
       const newData = await initialized();    // await the response form the backend
-      if (instanceOfFormBuilderData(newData)) {
+      if (newData && instanceOfFormBuilderData(newData)) {
         // we only get new data when the user made changes while the webview was destroyed
         if (newData.schema) {
           schema = newData.schema;
@@ -155,12 +173,12 @@ onMounted(async () => {
           uischema = newData.uischema;
         }
       }
-      return updateForm(schema, uischema);
+      updateForm(schema, uischema);
     } else {
       postMessage(MessageType.initialize, undefined, "Webview was loaded successfully.");
       const data = await initialized();    // await the response form the backend
-      if (instanceOfFormBuilderData(data)) {
-        return updateForm(data.schema, data.uischema);
+      if (data && instanceOfFormBuilderData(data)) {
+        updateForm(data.schema, data.uischema);
       }
     }
   } catch (error) {
@@ -168,7 +186,7 @@ onMounted(async () => {
     postMessage(MessageType.error, undefined, message);
   }
 
-  window.addEventListener('message', getDataFromExtension);
+  postMessage(MessageType.info, undefined, "Webview was initialized.");
 })
 
 onUnmounted(() => {

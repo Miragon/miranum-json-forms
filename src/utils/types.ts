@@ -1,6 +1,6 @@
 import { JsonSchema, UISchemaElement } from '@jsonforms/core'
 
-export type JsonForm  = {
-    schema: JsonSchema,
-    uischema?: UISchemaElement
+export interface FormBuilderData {
+    schema?: JsonSchema;
+    uischema?: UISchemaElement;
 }

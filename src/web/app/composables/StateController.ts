@@ -1,23 +1,25 @@
 import { isArray, mergeWith, reverse, uniqBy } from "lodash";
 import {WebviewApi} from "vscode-webview";
-import {VscMessage, VscState} from "@/types";
+import {FormBuilderData} from "../../../utils";
+import {VscMessage, VscState} from "../../../shared/types";
+
 export class StateController {
 
-    private vscode: WebviewApi<VscState>;
+    private vscode: WebviewApi<VscState<FormBuilderData>>;
 
     constructor() {
         this.vscode = acquireVsCodeApi();
     }
 
-    public getState(): VscState | undefined {
+    public getState(): VscState<FormBuilderData> | undefined {
         return this.vscode.getState();
     }
 
-    public setState(state: VscState) {
+    public setState(state: VscState<FormBuilderData>) {
         this.vscode.setState(state);
     }
 
-    public updateState(state: Subset<VscState>) {
+    public updateState(state: Subset<VscState<FormBuilderData>>) {
         function customizer(objValue: any, srcValue: any): any {
             if (isArray(objValue)) {
                 return reverse(uniqBy(reverse(objValue.concat(srcValue)), "type"));
@@ -30,7 +32,7 @@ export class StateController {
         });
     }
 
-    public postMessage(message: VscMessage) {
+    public postMessage(message: VscMessage<FormBuilderData>) {
         this.vscode.postMessage(message);
     }
 }

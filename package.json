@@ -112,8 +112,8 @@
     "publish": "vsce publish",
     "vscode:prepublish": "npm run build",
     "build": "tsup src/extension.ts --dts --external=vscode && npm run web",
-    "web": "patch-package && vite build --config src/web/vite.config.js",
-    "web-dev": "patch-package && vite build --config src/web/vite.config.js --watch",
+    "web": "vite build --config src/web/vite.config.js",
+    "web-dev": "vite build --config src/web/vite.config.js --watch",
     "watch": "tsup src/extension.ts --dts --external=vscode --sourcemap",
     "test": "node ./out/test/runTest.js",
     "doc": "typedoc --options ./docs/typedoc.json"

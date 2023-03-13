@@ -1,8 +1,7 @@
-import {FormBuilderData, MessageType} from "@/types";
+import {FormBuilderData} from "../../../utils";
 
 export let confirm: any = null;
 export function confirmed() {
-    // this promise resolves when confirm() is called!
     return new Promise((resolve) => {
         confirm = (response: boolean) => { resolve(response) }
     })
@@ -10,9 +9,8 @@ export function confirmed() {
 
 export let initialize: any = null;
 export function initialized() {
-    // this promise resolves when confirm() is called!
     return new Promise((resolve) => {
-        confirm = (response: FormBuilderData | undefined) => { resolve(response) }
+        initialize = (response: FormBuilderData | undefined) => { resolve(response) }
     })
 }
 
