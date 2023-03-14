@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import {ExtensionContext, TextDocument, TextEditor} from "vscode";
-import {DocumentManager, Observer} from "./types";
+import {DocumentManager, Observer, UIComponent} from "./types";
 
 
 export enum TextEditorShowOption {
@@ -8,7 +8,7 @@ export enum TextEditorShowOption {
     'Group' = 'Group'
 }
 
-export abstract class TextEditorWrapper implements Observer {
+export abstract class TextEditorWrapper implements Observer, UIComponent {
 
     abstract readonly viewType: string;
     protected abstract showOption: TextEditorShowOption;

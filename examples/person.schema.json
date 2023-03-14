@@ -1,0 +1,48 @@
+{
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "minLength": 3,
+            "description": "Please enter your name"
+        },
+        "personalData": {
+            "properties": {
+                "age": {
+                    "type": "integer",
+                    "description": "Please enter your age."
+                },
+                "height": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "age",
+                "height"
+            ]
+        },
+        "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Please enter your birth date."
+        },
+        "nationality": {
+            "type": "string",
+            "enum": [
+                "DE",
+                "IT",
+                "JP",
+                "US",
+                "RU",
+                "Other"
+            ]
+        },
+        "occupation": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "nationality",
+        "occupation"
+    ]
+}

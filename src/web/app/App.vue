@@ -33,10 +33,10 @@ import {JsonSchema, UISchemaElement} from "@jsonforms/core";
 import {vanillaRenderers} from "@jsonforms/vue-vanilla";
 import {debounce} from "lodash";
 
-import FormBuilderDetails from "./components/FormBuilderDetails.vue";
-import {confirm, confirmed, initialize, initialized, instanceOfFormBuilderData, StateController} from "@/composables";
 import {FormBuilderData} from "../../utils";
 import {MessageType, VscMessage} from "../../shared/types";
+import FormBuilderDetails from "./components/FormBuilderDetails.vue";
+import {confirm, confirmed, initialize, initialized, instanceOfFormBuilderData, StateController} from "@/composables";
 
 
 const stateController = new StateController();
@@ -63,6 +63,9 @@ function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
     uischema: uischema,
   }
   stateController.updateState({ data: { schema, uischema } });
+
+  console.log("[Webview] updateForm() -> schema", mode.value, schema);
+  console.log("[Webview] updateForm() -> uischema", mode.value, uischema);
 
   // todo: Is there a better way to reload the component?
   key.value++;
@@ -95,6 +98,7 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
       case `jsonforms-builder.${MessageType.redo}`:
       case `jsonforms-builder.${MessageType.updateFromExtension}`: {
         isUpdateFromExtension = true;
+        console.log("[Webview] updateForm()", mode.value);
         updateForm(data?.schema, data?.uischema);
         break;
       }
@@ -109,7 +113,6 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
         break;
       }
       case `jsonforms-renderer.${MessageType.updateFromExtension}`: {
-        console.log("[Webview] test");
         updateForm(data?.schema, data?.uischema);
         break;
       }
@@ -120,12 +123,14 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
   }
 }
 
-const sendChangesToExtension = debounce(updateFile, 500);
+const sendChangesToExtension = debounce(updateFile, 200);
 function updateFile(data: FormBuilderData) {
-  if (isUpdateFromExtension && mode.value === "jsonforms-renderer") {
+  if (isUpdateFromExtension || mode.value === "jsonforms-renderer") {
     isUpdateFromExtension = false;
     return;
   }
+  console.log("[Webview] updateFile", mode.value, data);
+  stateController.updateState({ data });
   postMessage(MessageType.updateFromWebview, data);
 }
 
@@ -164,6 +169,8 @@ onBeforeMount(async () => {
       let schema = state.data.schema;
       let uischema = state.data.uischema;
       const newData = await initialized();    // await the response form the backend
+      console.log("[Webview] restored() -> state", mode.value, state.data);
+      console.log("[Webview] restored() -> newData", mode.value, newData);
       if (newData && instanceOfFormBuilderData(newData)) {
         // we only get new data when the user made changes while the webview was destroyed
         if (newData.schema) {
@@ -177,6 +184,7 @@ onBeforeMount(async () => {
     } else {
       postMessage(MessageType.initialize, undefined, "Webview was loaded successfully.");
       const data = await initialized();    // await the response form the backend
+      console.log("[Webview] initialized()", mode.value, data);
       if (data && instanceOfFormBuilderData(data)) {
         updateForm(data.schema, data.uischema);
       }

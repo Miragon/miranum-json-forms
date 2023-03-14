@@ -12,7 +12,8 @@ export interface Observer {
 
 export interface DocumentManager extends Subject {
     document: TextDocument
-    getContent(): any
+    readonly tmpData: { uri: Uri, value: string }
+    getContent(): Promise<any>
     setInitialDocument(document: TextDocument): void
     //setDocument(document: TextDocument): void
     writeToDocument(documentUri: Uri, content: any): Promise<boolean>
@@ -20,7 +21,7 @@ export interface DocumentManager extends Subject {
 
 export interface UIComponent {
     readonly isOpen: boolean
-    open(data?: any): void
-    close(): void
-    toggle(data?: any): void
+    open(...data: any[]): void
+    close(key?: string): void
+    toggle(...data: any[]): void
 }

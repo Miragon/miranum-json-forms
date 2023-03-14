@@ -17,6 +17,7 @@ export class StateController {
 
     public setState(state: VscState<FormBuilderData>) {
         this.vscode.setState(state);
+        console.log("[Webview] setState", state);
     }
 
     public updateState(state: Subset<VscState<FormBuilderData>>) {

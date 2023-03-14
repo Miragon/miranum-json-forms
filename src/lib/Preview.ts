@@ -36,7 +36,7 @@ export abstract class Preview implements Observer, UIComponent {
 
     public abstract update(value: any): void;
     protected abstract getHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string;
-    protected abstract setEventHandlers(document: DocumentManager, webviewPanel: WebviewPanel): Disposable[]
+    protected abstract setEventHandlers(webviewPanel: WebviewPanel, document: DocumentManager): Disposable[]
 
 
     public get isOpen(): boolean {
@@ -106,7 +106,7 @@ export abstract class Preview implements Observer, UIComponent {
             webviewPanel.iconPath = this.webviewOptions.icon;
             webviewPanel.webview.options = {enableScripts: true};
             webviewPanel.webview.html = this.getHtml(webviewPanel.webview, this.extensionUri);
-            const disposables = this.setEventHandlers(document, webviewPanel);
+            const disposables = this.setEventHandlers(webviewPanel, document);
 
             // Make sure there will never be more than 2 webview panels inside our array
             while (this.webviews.length > 1) {

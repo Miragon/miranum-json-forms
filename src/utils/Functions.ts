@@ -24,7 +24,6 @@ export function getMinimum(): FormBuilderData {
     }))
 }
 
-
 /**
  * Get the HTML-Document which display the webview
  * @param webview Webview belonging to the panel

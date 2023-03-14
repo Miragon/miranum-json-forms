@@ -26,16 +26,22 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
 
     /** Number of currently open custom text editors with the view type `jsonschema-builder`. */
     private static counter = 0;
+
     /** The controller ({@link DocumentController}) manages the document (.form-file). */
     private readonly controller: DocumentManager;
+
     /** The preview ({@link BuildInPreview}) renders the content of the active custom text editor. */
     private readonly preview: Preview;
+
     /** The text editor ({@link TextEditorComponent}) for direct changes inside the document. */
     private readonly textEditor: TextEditorWrapper;
+
     /** An array with all disposables per webview panel. */
     private disposables: Map<string, vscode.Disposable[]> = new Map();
+
     /** @hidden Little helper to prevent the preview from closing after the text editor is opened. */
     private closePreview = true;
+
 
     /**
      * Register all components and controllers and set up all commands.
@@ -52,7 +58,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         this.preview = new BuildInPreview(this.context.extensionUri);
 
         // initialize controller and subscribe the components to it
-        this.controller = new DocumentController<FormBuilderData>();
+        this.controller = new DocumentController();
         this.controller.subscribe(this.preview, this.textEditor);
 
         // ----- Register commands ---->
@@ -111,39 +117,37 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         // Send content from the extension to the webview
         // todo: change signature to (message: VscMessage)
         const postMessage = async (msgType: MessageType) => {
-            //if (webviewPanel.visible) {
-                let data: FormBuilderData | undefined;
-                switch (msgType) {
-                    case MessageType.restore: {
-                        data = (isBuffer) ? this.controller.getContent() : undefined;
-                        break;
-                    }
-                    default: {
-                        data = this.controller.getContent();
-                        break;
-                    }
+            let data: FormBuilderData | undefined;
+            switch (msgType) {
+                case MessageType.restore: {
+                    data = (isBuffer) ? await this.controller.getContent() : undefined;
+                    break;
                 }
+                default: {
+                    data = await this.controller.getContent();
+                    break;
+                }
+            }
 
-                try {
-                    if (await webviewPanel.webview.postMessage({
-                        type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${msgType}`,
-                        data,
-                    })) {
-                        if (msgType === MessageType.restore) {
-                            isBuffer = false;
-                        }
-                    } else {
-                        Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, `Could not post message (Viewtype: ${webviewPanel.visible})`);
+            try {
+                if (await webviewPanel.webview.postMessage({
+                    type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${msgType}`,
+                    data,
+                })) {
+                    if (msgType === MessageType.restore) {
+                        isBuffer = false;
                     }
-                } catch (error) {
-                    if (!document.isClosed) {
-                        const message = (error instanceof Error)
-                            ? error.message
-                            : `Could not post message to ${webviewPanel}`;
-                        Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, message);
-                    }
+                } else {
+                    Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, `Could not post message (Viewtype: ${webviewPanel.visible})`);
                 }
-            //}
+            } catch (error) {
+                if (!document.isClosed) {
+                    const message = (error instanceof Error)
+                        ? error.message
+                        : `Could not post message to ${webviewPanel}`;
+                    Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, message);
+                }
+            }
         }
 
         // Receive messages from the webview
@@ -243,6 +247,19 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                 }
             }
             isUpdateFromWebview = false;    // reset
+        }, null, disposables);
+
+        vscode.workspace.onDidSaveTextDocument(() => {
+            try {
+                vscode.workspace.fs.writeFile(this.controller.tmpData.uri, Buffer.from(this.controller.tmpData.value));
+                Logger.info(
+                    "[Miranum.JsonForms]",
+                    `(Webview: ${webviewPanel.title})`,
+                    `Documents were saved: \n\t\t\t- ${document.fileName}\n\t\t\t- ${this.controller.tmpData.uri.fsPath}`);
+            } catch (error) {
+                const message = (error instanceof Error) ? error.message : `${error}`;
+                Logger.error("Miranum.JsonForms", "Could not save second document.", message);
+            }
         }, null, disposables);
 
         // Called when the view state changes (e.g. user switch the tab)

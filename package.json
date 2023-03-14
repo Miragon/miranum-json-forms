@@ -34,7 +34,10 @@
         "displayName": "Miranum Json Forms",
         "selector": [
           {
-            "filenamePattern": "*.jsonform"
+            "filenamePattern": "*.schema.json"
+          },
+          {
+            "filenamePattern": "*.uischema.json"
           }
         ],
         "priority": "default"

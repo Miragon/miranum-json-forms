@@ -6,40 +6,29 @@
 
 import * as vscode from 'vscode';
 import {TextDocument, Uri} from 'vscode';
-import {Observer, Subject, DocumentManager} from "../lib";
+import {Observer, DocumentManager} from "../lib";
 import {FormBuilderData} from "../utils";
 import { debounce } from "lodash";
 import {BuildInPreview, Logger, TextEditorComponent} from "../components";
 import {MessageType} from "../shared/types";
 
-export class DocumentController<ContentType extends FormBuilderData> implements Subject, DocumentManager {
+export class DocumentController implements DocumentManager {
 
     /** @hidden */
     public writeToDocument = this.asyncDebounce(this.write, 50);
-    //private static instance: DocumentController;
+
     /** Array of all subscribed components. */
     private observers: Observer[] = [];
+
     /** @hidden */
     private _document?: TextDocument;
 
+    private tmpChangedData?: { uri: Uri, value: string };
+
+
     public constructor() {
-        //vscode.workspace.onDidChangeTextDocument((event) => {
-        //    if (event.document.uri.toString() === this._document?.uri.toString() && event.contentChanges.length !== 0) {
-        //        this.updatePreview();
-        //    }
-        //})
         Logger.info("[Miranum.JsonForms.DocumentContr] DocumentController was created.")
     }
-
-    /**
-     * Get the current instance or create a new one. Ensures that there is always only one instance (Singleton).
-     */
-    //public static getInstance(): DocumentController {
-    //    if (this.instance === undefined) {
-    //        this.instance = new DocumentController();
-    //    }
-    //    return this.instance;
-    //}
 
     /**
      * Subscribe to get notified when changes are made to the document.
@@ -84,27 +73,59 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
         return this._document;
     }
 
+    public get tmpData(): { uri: Uri, value: string } {
+        if (!this.tmpChangedData) {
+            throw Error("No temporary data available.");
+        }
+        return this.tmpChangedData;
+    }
+
     /**
      * Get the content of the active document.
      **/
-    public getContent(): ContentType {
+    public async getContent(): Promise<FormBuilderData> {
+        async function readFile(uri: Uri): Promise<string> {
+            return Buffer.from(await vscode.workspace.fs.readFile(uri)).toString("utf-8");
+        }
+
+        const [ext, rest] = this.getFileExtension();
         try {
-            return this.getJsonFormFromString(this.document.getText());
+            if (ext === "schema.json") {
+                return {
+                    schema: JSON.parse(this.document.getText()),
+                    uischema: JSON.parse(this.tmpData.value)
+                }
+            } else {
+                return {
+                    schema: JSON.parse(this.tmpData.value),
+                    uischema: JSON.parse(this.document.getText())
+                }
+            }
         } catch (error) {
-            throw error;
+            if (ext === "schema.json") {
+                return {
+                    schema: JSON.parse(this.document.getText()),
+                    uischema: JSON.parse(await readFile(Uri.file(`${rest}.uischema.json`)))
+                }
+            } else {
+                return {
+                    schema: JSON.parse(await readFile(Uri.file(`${rest}.schema.json`))),
+                    uischema: JSON.parse(this.document.getText())
+                }
+            }
         }
     }
 
-    public notify() {
+    public async notify() {
         for (const observer of this.observers) {
             try {
                 if (observer instanceof BuildInPreview) {
-                    observer.update({
+                    await observer.update({
                         type: `${observer.viewType}.${MessageType.updateFromExtension}`,
-                        data: this.getContent()
+                        data: await this.getContent()
                     })
                 } else if (observer instanceof TextEditorComponent) {
-                    observer.update(this.document);
+                    await observer.update(this.document);
                 }
             } catch (error) {
                 const message = (error instanceof Error) ? error.message : "Couldn't update webview.";
@@ -119,35 +140,16 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
      * @param text
      * @private
      */
-    private getJsonFormFromString(text: string): ContentType {
-        if (text.trim().length === 0) {
-            return JSON.parse('{}');
-        }
+    //private getJsonFormFromString(text: string): ContentType {
+    //    if (text.trim().length === 0) {
+    //        return JSON.parse('{}');
+    //    }
 
-        try {
-            return JSON.parse(text);
-        } catch {
-            throw new Error("Could not parse text!");
-        }
-    }
-
-    /**
-     * Only updates the preview and ignores other observers.
-     */
-    //public updatePreview(): void {
-    //    this.observers.forEach((observer) => {
-    //        try {
-    //            switch (true) {
-    //                case observer instanceof Preview: {
-    //                    observer.update(this.content);
-    //                    break;
-    //                }
-    //            }
-    //        } catch (error) {
-    //            const message = (error instanceof Error) ? error.message : "Couldn't update preview.";
-    //            Logger.error("[Miranum.JsonForms.DocumentContr]", message);
-    //        }
-    //    });
+    //    try {
+    //        return JSON.parse(text);
+    //    } catch {
+    //        throw new Error("Could not parse text!");
+    //    }
     //}
 
     /**
@@ -156,17 +158,33 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
      * @param content The data which was sent from the webview.
      * @returns Promise
      */
-    private async write(uri: Uri, content: ContentType): Promise<boolean> {
+    private async write(uri: Uri, content: FormBuilderData): Promise<boolean> {
         try {
-            if (this.document.uri != uri) {
+            if (this.document.uri.toString() !== uri.toString()) {
                 throw Error("Inconsistent document!");
-            } else if (JSON.stringify(this.getContent()) === JSON.stringify(content)) {
+            } else if (JSON.stringify(await this.getContent()) === JSON.stringify(content)) {
                 throw Error("No changes to apply!")
             }
 
-            const edit = new vscode.WorkspaceEdit();
-            const text = JSON.stringify(content, undefined, 4);
+            const debug = await this.getContent();
 
+            const [ext, rest] = this.getFileExtension();
+            let text: string;
+            if (ext === "schema.json") {
+                text = JSON.stringify(content.schema, undefined, 4);
+                this.tmpChangedData = {
+                    uri: Uri.file(`${rest}.uischema.json`),
+                    value: JSON.stringify(content.uischema, undefined, 4)
+                };
+            } else {
+                text = JSON.stringify(content.uischema, undefined, 4);
+                this.tmpChangedData = {
+                    uri: Uri.file(`${rest}.schema.json`),
+                    value: JSON.stringify(content.schema, undefined, 4)
+                };
+            }
+
+            const edit = new vscode.WorkspaceEdit();
             edit.replace(
                 this.document.uri,
                 new vscode.Range(0, 0, this.document.lineCount, 0),
@@ -202,10 +220,19 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
         }) as ReturnType<F>;
     }
 
+    private getFileExtension(): [string, string] {
+        const pathParts = this.document.uri.path.split("/");
+        const fileParts = pathParts[pathParts.length - 1].split(".");
+        return [
+            fileParts.slice(1).join("."),
+            `${pathParts.slice(0, pathParts.length - 1).join("/")}/${fileParts[0]}`
+        ]
+    }
+
     /**
      * Get the default content which is displayed when the data model is empty.
      */
-    private getDefault(): ContentType {
+    private getDefault(): FormBuilderData {
         return JSON.parse(JSON.stringify({
             "schema": {
                 "type": "object",
