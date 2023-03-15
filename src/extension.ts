@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import {JsonSchemaBuilderProvider} from './JsonSchemaBuilderProvider';
+import {Logger} from "./components";
 
 /**
  * Function called by vscode when the user opens a .form-file and no JsonSchemaBuilderProvider is registered.
@@ -26,10 +27,10 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     // Create custom text editor
-    const builder = new JsonSchemaBuilderProvider(context);
+    context.subscriptions.push(Logger.get("Miranum: JsonForms"))
     context.subscriptions.push(vscode.window.registerCustomEditorProvider(
-        JsonSchemaBuilderProvider.viewType,
-        builder,
+        JsonSchemaBuilderProvider.VIEWTYPE,
+        new JsonSchemaBuilderProvider(context),
         { webviewOptions: { retainContextWhenHidden: true } }
     ));
 }

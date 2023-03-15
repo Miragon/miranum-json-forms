@@ -1,31 +1,25 @@
 import {TextDocument} from "vscode";
 
-export interface IContentController<T> {
-    document: TextDocument;
-    subscribe(observer: Updatable<T>): void;
+export interface Subject {
+    subscribe(...observers: Observer[]): void
+    unsubscribe(...observers: Observer[]): void
+    notify(): void
 }
 
-export interface Updatable<T> {
-    update(content: T): void;
+export interface Observer {
+    update(value: any): void
 }
 
-export enum ViewState {
-    'open' = 'open',
-    'closed' = 'closed'
+export interface DocumentManager<ContentType> extends Subject {
+    document: TextDocument
+    readonly content: ContentType
+    setInitialDocument(document: TextDocument): void
+    writeToDocument(content: ContentType): Promise<boolean>
 }
 
-export type VsCode = {
-    postMessage(message: VscMessage): void;
-    getState(): VscState;
-    setState(state: VscState): void;
-};
-
-type VscMessage = {
-    type: string;
-    content: string;
-}
-
-type VscState = {
-    text: string;
-    mode: string;
+export interface UIComponent<T> {
+    readonly isOpen: boolean
+    open(...data: T[]): void
+    close(id?: string): void
+    toggle(...data: T[]): void
 }

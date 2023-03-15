@@ -5,105 +5,37 @@
  */
 
 import * as vscode from 'vscode';
-import {IContentController, Preview, TextEditorWrapper, Updatable} from "../lib";
-import {getDefault, JsonForm} from "../utils";
-import {TextDocument, Uri} from "vscode";
-import {debounce} from "debounce";
+import {TextDocument} from 'vscode';
+import {Observer, DocumentManager} from "../lib";
+import {FormBuilderData, getMinimum} from "../utils";
+import { debounce } from "lodash";
+import {BuildInPreview, Logger, TextEditorComponent} from "../components";
+import {MessageType} from "../shared/types";
 
-export class DocumentController implements IContentController<TextDocument | JsonForm> {
+export class DocumentController<ContentType extends FormBuilderData> implements DocumentManager<ContentType> {
 
     /** @hidden */
-    public writeData = debounce(this.writeChangesToDocument)
-    private static instance: DocumentController;
+    public writeToDocument = this.asyncDebounce(this.write, 50);
     /** Array of all subscribed components. */
-    private observers: Updatable<TextDocument | JsonForm>[] = [];
+    private observers: Observer[] = [];
     /** @hidden */
-    private _document: TextDocument | undefined;
+    private _document?: TextDocument;
 
-    private constructor() {
-        vscode.workspace.onDidChangeTextDocument((event) => {
-            if (event.document.uri.toString() === this.document.uri.toString() && event.contentChanges.length !== 0) {
-                this.updatePreview();
-            }
-        })
-    }
-
-    /**
-     * Get the current instance or create a new one. Ensures that there is always only one instance (Singleton).
-     */
-    public static getInstance(): DocumentController {
-        if (this.instance === undefined) {
-            this.instance = new DocumentController();
-        }
-        return this.instance;
+    public constructor() {
+        Logger.info("[Miranum.JsonForms.DocumentContr] DocumentController was created.")
     }
 
     /**
      * Subscribe to get notified when changes are made to the document.
-     * @param observer One or more observers which subscribe for notification.
+     * @param observers One or more observers which subscribe for notification.
      */
-    public subscribe(...observer: Updatable<TextDocument | JsonForm>[]): void {
-        this.observers = this.observers.concat(observer);
+    public subscribe(...observers: Observer[]): void {
+        this.observers = this.observers.concat(observers);
+        Logger.info("[Miranum.JsonForms.DocumentContr]", `${observers.length} Observer(s) subscribed.`)
     }
 
-    /**
-     * Get the content of the active document.
-     **/
-    public get content(): JsonForm {
-        return this.getJsonFormFromString(this.document.getText());
-    }
-
-    /**
-     * Get the active document.
-     */
-    public get document(): TextDocument {
-        if (this._document) {
-            return this._document;
-        } else {
-            throw new Error('[Controller] Document is not initialized!');
-        }
-    }
-
-    /**
-     * Set a new document.
-     * @param document The new document.
-     */
-    public set document(document: TextDocument) {
-        this._document = document;
-        this.observers.forEach((observer) => {
-            try {
-                switch (true) {
-                    case observer instanceof Preview: {
-                        const content = this.getJsonFormFromString(this.document.getText());
-                        observer.update(content);
-                        break;
-                    }
-                    case observer instanceof TextEditorWrapper: {
-                        observer.update(this.document);
-                        break;
-                    }
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        });
-    }
-
-    /**
-     * Parses a given string to json.
-     * @param text
-     * @private
-     */
-    public getJsonFormFromString(text: string): JsonForm {
-        if (text.trim().length === 0) {
-            return JSON.parse('{}');
-        }
-
-        try {
-            return JSON.parse(text);
-        } catch {
-            throw new Error('[Controller] Could not parse text!');
-        }
+    public unsubscribe(...observers: Observer[]): void {
+        this.observers = this.observers.filter((observer) => !observers.includes(observer));
     }
 
     /**
@@ -113,51 +45,122 @@ export class DocumentController implements IContentController<TextDocument | Jso
     public async setInitialDocument(document: TextDocument) {
         this._document = document;
         if (!this.document.getText()) {
-            if (await this.writeChangesToDocument(document.uri, getDefault())) {
+            if (await this.write(getMinimum<ContentType>())) {
                 this.document.save();
+            }
+        }
+        Logger.info("[Miranum.JsonForms.DocumentContr]", "Initial document was set.")
+    }
+
+    /**
+     * Set a new document.
+     * @param document The new document.
+     */
+    public set document(document: TextDocument) {
+        this._document = document;
+        this.notify();
+    }
+
+    public get document(): TextDocument {
+        if (!this._document) {
+            throw Error("Document is not set!");
+        }
+        return this._document;
+    }
+
+    /**
+     * Get the content of the active document.
+     **/
+    public get content(): ContentType {
+        try {
+            return this.getJsonFormFromString(this.document.getText());
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    public notify() {
+        for (const observer of this.observers) {
+            try {
+                if (observer instanceof BuildInPreview) {
+                    observer.update({
+                        type: `${observer.viewType}.${MessageType.updateFromExtension}`,
+                        data: this.content
+                    })
+                } else if (observer instanceof TextEditorComponent) {
+                    observer.update(this.document);
+                }
+            } catch (error) {
+                const message = (error instanceof Error) ? error.message : "Couldn't update webview.";
+                Logger.error("[Miranum.JsonForms.DocumentContr]", message);
             }
         }
     }
 
+
     /**
-     * Only updates the preview and ignores other observers.
+     * Parses a given string to json.
+     * @param text
+     * @private
      */
-    public updatePreview(): void {
-        this.observers.forEach((observer) => {
-            try {
-                switch (true) {
-                    case observer instanceof Preview: {
-                        const content = this.getJsonFormFromString(this.document.getText());
-                        observer.update(content);
-                        break;
-                    }
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        });
+    private getJsonFormFromString(text: string): ContentType {
+        if (text.trim().length === 0) {
+            return JSON.parse('{}');
+        }
+
+        try {
+            return JSON.parse(text);
+        } catch {
+            throw new Error("Could not parse text!");
+        }
     }
 
     /**
      * Apply changes to the document.
-     * @param uri The URI of the document that should be updated.
      * @param content The data which was sent from the webview.
      * @returns Promise
      */
-    public writeChangesToDocument(uri: Uri, content: JsonForm): Promise<boolean> {
-        if (this._document && this.document.uri != uri) {
-            return Promise.reject('Inconsistent document!');
+    private async write(content: ContentType): Promise<boolean> {
+        try {
+            if (JSON.stringify(this.content) === JSON.stringify(content)) {
+                throw Error("No changes to apply!")
+            }
+
+            const edit = new vscode.WorkspaceEdit();
+            const text = JSON.stringify(content, undefined, 4);
+
+            edit.replace(
+                this.document.uri,
+                new vscode.Range(0, 0, this.document.lineCount, 0),
+                text
+            );
+
+            return vscode.workspace.applyEdit(edit);
+        } catch (error) {
+            return Promise.reject(error);
         }
+    }
 
-        const edit = new vscode.WorkspaceEdit();
-        const text = JSON.stringify(content, undefined, 4);
+    private asyncDebounce<F extends(...args: any[]) => Promise<boolean>>(func: F, wait?: number) {
+        const resolveSet = new Set<(p:boolean)=>void>();
+        const rejectSet = new Set<(p:boolean)=>void>();
 
-        edit.replace(
-            this.document.uri,
-            new vscode.Range(0, 0, this.document.lineCount, 0),
-            text
-        );
+        const debounced = debounce((bindSelf, args: Parameters<F>) => {
+            func.bind(bindSelf)(...args)
+                .then((...res) => {
+                    resolveSet.forEach((resolve) => resolve(...res));
+                    resolveSet.clear();
+                })
+                .catch((...res) => {
+                    rejectSet.forEach((reject) => reject(...res));
+                    rejectSet.clear();
+                });
+        }, wait);
 
-        return Promise.resolve(vscode.workspace.applyEdit(edit));
+        return (...args: Parameters<F>): ReturnType<F> => new Promise((resolve, reject) => {
+            resolveSet.add(resolve);
+            rejectSet.add(reject);
+            debounced(this, args);
+        }) as ReturnType<F>;
     }
 }

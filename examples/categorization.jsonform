@@ -1,0 +1,199 @@
+{
+    "schema": {
+        "type": "object",
+        "properties": {
+            "firstName": {
+                "type": "string",
+                "minLength": 3,
+                "description": "Please enter your first name"
+            },
+            "secondName": {
+                "type": "string",
+                "minLength": 3,
+                "description": "Please enter your second name"
+            },
+            "birthDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Please enter your birth date."
+            },
+            "nationality": {
+                "enum": [
+                    "DE",
+                    "IT",
+                    "JP",
+                    "US",
+                    "RU",
+                    "Other"
+                ],
+                "type": "string"
+            },
+            "provideAddress": {
+                "type": "boolean"
+            },
+            "vegetarian": {
+                "type": "boolean"
+            },
+            "address": {
+                "properties": {
+                    "street": {
+                        "type": "string"
+                    },
+                    "streetNumber": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "type": "string"
+                    },
+                    "postalCode": {
+                        "type": "string",
+                        "maxLength": 5
+                    }
+                }
+            },
+            "vegetarianOptions": {
+                "properties": {
+                    "vegan": {
+                        "type": "boolean"
+                    },
+                    "favoriteVegetable": {
+                        "enum": [
+                            "Tomato",
+                            "Potato",
+                            "Salad",
+                            "Aubergine",
+                            "Cucumber",
+                            "Other"
+                        ],
+                        "type": "string"
+                    },
+                    "otherFavoriteVegetable": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "uischema": {
+        "type": "Categorization",
+        "elements": [
+            {
+                "type": "Category",
+                "elements": [
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/firstName"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/secondName"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/birthDate"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/nationality"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/provideAddress"
+                    },
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/vegetarian"
+                    }
+                ],
+                "label": "categoryLabelKey"
+            },
+            {
+                "type": "Category",
+                "elements": [
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/address/properties/street"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/address/properties/streetNumber"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/address/properties/city"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/address/properties/postalCode"
+                            }
+                        ]
+                    }
+                ],
+                "i18n": "address",
+                "rule": {
+                    "effect": "SHOW",
+                    "condition": {
+                        "scope": "#/properties/provideAddress",
+                        "schema": {
+                            "const": true
+                        }
+                    }
+                }
+            },
+            {
+                "type": "Category",
+                "elements": [
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/vegetarianOptions/properties/vegan"
+                    },
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/vegetarianOptions/properties/favoriteVegetable"
+                    },
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/vegetarianOptions/properties/otherFavoriteVegetable",
+                        "rule": {
+                            "effect": "SHOW",
+                            "condition": {
+                                "scope": "#/properties/vegetarianOptions/properties/favoriteVegetable",
+                                "schema": {
+                                    "const": "Other"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "label": "Additional",
+                "rule": {
+                    "effect": "SHOW",
+                    "condition": {
+                        "scope": "#/properties/vegetarian",
+                        "schema": {
+                            "const": true
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

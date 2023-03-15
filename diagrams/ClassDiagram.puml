@@ -1,0 +1,139 @@
+@startuml
+skinparam groupInheritance 2
+
+class CustomTextEditorProvider << singleton >> #line:darkgreen;back:lightgreen {
+    + {static} viewType: string
+    - {static} counter: number
+    - controller: DocumentController
+    - preview: PreviewComponent
+    - textEditor: MiranumTextEditor
+    + register(context: ExtensionContext): Disposable
+    + resolveCustomTextEditor(document: TextDocument, webviewPanel: WebviewPanel): void
+    - getHtml(webview: Webview, extensionUri: Uri)
+}
+CustomTextEditorProvider::controller "1"-->"1" DocumentController : use
+CustomTextEditorProvider::preview "1"-->"1" PreviewComponent : use
+CustomTextEditorProvider::textEditor "1"-->"1" TextEditorComponent : use
+CustomTextEditorProvider "1"-->"1" Logger : use
+CustomTextEditorProvider --> vscode #line:blue;line.dotted;text:blue : use
+
+interface Observer {
+    + update<T>(value: T)
+}
+
+interface Subject {
+    + subscribe(observers: Observer[])
+    + unsubscribe(observers: Observer[])
+    + notify()
+}
+
+interface DocumentManager {
+    + << set >> document: TextDocument
+    + {static} getContent(): ContentType
+    + setInitialDocument(document: TextDocument): void
+    + writeToDocument<ContentType>(documentUri: Uri, content: ContentType): Promise<boolean>
+}
+
+
+interface UIComponent {
+    + << get >> isOpen: boolean
+    + toggle(): void
+    + open(): void
+    + close(): void
+}
+
+interface WebviewOption {
+    + title: string
+    + icon: Uri
+}
+
+interface WebviewObject {
+    + webview: WebviewPanel
+    + disposables: Disposable[]
+}
+
+enum ViewState {
+    + open: string
+    + closed: string
+}
+enum CloseCaller {
+    + explicit: string
+    + implicit: string
+    + undefined: string
+}
+enum TextEditorShowOption {
+    + Tab: string
+    + Group: string
+}
+
+abstract class Preview<ContentType> implements Observer, UIComponent {
+    # {abstract} << get >> viewType: string
+    # {abstract} extensionUri: Uri
+    # {abstract} webviewOption: WebviewOption
+    + << get >> lastViewState: ViewState
+    - webviews: WebviewObject[]
+    - closeCaller: CloseCaller
+    - isBuffer: boolean
+    # {abstract} getHtml(webview: Webview, extensionUri: Uri): string
+    # {abstract} setEventHandlers(webview: Webview): void
+    + active(): boolean
+    + visible(): boolean
+    + lastViewState(): ViewState
+    + create(content: ContentType): void
+    + update<ContentType>(content: ContentType): never
+}
+Preview::webviewOption --|> WebviewOption
+Preview::webviews --|> WebviewObject
+Preview::lastViewState --|> ViewState
+Preview::closeCaller --|> CloseCaller
+
+abstract class MiranumTextEditor<TextDocument> implements Observer, UIComponent {
+    # {abstract} showOption: TextEditorShowOption
+    - << get >> textEditor: TextEditor
+    + update<TextDocument>(document: TextDocument): never
+    - getShowOption(): TextDocumentShowOption
+    - getTab(documentName: string): Tab
+}
+MiranumTextEditor::showOption --|> TextEditorShowOption
+
+class DocumentController << singleton >> #line:black;back:lightyellow implements Subject, DocumentManager {
+    - observers: Observer[]
+    - getFormBuilderData(text: string): FormBuilderData
+}
+DocumentController "1"-->"*" Observer #line:red;text:red : update
+DocumentController --> vscode #line:blue;line.dotted;text:blue : use
+
+together {
+    class PreviewComponent << singleton >> #line:darkred;back:pink extends Preview {}
+    class TextEditorComponent << singleton >> #line:darkred;back:pink extends MiranumTextEditor {
+        + setShowOption(context: ExtensionContext): void
+    }
+    PreviewComponent --> vscode #line:blue;line.dotted;text:blue : use
+    TextEditorComponent --> vscode #line:blue;line.dotted;text:blue : use
+}
+
+class Logger #line:darkred;back:pink implements UIComponent {
+    - {static} logger: LogOutputChannel
+    + {static} get()
+    + {static} get(channel: string): LogOutputChannel
+    + {static} info(args: string[]): void
+    + {static} error(args: string[]): void
+}
+Logger --> vscode #line:blue;line.dotted;text:blue : use
+
+namespace vscode #ADD8E6 {
+    interface ExtensionContext {}
+    interface LogOutputChannel {}
+    interface Tab {}
+    interface TextDocument {}
+    interface TextEditor {}
+    enum TextDocumentShowOption {}
+    class Disposable {}
+    class Uri {}
+    together {
+        interface Webview {}
+        interface WebviewPanel {}
+    }
+}
+
+@enduml
