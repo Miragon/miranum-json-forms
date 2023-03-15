@@ -12,7 +12,7 @@ import {MessageType, VscMessage} from "../shared/types";
 import {FormBuilderData, getHtmlForWebview} from "../utils";
 import {Logger} from "./Logger";
 
-export class BuildInPreview extends Preview {
+export class BuildInPreview extends Preview<DocumentManager<JsonSchema | Layout>> {
 
     /** Unique identifier for the preview. */
     public readonly viewType = "jsonforms-renderer";

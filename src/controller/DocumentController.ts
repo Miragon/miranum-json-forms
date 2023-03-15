@@ -6,19 +6,19 @@
 
 import * as vscode from 'vscode';
 import {TextDocument} from 'vscode';
-import {Observer, DocumentManager} from "../lib";
 import { debounce } from "lodash";
-import {BuildInPreview, Logger, TextEditorComponent} from "../components";
-import {MessageType} from "../shared/types";
-import {JsonForms} from "@jsonforms/vue";
-import {FormBuilderData} from "../utils";
 import {JsonSchema, Layout} from "@jsonforms/core";
+import {Observer, DocumentManager} from "../lib";
+import {MessageType} from "../shared/types";
+import {FormBuilderData} from "../utils";
+import {BuildInPreview, Logger, TextEditorComponent} from "../components";
 
 export class DocumentController<ContentType extends JsonSchema | Layout> implements DocumentManager<ContentType> {
 
-    private static edit = new vscode.WorkspaceEdit();
     /** @hidden */
     public writeToDocument = this.asyncDebounce(this.write, 50);
+
+    private static edit = new vscode.WorkspaceEdit();
 
     /** Array of all subscribed components. */
     private observers: Observer[] = [];
@@ -28,7 +28,7 @@ export class DocumentController<ContentType extends JsonSchema | Layout> impleme
 
 
     public constructor() {
-        Logger.info("[Miranum.JsonForms.DocumentContr] DocumentController was created.")
+        Logger.info("[Miranum.JsonForms.DocumentController] DocumentController was created.")
     }
 
     /**
@@ -37,7 +37,7 @@ export class DocumentController<ContentType extends JsonSchema | Layout> impleme
      */
     public subscribe(...observers: Observer[]): void {
         this.observers = this.observers.concat(observers);
-        Logger.info("[Miranum.JsonForms.DocumentContr]", `${observers.length} Observer(s) subscribed.`)
+        Logger.info("[Miranum.JsonForms.DocumentController]", `${observers.length} Observer(s) subscribed.`)
     }
 
     public unsubscribe(...observers: Observer[]): void {
@@ -51,12 +51,19 @@ export class DocumentController<ContentType extends JsonSchema | Layout> impleme
     public async setInitialDocument(document: TextDocument) {
         this._document = document;
         // todo How to proceed with an empty document?
-        //if (!this.document.getText()) {
-        //    if (await this.write(this.getDefault())) {
-        //        this.document.save();
-        //    }
-        //}
-        Logger.info("[Miranum.JsonForms.DocumentContr]", "Initial document was set.")
+        if (!this.document.getText()) {
+            const content = this.content
+            if (this.instanceOfJsonSchema(content)) {
+                //if (await this.write(getMinimumJsonSchema<JsonSchema>())) {
+                //    this.document.save();
+                //}
+            } else if (this.instanceOfLayout(content)) {
+                //if (await this.write(getMinimumLayout<Layout>())) {
+                //    this.document.save();
+                //}
+            }
+        }
+        Logger.info("[Miranum.JsonForms.DocumentController]", "Initial document was set.")
     }
 
     /**
@@ -90,7 +97,7 @@ export class DocumentController<ContentType extends JsonSchema | Layout> impleme
         try {
             let data: Partial<FormBuilderData> | undefined;
             const content = this.content
-            if (content instanceof JsonForms) {
+            if (this.instanceOfJsonSchema(content)) {
                 data = { schema: content }
             } else if (this.instanceOfLayout(content)) {
                 data = { uischema: content }
@@ -147,6 +154,10 @@ export class DocumentController<ContentType extends JsonSchema | Layout> impleme
 
             const text = JSON.stringify(content, undefined, 4);
 
+            if (DocumentController.edit.has(this.document.uri)) {
+                DocumentController.edit = new vscode.WorkspaceEdit();
+            }
+
             DocumentController.edit.replace(
                 this.document.uri,
                 new vscode.Range(0, 0, this.document.lineCount, 0),
@@ -184,5 +195,9 @@ export class DocumentController<ContentType extends JsonSchema | Layout> impleme
 
     private instanceOfLayout(object: any): object is Layout {
         return ("type" in object && "elements" in object)
+    }
+
+    private instanceOfJsonSchema(object: any): object is JsonSchema {
+        return ("type" in object && "properties" in object)
     }
 }

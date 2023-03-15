@@ -62,10 +62,10 @@ function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
     schema: schema,
     uischema: uischema,
   }
-  stateController.updateState({ data: { schema, uischema } });
-
-  console.log("[Webview] updateForm() -> schema", mode.value, schema);
-  console.log("[Webview] updateForm() -> uischema", mode.value, uischema);
+  stateController.updateState({
+    mode: mode.value,
+    data: { schema, uischema }
+  });
 
   // todo: Is there a better way to reload the component?
   key.value++;
@@ -98,7 +98,6 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
       case `jsonforms-builder.${MessageType.redo}`:
       case `jsonforms-builder.${MessageType.updateFromExtension}`: {
         isUpdateFromExtension = true;
-        console.log("[Webview] updateForm()", mode.value);
         updateForm(data?.schema, data?.uischema);
         break;
       }
@@ -123,14 +122,16 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
   }
 }
 
-const sendChangesToExtension = debounce(updateFile, 500);
+const sendChangesToExtension = debounce(updateFile, 100);
 function updateFile(data: FormBuilderData) {
   if (isUpdateFromExtension) {
     isUpdateFromExtension = false;
     return;
   }
-  console.log("[Webview] updateFile_2", isUpdateFromExtension, mode.value, data);
-  stateController.updateState({ data });
+  stateController.updateState({
+    mode: mode.value,
+    data
+  });
   postMessage(MessageType.updateFromWebview, data);
 }
 
@@ -166,11 +167,10 @@ onBeforeMount(async () => {
     const state = stateController.getState();
     if (state && state.data) {
       postMessage(MessageType.restore, undefined, "State was restored successfully.");
+      mode.value = state.mode
       let schema = state.data.schema;
       let uischema = state.data.uischema;
       const newData = await initialized();    // await the response form the backend
-      console.log("[Webview] restored() -> state", mode.value, state.data);
-      console.log("[Webview] restored() -> newData", mode.value, newData);
       if (newData && instanceOfFormBuilderData(newData)) {
         // we only get new data when the user made changes while the webview was destroyed
         if (newData.schema) {
@@ -184,13 +184,12 @@ onBeforeMount(async () => {
     } else {
       postMessage(MessageType.initialize, undefined, "Webview was loaded successfully.");
       const data = await initialized();    // await the response form the backend
-      console.log("[Webview] initialized()", mode.value, data);
       if (data && instanceOfFormBuilderData(data)) {
         updateForm(data.schema, data.uischema);
       }
     }
   } catch (error) {
-    const message = (error instanceof Error) ? error.message : "Failed to initialize webview.";
+    const message = (error instanceof Error) ? error.message : `${error}`;
     postMessage(MessageType.error, undefined, message);
   }
 

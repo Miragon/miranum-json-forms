@@ -18,5 +18,6 @@ export interface VscMessage<T> {
 }
 
 export interface VscState<T> {
+    mode: string;
     data?: T;
 }

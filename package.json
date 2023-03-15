@@ -96,7 +96,7 @@
         {
           "command": "jsonforms-renderer.togglePreview",
           "group": "navigation",
-          "when": "activeWebviewPanelId == 'jsonforms-renderer'"
+          "when": "activeWebviewPanelId == 'jsonforms-builder'"
         },
         {
           "command": "jsonforms-builder.toggleTextEditor",

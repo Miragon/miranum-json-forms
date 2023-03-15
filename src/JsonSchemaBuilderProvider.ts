@@ -4,13 +4,13 @@
  * @module JsonSchemaBuilderProvider
  */
 
+import {JsonSchema, Layout} from "@jsonforms/core";
 import * as vscode from 'vscode';
-import {DocumentManager, Preview, TextEditorWrapper, ViewState} from "./lib";
+import {ViewState} from "./lib";
 import {MessageType, VscMessage} from "./shared/types";
 import {FormBuilderData, getHtmlForWebview, getMinimumJsonSchema, getMinimumLayout} from './utils';
 import {DocumentController} from "./controller";
 import {Logger, BuildInPreview, TextEditorComponent} from "./components";
-import {JsonSchema, Layout} from "@jsonforms/core";
 
 /**
  * The [Custom Text Editor](https://code.visualstudio.com/api/extension-guides/custom-editors) uses a '.form'-File as its
@@ -29,15 +29,15 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
     private static counter = 0;
 
     /** The controller ({@link DocumentController}) manages the document (.form-file). */
-    private readonly schema: DocumentManager<JsonSchema>;
+    private readonly schema: DocumentController<JsonSchema>;
 
-    private readonly uischema: DocumentManager<Layout>;
+    private readonly uischema: DocumentController<Layout>;
 
     /** The preview ({@link BuildInPreview}) renders the content of the active custom text editor. */
-    private readonly preview: Preview;
+    private readonly preview: BuildInPreview;
 
     /** The text editor ({@link TextEditorComponent}) for direct changes inside the document. */
-    private readonly textEditor: TextEditorWrapper;
+    private readonly textEditor: TextEditorComponent;
 
     /** An array with all disposables per webview panel. */
     private disposables: Map<string, vscode.Disposable[]> = new Map();
@@ -61,9 +61,9 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         this.preview = new BuildInPreview(this.context.extensionUri);
 
         // initialize controller and subscribe the components to it
-        this.schema = new DocumentController();
+        this.schema = new DocumentController<JsonSchema>();
         this.schema.subscribe(this.preview, this.textEditor);
-        this.uischema = new DocumentController();
+        this.uischema = new DocumentController<Layout>();
         this.uischema.subscribe(this.preview, this.textEditor);
 
         // ----- Register commands ---->
@@ -73,7 +73,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                 if (!this.textEditor.isOpen) {
                     this.closePreview = false;
                 }
-                this.textEditor.toggle(this.schema);
+                this.textEditor.toggle(this.schema.document);
             });
         const togglePreview = vscode.commands.registerCommand(
             `${this.preview.viewType}.togglePreview`,
@@ -122,7 +122,6 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         // Send content from the extension to the webview
         // todo: change signature to (message: VscMessage)
         const postMessage = async (msgType: MessageType) => {
-            //let data: FormBuilderData | undefined;
             let data: FormBuilderData | undefined = {
                 schema: this.schema.content,
                 uischema: this.uischema.content

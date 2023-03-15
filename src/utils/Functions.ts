@@ -9,14 +9,14 @@ import {JsonSchema, Layout} from "@jsonforms/core";
 /**
  * Get minimum form.
  */
-export function getMinimumJsonSchema(): JsonSchema {
+export function getMinimumJsonSchema<T extends JsonSchema>(): T {
     return JSON.parse(JSON.stringify({
         "type": "object",
         "properties": {}
     }))
 }
 
-export function getMinimumLayout(): Layout {
+export function getMinimumLayout<T extends Layout>(): T {
     return JSON.parse(JSON.stringify({
         "type": "object",
         "elements": []

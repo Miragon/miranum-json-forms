@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {DocumentManager, Observer, UIComponent} from "./types";
+import {Observer, UIComponent} from "./types";
 import {Disposable, Uri, Webview, WebviewPanel} from "vscode";
 
 export enum CloseCaller {
@@ -23,7 +23,7 @@ export interface WebviewOptions {
     icon: Uri,
 }
 
-export abstract class Preview implements Observer, UIComponent {
+export abstract class Preview<T> implements Observer, UIComponent<T> {
 
     public abstract readonly viewType: string;
     protected abstract readonly extensionUri: Uri;
@@ -36,7 +36,7 @@ export abstract class Preview implements Observer, UIComponent {
 
     public abstract update(value: any): void;
     protected abstract getHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string;
-    protected abstract setEventHandlers(webviewPanel: WebviewPanel, ...data: DocumentManager<any>[]): Disposable[]
+    protected abstract setEventHandlers(webviewPanel: WebviewPanel, ...data: T[]): Disposable[]
 
 
     public get isOpen(): boolean {
@@ -89,7 +89,7 @@ export abstract class Preview implements Observer, UIComponent {
     /**
      * Create a new webview panel.
      */
-    public open(...data: DocumentManager<any>[]): void {
+    public open(...data: T[]): void {
         try {
             this._lastViewState = ViewState.open;
             this._isOpen = true;
@@ -142,7 +142,7 @@ export abstract class Preview implements Observer, UIComponent {
         }
     }
 
-    public toggle(...data: DocumentManager<any>[]): void {
+    public toggle(...data: T[]): void {
         if (this.isOpen) {
             this.closeCaller = CloseCaller.explicit;
             this.close();

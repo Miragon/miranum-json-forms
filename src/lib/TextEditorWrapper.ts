@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import {ExtensionContext, TextDocument, TextEditor} from "vscode";
-import {DocumentManager, Observer, UIComponent} from "./types";
-import {JsonSchema, Layout} from "@jsonforms/core";
+import {Observer, UIComponent} from "./types";
 
 
 export enum TextEditorShowOption {
@@ -9,7 +8,7 @@ export enum TextEditorShowOption {
     'Group' = 'Group'
 }
 
-export abstract class TextEditorWrapper implements Observer, UIComponent {
+export abstract class TextEditorWrapper implements Observer, UIComponent<TextDocument> {
 
     abstract readonly viewType: string;
     protected abstract showOption: TextEditorShowOption;
@@ -42,12 +41,12 @@ export abstract class TextEditorWrapper implements Observer, UIComponent {
         }
     }
 
-    public toggle(document: DocumentManager<JsonSchema | Layout>): void {
+    public toggle(document: TextDocument): void {
         try {
             if (this._isOpen) {
-                this.close(document.document.fileName);
+                this.close(document.fileName);
             } else {
-                this.open(document.document);
+                this.open(document);
             }
         } catch (error) {
             console.error('', error);

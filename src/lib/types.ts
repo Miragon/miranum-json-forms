@@ -17,9 +17,9 @@ export interface DocumentManager<ContentType> extends Subject {
     writeToDocument(content: ContentType): Promise<boolean>
 }
 
-export interface UIComponent {
+export interface UIComponent<T> {
     readonly isOpen: boolean
-    open(...data: any[]): void
+    open(...data: T[]): void
     close(key?: string): void
-    toggle(...data: any[]): void
+    toggle(...data: T[]): void
 }
