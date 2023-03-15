@@ -20,6 +20,6 @@ export interface DocumentManager<ContentType> extends Subject {
 export interface UIComponent<T> {
     readonly isOpen: boolean
     open(...data: T[]): void
-    close(id?: string): void
+    close(key?: string): void
     toggle(...data: T[]): void
 }

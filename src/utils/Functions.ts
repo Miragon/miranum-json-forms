@@ -4,25 +4,24 @@
  */
 
 import * as vscode from "vscode";
-import {FormBuilderData} from "./types";
+import {JsonSchema, Layout} from "@jsonforms/core";
 
 /**
  * Get minimum form.
  */
-export function getMinimum<T extends FormBuilderData>(): T {
+export function getMinimumJsonSchema<T extends JsonSchema>(): T {
     return JSON.parse(JSON.stringify({
-        "schema": {
-            "type": "object",
-            "properties": {}
-        },
-        "uischema": {
-            "type": "VerticalLayout",
-            "elements": []
-        },
-        "data": {}
+        "type": "object",
+        "properties": {}
     }))
 }
 
+export function getMinimumLayout<T extends Layout>(): T {
+    return JSON.parse(JSON.stringify({
+        "type": "object",
+        "elements": []
+    }))
+}
 
 /**
  * Get the HTML-Document which display the webview

@@ -4,10 +4,11 @@
  * @module JsonSchemaBuilderProvider
  */
 
+import {JsonSchema, Layout} from "@jsonforms/core";
 import * as vscode from 'vscode';
-import {TextEditorWrapper, ViewState} from "./lib";
+import {ViewState} from "./lib";
 import {MessageType, VscMessage} from "./shared/types";
-import {FormBuilderData, getHtmlForWebview, getMinimum} from './utils';
+import {FormBuilderData, getHtmlForWebview, getMinimumJsonSchema, getMinimumLayout} from './utils';
 import {DocumentController} from "./controller";
 import {Logger, BuildInPreview, TextEditorComponent} from "./components";
 
@@ -26,16 +27,24 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
 
     /** Number of currently open custom text editors with the view type `jsonschema-builder`. */
     private static counter = 0;
+
     /** The controller ({@link DocumentController}) manages the document (.form-file). */
-    private readonly controller: DocumentController<FormBuilderData>;
+    private readonly schema: DocumentController<JsonSchema>;
+
+    private readonly uischema: DocumentController<Layout>;
+
     /** The preview ({@link BuildInPreview}) renders the content of the active custom text editor. */
     private readonly preview: BuildInPreview;
+
     /** The text editor ({@link TextEditorComponent}) for direct changes inside the document. */
-    private readonly textEditor: TextEditorWrapper;
+    private readonly textEditor: TextEditorComponent;
+
     /** An array with all disposables per webview panel. */
     private disposables: Map<string, vscode.Disposable[]> = new Map();
+
     /** @hidden Little helper to prevent the preview from closing after the text editor is opened. */
     private closePreview = true;
+
 
     /**
      * Register all components and controllers and set up all commands.
@@ -52,8 +61,10 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         this.preview = new BuildInPreview(this.context.extensionUri);
 
         // initialize controller and subscribe the components to it
-        this.controller = new DocumentController<FormBuilderData>();
-        this.controller.subscribe(this.preview, this.textEditor);
+        this.schema = new DocumentController<JsonSchema>();
+        this.schema.subscribe(this.preview, this.textEditor);
+        this.uischema = new DocumentController<Layout>();
+        this.uischema.subscribe(this.preview, this.textEditor);
 
         // ----- Register commands ---->
         const toggleTextEditor = vscode.commands.registerCommand(
@@ -62,12 +73,12 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                 if (!this.textEditor.isOpen) {
                     this.closePreview = false;
                 }
-                this.textEditor.toggle(this.controller.document);
+                this.textEditor.toggle(this.schema.document);
             });
         const togglePreview = vscode.commands.registerCommand(
             `${this.preview.viewType}.togglePreview`,
             () => {
-                this.preview.toggle(this.controller);
+                this.preview.toggle(this.schema, this.uischema);
             });
         const toggleLogger = vscode.commands.registerCommand(
             `${JsonSchemaBuilderProvider.VIEWTYPE}.toggleLogger`,
@@ -111,39 +122,40 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         // Send content from the extension to the webview
         // todo: change signature to (message: VscMessage)
         const postMessage = async (msgType: MessageType) => {
-            //if (webviewPanel.visible) {
-                let data: FormBuilderData | undefined;
-                switch (msgType) {
-                    case MessageType.restore: {
-                        data = (isBuffer) ? this.controller.content : undefined;
-                        break;
-                    }
-                    default: {
-                        data = this.controller.content;
-                        break;
-                    }
+            let data: FormBuilderData | undefined = {
+                schema: this.schema.content,
+                uischema: this.uischema.content
+            }
+            switch (msgType) {
+                case MessageType.restore: {
+                    data = (isBuffer) ? data : undefined;
+                    break;
                 }
+                default: {
+                    //data = await this.schema.getContent();
+                    break;
+                }
+            }
 
-                try {
-                    if (await webviewPanel.webview.postMessage({
-                        type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${msgType}`,
-                        data,
-                    })) {
-                        if (msgType === MessageType.restore) {
-                            isBuffer = false;
-                        }
-                    } else {
-                        Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, `Could not post message (Viewtype: ${webviewPanel.visible})`);
+            try {
+                if (await webviewPanel.webview.postMessage({
+                    type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${msgType}`,
+                    data,
+                })) {
+                    if (msgType === MessageType.restore) {
+                        isBuffer = false;
                     }
-                } catch (error) {
-                    if (!document.isClosed) {
-                        const message = (error instanceof Error)
-                            ? error.message
-                            : `Could not post message to ${webviewPanel}`;
-                        Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, message);
-                    }
+                } else {
+                    Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, `Could not post message (Viewtype: ${webviewPanel.visible})`);
                 }
-            //}
+            } catch (error) {
+                if (!document.isClosed) {
+                    const message = (error instanceof Error)
+                        ? error.message
+                        : `Could not post message to ${webviewPanel}`;
+                    Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, message);
+                }
+            }
         }
 
         // Receive messages from the webview
@@ -162,8 +174,9 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                     }
                     case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.updateFromWebview}`: {
                         isUpdateFromWebview = true;
-                        if (event.data) {
-                            await this.controller.writeToDocument(event.data);
+                        if (event.data && event.data.schema && event.data.uischema) {
+                            await this.schema.writeToDocument(event.data.schema);
+                            await this.uischema.writeToDocument(<Layout>event.data.uischema);
                         }
                         break;
                     }
@@ -211,12 +224,14 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
          * the webview to synchronize it with the current content of the model.
          */
         vscode.workspace.onDidChangeTextDocument(e => {
-            if (e.document.uri.toString() === document.uri.toString() &&
-                e.contentChanges.length !== 0 && !isUpdateFromWebview) {
-
+            if ((e.document.uri.toString() === this.schema.document.uri.toString() ||
+                    e.document.uri.toString() === this.uischema.document.uri.toString()) &&
+                    e.contentChanges.length !== 0 && !isUpdateFromWebview)
+            {
                 if (!e.document.getText()) {
                     // e.g. when user deletes all lines in text editor
-                    this.controller.writeToDocument(getMinimum<FormBuilderData>());
+                    this.schema.writeToDocument(getMinimumJsonSchema());
+                    this.uischema.writeToDocument(getMinimumLayout());
                 }
 
                 // If the webview is in the background then no messages can be sent to it.
@@ -251,12 +266,11 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                 switch (true) {
                     /* ------- Panel is active/visible ------- */
                     case wp.webviewPanel.active: {
-                        this.controller.document = document;
+                        this.schema.document = document;
                         if (!this.preview.isOpen && this.preview.lastViewState === ViewState.open) {
-                            this.preview.open(this.controller);
+                            this.preview.open(this.schema);
                         }
-
-                        /* falls through */
+                        // break omitted
                     }
                     case wp.webviewPanel.visible: {
                         // If changes has been made while the webview was not visible no messages could have been sent to the
@@ -286,7 +300,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
             JsonSchemaBuilderProvider.counter--;
             vscode.commands.executeCommand('setContext', `${JsonSchemaBuilderProvider.VIEWTYPE}.openCustomEditors`, JsonSchemaBuilderProvider.counter);
 
-            this.textEditor.close(this.controller.document.fileName);
+            this.textEditor.close(this.schema.document.fileName);
             this.preview.close();
 
             this.dispose(document.uri.toString());
@@ -305,13 +319,24 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
 
         // set the document
         try {
-            await this.controller.setInitialDocument(document);
+            const [ext, rest] = this.getFileExtension(document.uri.path);
+            if (ext === "schema.json") {
+                await this.schema.setInitialDocument(document);
+                await this.uischema.setInitialDocument(
+                    await vscode.workspace.openTextDocument(vscode.Uri.file(`${rest}.uischema.json`))
+                );
+            } else {
+                await this.schema.setInitialDocument(
+                    await vscode.workspace.openTextDocument(vscode.Uri.file(`${rest}.schema.json`))
+                );
+                await this.uischema.setInitialDocument(document);
+            }
 
             // if we open a second editor beside one with an open preview window we have to close it and create a new one.
             if (this.preview.isOpen) {
                 this.preview.close();
             }
-            this.preview.open(this.controller);
+            this.preview.open(this.schema, this.uischema);
 
         } catch (error) {
             const message = (error instanceof Error) ? error.message : `${error}`;
@@ -322,18 +347,27 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
 
     /** @hidden */
     private dispose(key: string): void {
-        let disposables = this.disposables.get(key);
-        if (disposables) {
+        let disposable = this.disposables.get(key);
+        if (disposable) {
             this.disposables.delete(key);
         } else {
-            disposables = [];
+            disposable = [];
         }
 
-        while (disposables.length) {
-            const item = disposables.pop();
+        while (disposable.length) {
+            const item = disposable.pop();
             if (item) {
                 item.dispose();
             }
         }
+    }
+
+    private getFileExtension(path: string): [string, string] {
+        const pathParts = path.split("/");
+        const fileParts = pathParts[pathParts.length - 1].split(".");
+        return [
+            fileParts.slice(1).join("."),
+            `${pathParts.slice(0, pathParts.length - 1).join("/")}/${fileParts[0]}`
+        ]
     }
 }

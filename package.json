@@ -34,7 +34,10 @@
         "displayName": "Miranum Json Forms",
         "selector": [
           {
-            "filenamePattern": "*.jsonform"
+            "filenamePattern": "*.schema.json"
+          },
+          {
+            "filenamePattern": "*.uischema.json"
           }
         ],
         "priority": "default"
@@ -93,7 +96,7 @@
         {
           "command": "jsonforms-renderer.togglePreview",
           "group": "navigation",
-          "when": "activeWebviewPanelId == 'jsonforms-renderer'"
+          "when": "activeWebviewPanelId == 'jsonforms-builder'"
         },
         {
           "command": "jsonforms-builder.toggleTextEditor",

@@ -6,12 +6,13 @@
 
 import * as vscode from "vscode";
 import {Disposable, WebviewPanel} from "vscode";
+import {JsonSchema, Layout} from '@jsonforms/core'
 import {CloseCaller, DocumentManager, Preview, ViewState, WebviewOptions} from "../lib"
+import {MessageType, VscMessage} from "../shared/types";
 import {FormBuilderData, getHtmlForWebview} from "../utils";
 import {Logger} from "./Logger";
-import {MessageType, VscMessage} from "../shared/types";
 
-export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
+export class BuildInPreview extends Preview<DocumentManager<JsonSchema | Layout>> {
 
     /** Unique identifier for the preview. */
     public readonly viewType = "jsonforms-renderer";
@@ -27,7 +28,7 @@ export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
         Logger.info("[Miranum.JsonForms.Preview]", "Preview was created.")
     }
 
-    public async update(message: VscMessage<FormBuilderData>) {
+    public async update(message: VscMessage<Partial<FormBuilderData>>) {
         try {
             if (await this.webview.postMessage(message)) {
                 this.isBuffer = false;
@@ -50,32 +51,58 @@ export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
         return getHtmlForWebview(webview, extensionUri);
     }
 
-    protected setEventHandlers(webviewPanel: WebviewPanel, document: DocumentManager<FormBuilderData>): Disposable[] {
+    protected setEventHandlers(webviewPanel: WebviewPanel,
+                               schema: DocumentManager<JsonSchema>,
+                               uischema: DocumentManager<Layout>
+    ): Disposable[] {
+
         const disposables: Disposable[] = []
 
-        vscode.workspace.onDidChangeTextDocument((event) => {
-            if (event.document.uri.toString() === document.document.uri.toString() && event.contentChanges.length !== 0) {
-                this.update({
-                    type: `${this.viewType}.${MessageType.updateFromExtension}`,
-                    data: document.content
-                });
+        vscode.workspace.onDidChangeTextDocument(async (event) => {
+            // todo only send the changed data and handle it accordingly in the webview.
+            try {
+                const data: FormBuilderData = {
+                    schema: schema.content,
+                    uischema: uischema.content
+                }
+                if ((event.document.uri.toString() === schema.document.uri.toString() ||
+                        event.document.uri.toString() === uischema.document.uri.toString()) &&
+                        event.contentChanges.length !== 0)
+                {
+                    try {
+                        await this.update({
+                            type: `${this.viewType}.${MessageType.updateFromExtension}`,
+                            data
+                        });
+                    } catch (error) {
+                        const message = (error instanceof Error) ? error.message : "Couldn't update webview.";
+                        Logger.error("[Miranum.JsonForms.Preview]", message);
+                    }
+                }
+            } catch (error) {
+                const message = (error instanceof Error) ? error.message : `${error}`;
+                Logger.error("[Miranum.JsonForms.Preview]", `(Webview: ${webviewPanel.title})`, message);
             }
         })
 
-        webviewPanel.webview.onDidReceiveMessage((message: VscMessage<FormBuilderData>) => {
+        webviewPanel.webview.onDidReceiveMessage(async (message: VscMessage<FormBuilderData>) => {
             try {
+                const data: FormBuilderData = {
+                    schema: schema.content,
+                    uischema: uischema.content
+                }
                 switch (message.type) {
                     case `jsonforms-builder.${MessageType.initialize}`: {
-                        this.update({
+                        await this.update({
                             type: `${this.viewType}.${MessageType.initialize}`,
-                            data: document.content
+                            data
                         });
                         break;
                     }
                     case `jsonforms-builder.${MessageType.restore}`: {
-                        this.update({
+                        await this.update({
                             type: `${this.viewType}.${MessageType.restore}`,
-                            data: (this.isBuffer) ? document.content : undefined
+                            data: (this.isBuffer) ? data : undefined
                         });
                         break;
                     }
@@ -86,16 +113,25 @@ export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
             }
         });
 
-        webviewPanel.onDidChangeViewState((event) => {
-            switch (true) {
-                case event.webviewPanel?.visible: {
-                    if (this.isBuffer) {
-                        this.update({
-                            type: `${this.viewType}.${MessageType.restore}`,
-                            data: document.content
-                        });
+        webviewPanel.onDidChangeViewState(async (event) => {
+            try {
+                const data: FormBuilderData = {
+                    schema: schema.content,
+                    uischema: uischema.content
+                }
+                switch (true) {
+                    case event.webviewPanel?.visible: {
+                        if (this.isBuffer) {
+                            await this.update({
+                                type: `${this.viewType}.${MessageType.restore}`,
+                                data
+                            });
+                        }
                     }
                 }
+            } catch (error) {
+                const message = (error instanceof Error) ? error.message : "Couldn't update webview.";
+                Logger.error("[Miranum.JsonForms.Preview]", message);
             }
         }, null, disposables);
 

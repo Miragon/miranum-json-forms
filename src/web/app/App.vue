@@ -33,10 +33,10 @@ import {JsonSchema, UISchemaElement} from "@jsonforms/core";
 import {vanillaRenderers} from "@jsonforms/vue-vanilla";
 import {debounce} from "lodash";
 
-import FormBuilderDetails from "./components/FormBuilderDetails.vue";
-import {confirm, confirmed, initialize, initialized, instanceOfFormBuilderData, StateController} from "@/composables";
 import {FormBuilderData} from "../../utils";
 import {MessageType, VscMessage} from "../../shared/types";
+import FormBuilderDetails from "./components/FormBuilderDetails.vue";
+import {confirm, confirmed, initialize, initialized, instanceOfFormBuilderData, StateController} from "@/composables";
 
 
 const stateController = new StateController();
@@ -131,7 +131,7 @@ function updateFile(data: FormBuilderData) {
   stateController.updateState({
     mode: mode.value,
     data
-  })
+  });
   postMessage(MessageType.updateFromWebview, data);
 }
 
@@ -167,7 +167,7 @@ onBeforeMount(async () => {
     const state = stateController.getState();
     if (state && state.data) {
       postMessage(MessageType.restore, undefined, "State was restored successfully.");
-      mode.value = state.mode;
+      mode.value = state.mode
       let schema = state.data.schema;
       let uischema = state.data.uischema;
       const newData = await initialized();    // await the response form the backend
@@ -189,7 +189,7 @@ onBeforeMount(async () => {
       }
     }
   } catch (error) {
-    const message = (error instanceof Error) ? error.message : "Failed to initialize webview.";
+    const message = (error instanceof Error) ? error.message : `${error}`;
     postMessage(MessageType.error, undefined, message);
   }
 
