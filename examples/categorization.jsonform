@@ -85,46 +85,37 @@
                         "elements": [
                             {
                                 "type": "Control",
-                                "scope": "#/properties/firstName",
-                                "options": {}
+                                "scope": "#/properties/firstName"
                             },
                             {
                                 "type": "Control",
-                                "scope": "#/properties/secondName",
-                                "options": {}
+                                "scope": "#/properties/secondName"
                             }
-                        ],
-                        "options": {}
+                        ]
                     },
                     {
                         "type": "HorizontalLayout",
                         "elements": [
                             {
                                 "type": "Control",
-                                "scope": "#/properties/birthDate",
-                                "options": {}
+                                "scope": "#/properties/birthDate"
                             },
                             {
                                 "type": "Control",
-                                "scope": "#/properties/nationality",
-                                "options": {}
+                                "scope": "#/properties/nationality"
                             }
-                        ],
-                        "options": {}
+                        ]
                     },
                     {
                         "type": "Control",
-                        "scope": "#/properties/provideAddress",
-                        "options": {}
+                        "scope": "#/properties/provideAddress"
                     },
                     {
                         "type": "Control",
-                        "scope": "#/properties/vegetarian",
-                        "options": {}
+                        "scope": "#/properties/vegetarian"
                     }
                 ],
-                "label": "categoryLabelKey",
-                "options": {}
+                "label": "categoryLabelKey"
             },
             {
                 "type": "Category",
@@ -134,32 +125,26 @@
                         "elements": [
                             {
                                 "type": "Control",
-                                "scope": "#/properties/address/properties/street",
-                                "options": {}
+                                "scope": "#/properties/address/properties/street"
                             },
                             {
                                 "type": "Control",
-                                "scope": "#/properties/address/properties/streetNumber",
-                                "options": {}
+                                "scope": "#/properties/address/properties/streetNumber"
                             }
-                        ],
-                        "options": {}
+                        ]
                     },
                     {
                         "type": "HorizontalLayout",
                         "elements": [
                             {
                                 "type": "Control",
-                                "scope": "#/properties/address/properties/city",
-                                "options": {}
+                                "scope": "#/properties/address/properties/city"
                             },
                             {
                                 "type": "Control",
-                                "scope": "#/properties/address/properties/postalCode",
-                                "options": {}
+                                "scope": "#/properties/address/properties/postalCode"
                             }
-                        ],
-                        "options": {}
+                        ]
                     }
                 ],
                 "i18n": "address",
@@ -171,21 +156,18 @@
                             "const": true
                         }
                     }
-                },
-                "options": {}
+                }
             },
             {
                 "type": "Category",
                 "elements": [
                     {
                         "type": "Control",
-                        "scope": "#/properties/vegetarianOptions/properties/vegan",
-                        "options": {}
+                        "scope": "#/properties/vegetarianOptions/properties/vegan"
                     },
                     {
                         "type": "Control",
-                        "scope": "#/properties/vegetarianOptions/properties/favoriteVegetable",
-                        "options": {}
+                        "scope": "#/properties/vegetarianOptions/properties/favoriteVegetable"
                     },
                     {
                         "type": "Control",
@@ -198,8 +180,7 @@
                                     "const": "Other"
                                 }
                             }
-                        },
-                        "options": {}
+                        }
                     }
                 ],
                 "label": "Additional",
@@ -211,14 +192,8 @@
                             "const": true
                         }
                     }
-                },
-                "options": {}
+                }
             }
-        ],
-        "options": {}
-    },
-    "data": {
-        "provideAddress": true,
-        "vegetarian": false
+        ]
     }
 }

@@ -4,13 +4,12 @@
  */
 
 import * as vscode from "vscode";
-import {JsonForm} from "./types";
+import {FormBuilderData} from "./types";
 
 /**
  * Get minimum form.
  */
-export function getMinimum(): JsonForm {
-    // todo: What is the minimum json object?
+export function getMinimum<T extends FormBuilderData>(): T {
     return JSON.parse(JSON.stringify({
         "schema": {
             "type": "object",
@@ -24,138 +23,14 @@ export function getMinimum(): JsonForm {
     }))
 }
 
-/**
- * Get the default content which is displayed when the data model is empty.
- */
-export function getDefault(): JsonForm {
-    return JSON.parse(JSON.stringify({
-        "schema": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "minLength": 3,
-                    "description": "Please enter your name"
-                },
-                "vegetarian": {
-                    "type": "boolean"
-                },
-                "birthDate": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "Please enter your birth date."
-                },
-                "nationality": {
-                    "type": "string",
-                    "enum": [
-                        "DE",
-                        "IT",
-                        "JP",
-                        "US",
-                        "RU",
-                        "Other"
-                    ]
-                },
-                "personalData": {
-                    "type": "object",
-                    "properties": {
-                        "age": {
-                            "type": "integer",
-                            "description": "Please enter your age."
-                        },
-                        "height": {
-                            "type": "number"
-                        },
-                        "drivingSkill": {
-                            "type": "number",
-                            "maximum": 10,
-                            "minimum": 1,
-                            "default": 7
-                        }
-                    },
-                    "required": [
-                        "age",
-                        "height"
-                    ]
-                },
-                "occupation": {
-                    "type": "string"
-                },
-                "postalCode": {
-                    "type": "string",
-                    "maxLength": 5
-                }
-            },
-            "required": [
-                "occupation",
-                "nationality"
-            ]
-        },
-        "uischema": {
-            "type": "VerticalLayout",
-            "elements": [
-                {
-                    "type": "HorizontalLayout",
-                    "elements": [
-                        {
-                            "type": "Control",
-                            "scope": "#/properties/name"
-                        },
-                        {
-                            "type": "Control",
-                            "scope": "#/properties/personalData/properties/age"
-                        },
-                        {
-                            "type": "Control",
-                            "scope": "#/properties/birthDate"
-                        }
-                    ]
-                },
-                {
-                    "type": "Label",
-                    "text": "Additional Information"
-                },
-                {
-                    "type": "HorizontalLayout",
-                    "elements": [
-                        {
-                            "type": "Control",
-                            "scope": "#/properties/personalData/properties/height"
-                        },
-                        {
-                            "type": "Control",
-                            "scope": "#/properties/nationality"
-                        },
-                        {
-                            "type": "Control",
-                            "scope": "#/properties/occupation",
-                            "suggestion": [
-                                "Accountant",
-                                "Engineer",
-                                "Freelancer",
-                                "Journalism",
-                                "Physician",
-                                "Student",
-                                "Teacher",
-                                "Other"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
-    }));
-}
 
 /**
  * Get the HTML-Document which display the webview
  * @param webview Webview belonging to the panel
  * @param extensionUri
- * @param initialContent
- * @param mode
  * @returns a string which represents the html content
  */
-export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri, initialContent: JsonForm, mode: string): string {
+export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri): string {
     const vueAppUri = webview.asWebviewUri(vscode.Uri.joinPath(
         extensionUri, 'dist', 'client', 'webview.mjs'
     ));
@@ -195,15 +70,6 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
             </head>
             <body>
                 <div id="app"></div>
-                <script nonce="${nonce}">
-                    // Store the VsCodeAPI in a global variable, so we can use it inside the Vue-App
-                    const vscode = acquireVsCodeApi();
-                    // Set the initial state of the webview
-                    vscode.setState({
-                        text: '${JSON.stringify(initialContent)}',
-                        mode: '${mode}'
-                    });
-                </script>
                 <script type="text/javascript" src="${vueAppUri}" nonce="${nonce}"></script>
             </body>
             </html>

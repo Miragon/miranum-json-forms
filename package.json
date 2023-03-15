@@ -3,7 +3,7 @@
   "displayName": "Miranum: Json Forms",
   "description": "Create and edit JsonForms with an modern easy to use editor.",
   "license": "Apache License 2.0",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "miragon-gmbh",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
     "url": "https://github.com/FlowSquad/miranum-vs-code-forms/issues"
   },
   "engines": {
-    "vscode": "^1.69.0"
+    "vscode": "^1.76.0"
   },
   "icon": "images/komet.png",
   "categories": [
@@ -21,16 +21,16 @@
     "Visualization"
   ],
   "activationEvents": [
-    "onCustomEditor:jsonform-modeler",
-    "onCommand:jsonform-renderer.togglePreview",
-    "onCommand:jsonform-modeler.toggleTextEditor"
+    "onCustomEditor:jsonforms-builder",
+    "onCommand:jsonforms-renderer.togglePreview",
+    "onCommand:jsonforms-builder.toggleTextEditor"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "customEditors": [
       {
-        "viewType": "jsonform-modeler",
-        "id": "jsonform-modeler",
+        "viewType": "jsonforms-builder",
+        "id": "jsonforms-builder",
         "displayName": "Miranum Json Forms",
         "selector": [
           {
@@ -42,79 +42,99 @@
     ],
     "commands": [
       {
-        "command": "jsonform-renderer.togglePreview",
+        "command": "jsonforms-renderer.togglePreview",
         "title": "Miranum: Toggle Preview",
         "icon": "$(notebook-render-output)"
       },
       {
-        "command": "jsonform-modeler.toggleTextEditor",
+        "command": "jsonforms-builder.toggleTextEditor",
         "title": "Miranum: Toggle Standard Text Editor",
         "icon": "$(notebook-mimetype)"
+      },
+      {
+        "command": "jsonforms-builder.toggleLogger",
+        "title": "Miranum: Toggle Logging Information",
+        "icon": "$(callstack-view-session)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "jsonforms-renderer.togglePreview",
+        "key": "ctrl+shift+p",
+        "when": "jsonforms-builder.openCustomEditors > 0"
+      },
+      {
+        "command": "jsonforms-builder.toggleTextEditor",
+        "key": "ctrl+shift+t",
+        "when": "jsonforms-builder.openCustomEditors > 0"
+      },
+      {
+        "command": "jsonforms-builder.toggleLogger",
+        "key": "ctrl+shift+l",
+        "when": "jsonforms-builder.openCustomEditors > 0"
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "jsonform-renderer.togglePreview",
-          "when": "resourceExtname == .jsonform && jsonform-modeler.openCustomEditors > 0"
+          "command": "jsonforms-renderer.togglePreview",
+          "when": "jsonforms-builder.openCustomEditors > 0"
         },
         {
-          "command": "jsonform-modeler.toggleTextEditor",
-          "when": "resourceExtname == .jsonform && jsonform-modeler.openCustomEditors > 0"
+          "command": "jsonforms-builder.toggleTextEditor",
+          "when": "jsonforms-builder.openCustomEditors > 0"
+        },
+        {
+          "command": "jsonforms-builder.toggleLogger",
+          "when": "jsonforms-builder.openCustomEditors > 0"
         }
       ],
       "editor/title": [
         {
-          "command": "jsonform-renderer.togglePreview",
+          "command": "jsonforms-renderer.togglePreview",
           "group": "navigation",
-          "when": "resourceExtname == .jsonform && jsonform-modeler.openCustomEditors > 0"
+          "when": "activeWebviewPanelId == 'jsonforms-renderer'"
         },
         {
-          "command": "jsonform-modeler.toggleTextEditor",
+          "command": "jsonforms-builder.toggleTextEditor",
           "group": "navigation",
-          "when": "resourceExtname == .jsonform && jsonform-modeler.openCustomEditors > 0"
+          "when": "activeWebviewPanelId == 'jsonforms-builder'"
+        },
+        {
+          "command": "jsonforms-builder.toggleLogger",
+          "group": "navigation",
+          "when": "activeWebviewPanelId == 'jsonforms-builder'"
         }
       ]
-    },
-    "keybindings": [
-      {
-        "command": "jsonform-renderer.togglePreview",
-        "key": "ctrl+shift+p",
-        "when": "resourceExtname == .jsonform && jsonform-modeler.openCustomEditors > 0"
-      },
-      {
-        "command": "jsonform-modeler.toggleTextEditor",
-        "key": "ctrl+shift+t",
-        "when": "resourceExtname == .jsonform && jsonform-modeler.openCustomEditors > 0"
-      }
-    ]
+    }
   },
   "scripts": {
     "publish": "vsce publish",
     "vscode:prepublish": "npm run build",
     "build": "tsup src/extension.ts --dts --external=vscode && npm run web",
-    "web": "patch-package && vite build --config src/web/vite.config.js",
-    "web-dev": "patch-package && vite build --config src/web/vite.config.js --watch",
+    "web": "vite build --config src/web/vite.config.js",
+    "web-dev": "vite build --config src/web/vite.config.js --watch",
     "watch": "tsup src/extension.ts --dts --external=vscode --sourcemap",
     "test": "node ./out/test/runTest.js",
     "doc": "typedoc --options ./docs/typedoc.json"
   },
   "dependencies": {
-    "@backoffice-plus/formbuilder": "0.0.22",
+    "@backoffice-plus/formbuilder": "0.0.25",
     "@jsonforms/core": "^3.0.0",
     "@jsonforms/vue": "^3.0.0",
     "@jsonforms/vue-vanilla": "^3.0.0",
-    "@types/lodash.debounce": "^4.0.7",
     "@vueuse/core": "^9.11.1",
     "core-js": "^3.8.3",
-    "lodash.debounce": "^4.0.8",
+    "lodash": "^4.17.21",
     "tailwindcss": "^3.2.4",
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.191",
     "@types/node": "^18.13.0",
-    "@types/vscode": "^1.69.0",
+    "@types/vscode": "^1.76.0",
+    "@types/vscode-webview": "^1.57.1",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vscode/test-electron": "^2.1.3",
     "autoprefixer": "^10.4.13",

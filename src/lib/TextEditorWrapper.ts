@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import {TextDocument, TextEditor} from "vscode";
-import {Updatable} from "./types";
+import {ExtensionContext, TextDocument, TextEditor} from "vscode";
+import {Observer, UIComponent} from "./types";
 
 
 export enum TextEditorShowOption {
@@ -8,11 +8,13 @@ export enum TextEditorShowOption {
     'Group' = 'Group'
 }
 
-export abstract class TextEditorWrapper implements Updatable<TextDocument> {
+export abstract class TextEditorWrapper implements Observer, UIComponent<TextDocument> {
 
     protected abstract showOption: TextEditorShowOption;
-    private _textEditor: TextEditor | undefined;
+    private _textEditor?: TextEditor;
     private _isOpen = false;
+
+    public abstract setShowOption(context: ExtensionContext): void;
 
     public get isOpen(): boolean {
         return this._isOpen
@@ -43,14 +45,14 @@ export abstract class TextEditorWrapper implements Updatable<TextDocument> {
             if (this._isOpen) {
                 this.close(document.fileName);
             } else {
-                this.create(document);
+                this.open(document);
             }
         } catch (error) {
             console.error('', error);
         }
     }
 
-    public async create(document: TextDocument): Promise<boolean> {
+    public async open(document: TextDocument): Promise<boolean> {
         try {
             if (!this._isOpen) {
                 this._textEditor = await vscode.window.showTextDocument(document, this.getShowOptions())
@@ -93,7 +95,7 @@ export abstract class TextEditorWrapper implements Updatable<TextDocument> {
         try {
             if (this._isOpen && this.textEditor.document.uri.toString() !== document.uri.toString()) {
                 if (await this.close(this.textEditor.document.fileName)) {
-                    return Promise.resolve(this.create(document));
+                    return Promise.resolve(this.open(document));
                 }
             }
 

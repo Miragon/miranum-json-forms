@@ -1,2 +1,3 @@
-export * from './PreviewComponent';
-export * from './TextEditorComponent';
+export * from "./BuildInPreview";
+export * from "./TextEditorComponent";
+export * from "./Logger"
