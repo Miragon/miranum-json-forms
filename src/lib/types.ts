@@ -1,4 +1,4 @@
-import {TextDocument, Uri} from "vscode";
+import {TextDocument} from "vscode";
 
 export interface Subject {
     subscribe(...observers: Observer[]): void
@@ -10,17 +10,16 @@ export interface Observer {
     update(value: any): void
 }
 
-export interface DocumentManager extends Subject {
+export interface DocumentManager<ContentType> extends Subject {
     document: TextDocument
-    getContent(): any
+    readonly content: ContentType
     setInitialDocument(document: TextDocument): void
-    //setDocument(document: TextDocument): void
-    writeToDocument(documentUri: Uri, content: any): Promise<boolean>
+    writeToDocument(content: ContentType): Promise<boolean>
 }
 
-export interface UIComponent {
+export interface UIComponent<T> {
     readonly isOpen: boolean
-    open(data?: any): void
-    close(): void
-    toggle(data?: any): void
+    open(...data: T[]): void
+    close(id?: string): void
+    toggle(...data: T[]): void
 }

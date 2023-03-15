@@ -9,8 +9,7 @@ import {FormBuilderData} from "./types";
 /**
  * Get minimum form.
  */
-export function getMinimum(): FormBuilderData {
-    // todo: What is the minimum json object?
+export function getMinimum<T extends FormBuilderData>(): T {
     return JSON.parse(JSON.stringify({
         "schema": {
             "type": "object",

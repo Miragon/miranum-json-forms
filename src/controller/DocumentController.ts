@@ -5,41 +5,25 @@
  */
 
 import * as vscode from 'vscode';
-import {TextDocument, Uri} from 'vscode';
-import {Observer, Subject, DocumentManager} from "../lib";
-import {FormBuilderData} from "../utils";
+import {TextDocument} from 'vscode';
+import {Observer, DocumentManager} from "../lib";
+import {FormBuilderData, getMinimum} from "../utils";
 import { debounce } from "lodash";
 import {BuildInPreview, Logger, TextEditorComponent} from "../components";
 import {MessageType} from "../shared/types";
 
-export class DocumentController<ContentType extends FormBuilderData> implements Subject, DocumentManager {
+export class DocumentController<ContentType extends FormBuilderData> implements DocumentManager<ContentType> {
 
     /** @hidden */
     public writeToDocument = this.asyncDebounce(this.write, 50);
-    //private static instance: DocumentController;
     /** Array of all subscribed components. */
     private observers: Observer[] = [];
     /** @hidden */
     private _document?: TextDocument;
 
     public constructor() {
-        //vscode.workspace.onDidChangeTextDocument((event) => {
-        //    if (event.document.uri.toString() === this._document?.uri.toString() && event.contentChanges.length !== 0) {
-        //        this.updatePreview();
-        //    }
-        //})
         Logger.info("[Miranum.JsonForms.DocumentContr] DocumentController was created.")
     }
-
-    /**
-     * Get the current instance or create a new one. Ensures that there is always only one instance (Singleton).
-     */
-    //public static getInstance(): DocumentController {
-    //    if (this.instance === undefined) {
-    //        this.instance = new DocumentController();
-    //    }
-    //    return this.instance;
-    //}
 
     /**
      * Subscribe to get notified when changes are made to the document.
@@ -61,7 +45,7 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
     public async setInitialDocument(document: TextDocument) {
         this._document = document;
         if (!this.document.getText()) {
-            if (await this.write(document.uri, this.getDefault())) {
+            if (await this.write(getMinimum<ContentType>())) {
                 this.document.save();
             }
         }
@@ -87,7 +71,7 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
     /**
      * Get the content of the active document.
      **/
-    public getContent(): ContentType {
+    public get content(): ContentType {
         try {
             return this.getJsonFormFromString(this.document.getText());
         } catch (error) {
@@ -101,7 +85,7 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
                 if (observer instanceof BuildInPreview) {
                     observer.update({
                         type: `${observer.viewType}.${MessageType.updateFromExtension}`,
-                        data: this.getContent()
+                        data: this.content
                     })
                 } else if (observer instanceof TextEditorComponent) {
                     observer.update(this.document);
@@ -132,35 +116,13 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
     }
 
     /**
-     * Only updates the preview and ignores other observers.
-     */
-    //public updatePreview(): void {
-    //    this.observers.forEach((observer) => {
-    //        try {
-    //            switch (true) {
-    //                case observer instanceof Preview: {
-    //                    observer.update(this.content);
-    //                    break;
-    //                }
-    //            }
-    //        } catch (error) {
-    //            const message = (error instanceof Error) ? error.message : "Couldn't update preview.";
-    //            Logger.error("[Miranum.JsonForms.DocumentContr]", message);
-    //        }
-    //    });
-    //}
-
-    /**
      * Apply changes to the document.
-     * @param uri The URI of the document that should be updated.
      * @param content The data which was sent from the webview.
      * @returns Promise
      */
-    private async write(uri: Uri, content: ContentType): Promise<boolean> {
+    private async write(content: ContentType): Promise<boolean> {
         try {
-            if (this.document.uri != uri) {
-                throw Error("Inconsistent document!");
-            } else if (JSON.stringify(this.getContent()) === JSON.stringify(content)) {
+            if (JSON.stringify(this.content) === JSON.stringify(content)) {
                 throw Error("No changes to apply!")
             }
 
@@ -200,128 +162,5 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
             rejectSet.add(reject);
             debounced(this, args);
         }) as ReturnType<F>;
-    }
-
-    /**
-     * Get the default content which is displayed when the data model is empty.
-     */
-    private getDefault(): ContentType {
-        return JSON.parse(JSON.stringify({
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "minLength": 3,
-                        "description": "Please enter your name"
-                    },
-                    "vegetarian": {
-                        "type": "boolean"
-                    },
-                    "birthDate": {
-                        "type": "string",
-                        "format": "date",
-                        "description": "Please enter your birth date."
-                    },
-                    "nationality": {
-                        "type": "string",
-                        "enum": [
-                            "DE",
-                            "IT",
-                            "JP",
-                            "US",
-                            "RU",
-                            "Other"
-                        ]
-                    },
-                    "personalData": {
-                        "type": "object",
-                        "properties": {
-                            "age": {
-                                "type": "integer",
-                                "description": "Please enter your age."
-                            },
-                            "height": {
-                                "type": "number"
-                            },
-                            "drivingSkill": {
-                                "type": "number",
-                                "maximum": 10,
-                                "minimum": 1,
-                                "default": 7
-                            }
-                        },
-                        "required": [
-                            "age",
-                            "height"
-                        ]
-                    },
-                    "occupation": {
-                        "type": "string"
-                    },
-                    "postalCode": {
-                        "type": "string",
-                        "maxLength": 5
-                    }
-                },
-                "required": [
-                    "occupation",
-                    "nationality"
-                ]
-            },
-            "uischema": {
-                "type": "VerticalLayout",
-                "elements": [
-                    {
-                        "type": "HorizontalLayout",
-                        "elements": [
-                            {
-                                "type": "Control",
-                                "scope": "#/properties/name"
-                            },
-                            {
-                                "type": "Control",
-                                "scope": "#/properties/personalData/properties/age"
-                            },
-                            {
-                                "type": "Control",
-                                "scope": "#/properties/birthDate"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "Label",
-                        "text": "Additional Information"
-                    },
-                    {
-                        "type": "HorizontalLayout",
-                        "elements": [
-                            {
-                                "type": "Control",
-                                "scope": "#/properties/personalData/properties/height"
-                            },
-                            {
-                                "type": "Control",
-                                "scope": "#/properties/nationality"
-                            },
-                            {
-                                "type": "Control",
-                                "scope": "#/properties/occupation",
-                                "suggestion": [
-                                    "Accountant",
-                                    "Engineer",
-                                    "Freelancer",
-                                    "Journalism",
-                                    "Physician",
-                                    "Student",
-                                    "Teacher",
-                                    "Other"
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
-        }));
     }
 }

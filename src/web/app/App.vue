@@ -62,7 +62,10 @@ function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
     schema: schema,
     uischema: uischema,
   }
-  stateController.updateState({ data: { schema, uischema } });
+  stateController.updateState({
+    mode: mode.value,
+    data: { schema, uischema }
+  });
 
   // todo: Is there a better way to reload the component?
   key.value++;
@@ -109,7 +112,6 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
         break;
       }
       case `jsonforms-renderer.${MessageType.updateFromExtension}`: {
-        console.log("[Webview] test");
         updateForm(data?.schema, data?.uischema);
         break;
       }
@@ -120,12 +122,16 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
   }
 }
 
-const sendChangesToExtension = debounce(updateFile, 500);
+const sendChangesToExtension = debounce(updateFile, 100);
 function updateFile(data: FormBuilderData) {
-  if (isUpdateFromExtension && mode.value === "jsonforms-renderer") {
+  if (isUpdateFromExtension) {
     isUpdateFromExtension = false;
     return;
   }
+  stateController.updateState({
+    mode: mode.value,
+    data
+  })
   postMessage(MessageType.updateFromWebview, data);
 }
 
@@ -161,6 +167,7 @@ onBeforeMount(async () => {
     const state = stateController.getState();
     if (state && state.data) {
       postMessage(MessageType.restore, undefined, "State was restored successfully.");
+      mode.value = state.mode;
       let schema = state.data.schema;
       let uischema = state.data.uischema;
       const newData = await initialized();    // await the response form the backend

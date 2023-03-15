@@ -11,7 +11,7 @@ import {FormBuilderData, getHtmlForWebview} from "../utils";
 import {Logger} from "./Logger";
 import {MessageType, VscMessage} from "../shared/types";
 
-export class BuildInPreview extends Preview {
+export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
 
     /** Unique identifier for the preview. */
     public readonly viewType = "jsonforms-renderer";
@@ -50,14 +50,14 @@ export class BuildInPreview extends Preview {
         return getHtmlForWebview(webview, extensionUri);
     }
 
-    protected setEventHandlers(document: DocumentManager, webviewPanel: WebviewPanel): Disposable[] {
+    protected setEventHandlers(webviewPanel: WebviewPanel, document: DocumentManager<FormBuilderData>): Disposable[] {
         const disposables: Disposable[] = []
 
         vscode.workspace.onDidChangeTextDocument((event) => {
             if (event.document.uri.toString() === document.document.uri.toString() && event.contentChanges.length !== 0) {
                 this.update({
                     type: `${this.viewType}.${MessageType.updateFromExtension}`,
-                    data: document.getContent()
+                    data: document.content
                 });
             }
         })
@@ -68,14 +68,14 @@ export class BuildInPreview extends Preview {
                     case `jsonforms-builder.${MessageType.initialize}`: {
                         this.update({
                             type: `${this.viewType}.${MessageType.initialize}`,
-                            data: document.getContent()
+                            data: document.content
                         });
                         break;
                     }
                     case `jsonforms-builder.${MessageType.restore}`: {
                         this.update({
                             type: `${this.viewType}.${MessageType.restore}`,
-                            data: (this.isBuffer) ? document.getContent() : undefined
+                            data: (this.isBuffer) ? document.content : undefined
                         });
                         break;
                     }
@@ -92,7 +92,7 @@ export class BuildInPreview extends Preview {
                     if (this.isBuffer) {
                         this.update({
                             type: `${this.viewType}.${MessageType.restore}`,
-                            data: document.getContent()
+                            data: document.content
                         });
                     }
                 }

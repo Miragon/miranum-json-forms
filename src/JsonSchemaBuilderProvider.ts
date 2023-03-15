@@ -5,7 +5,7 @@
  */
 
 import * as vscode from 'vscode';
-import {DocumentManager, Preview, TextEditorWrapper, ViewState} from "./lib";
+import {TextEditorWrapper, ViewState} from "./lib";
 import {MessageType, VscMessage} from "./shared/types";
 import {FormBuilderData, getHtmlForWebview, getMinimum} from './utils';
 import {DocumentController} from "./controller";
@@ -27,9 +27,9 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
     /** Number of currently open custom text editors with the view type `jsonschema-builder`. */
     private static counter = 0;
     /** The controller ({@link DocumentController}) manages the document (.form-file). */
-    private readonly controller: DocumentManager;
+    private readonly controller: DocumentController<FormBuilderData>;
     /** The preview ({@link BuildInPreview}) renders the content of the active custom text editor. */
-    private readonly preview: Preview;
+    private readonly preview: BuildInPreview;
     /** The text editor ({@link TextEditorComponent}) for direct changes inside the document. */
     private readonly textEditor: TextEditorWrapper;
     /** An array with all disposables per webview panel. */
@@ -62,7 +62,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                 if (!this.textEditor.isOpen) {
                     this.closePreview = false;
                 }
-                this.textEditor.toggle(this.controller);
+                this.textEditor.toggle(this.controller.document);
             });
         const togglePreview = vscode.commands.registerCommand(
             `${this.preview.viewType}.togglePreview`,
@@ -115,11 +115,11 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                 let data: FormBuilderData | undefined;
                 switch (msgType) {
                     case MessageType.restore: {
-                        data = (isBuffer) ? this.controller.getContent() : undefined;
+                        data = (isBuffer) ? this.controller.content : undefined;
                         break;
                     }
                     default: {
-                        data = this.controller.getContent();
+                        data = this.controller.content;
                         break;
                     }
                 }
@@ -163,7 +163,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                     case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.updateFromWebview}`: {
                         isUpdateFromWebview = true;
                         if (event.data) {
-                            await this.controller.writeToDocument(document.uri, event.data);
+                            await this.controller.writeToDocument(event.data);
                         }
                         break;
                     }
@@ -216,7 +216,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
 
                 if (!e.document.getText()) {
                     // e.g. when user deletes all lines in text editor
-                    this.controller.writeToDocument(e.document.uri, getMinimum());
+                    this.controller.writeToDocument(getMinimum<FormBuilderData>());
                 }
 
                 // If the webview is in the background then no messages can be sent to it.
