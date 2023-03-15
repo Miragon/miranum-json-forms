@@ -2,7 +2,7 @@
 
   <div class="container max-w-screen-lg mx-auto p-4 flex flex-col gap-4">
 
-    <div v-if="mode === 'jsonforms-builder'">
+    <div v-if="mode === 'jsonforms-builder'" class="styleA">
       Disable Formbuilder: <input type="checkbox" v-model="disableFormbuilder" /><br>
       Schema ReadOnly: <input type="checkbox" v-model="schemaReadOnly" /><br>
     </div>
@@ -211,5 +211,12 @@ body {
 .card {
   @apply
   bg-white rounded shadow
+}
+
+.formbuilder nav {
+  box-shadow: 0px 8px 8px -8px rgb(30, 30, 30, 30%);
+  z-index:9;
+  @apply
+  sticky top-0 pt-2
 }
 </style>
