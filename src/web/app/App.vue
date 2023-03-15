@@ -123,13 +123,13 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
   }
 }
 
-const sendChangesToExtension = debounce(updateFile, 200);
+const sendChangesToExtension = debounce(updateFile, 500);
 function updateFile(data: FormBuilderData) {
-  if (isUpdateFromExtension || mode.value === "jsonforms-renderer") {
+  if (isUpdateFromExtension) {
     isUpdateFromExtension = false;
     return;
   }
-  console.log("[Webview] updateFile", mode.value, data);
+  console.log("[Webview] updateFile_2", isUpdateFromExtension, mode.value, data);
   stateController.updateState({ data });
   postMessage(MessageType.updateFromWebview, data);
 }

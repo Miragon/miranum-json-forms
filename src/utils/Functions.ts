@@ -4,23 +4,22 @@
  */
 
 import * as vscode from "vscode";
-import {FormBuilderData} from "./types";
+import {JsonSchema, Layout} from "@jsonforms/core";
 
 /**
  * Get minimum form.
  */
-export function getMinimum(): FormBuilderData {
-    // todo: What is the minimum json object?
+export function getMinimumJsonSchema(): JsonSchema {
     return JSON.parse(JSON.stringify({
-        "schema": {
-            "type": "object",
-            "properties": {}
-        },
-        "uischema": {
-            "type": "VerticalLayout",
-            "elements": []
-        },
-        "data": {}
+        "type": "object",
+        "properties": {}
+    }))
+}
+
+export function getMinimumLayout(): Layout {
+    return JSON.parse(JSON.stringify({
+        "type": "object",
+        "elements": []
     }))
 }
 

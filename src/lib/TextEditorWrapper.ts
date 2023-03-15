@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import {ExtensionContext, TextDocument, TextEditor} from "vscode";
 import {DocumentManager, Observer, UIComponent} from "./types";
+import {JsonSchema, Layout} from "@jsonforms/core";
 
 
 export enum TextEditorShowOption {
@@ -41,7 +42,7 @@ export abstract class TextEditorWrapper implements Observer, UIComponent {
         }
     }
 
-    public toggle(document: DocumentManager): void {
+    public toggle(document: DocumentManager<JsonSchema | Layout>): void {
         try {
             if (this._isOpen) {
                 this.close(document.document.fileName);
