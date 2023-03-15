@@ -1,6 +1,6 @@
 ---
 name: Epic
-about: Create an Epic for Miranum Docs
+about: Create an Epic for Miranum Json Forms
 title: '[Epic] - <your-name-here>'
 labels: 'epic'
 
