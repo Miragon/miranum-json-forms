@@ -1,6 +1,6 @@
 ---
 name: Feature
-about: Create a Feature for Miranum Docs
+about: Create a Feature for Miranum Json Forms
 title: '[Feature] - <your-name-here>'
 labels: 'connect'
 
