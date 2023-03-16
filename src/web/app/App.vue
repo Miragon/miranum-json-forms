@@ -3,8 +3,16 @@
   <div class="container max-w-screen-lg mx-auto p-4 flex flex-col gap-4 vscode">
 
     <div v-if="mode === 'jsonforms-builder'">
-      Disable Formbuilder: <input type="checkbox" v-model="disableFormbuilder" /><br>
-      Schema ReadOnly: <input type="checkbox" v-model="schemaReadOnly" /><br>
+      <vscode-checkbox
+          :checked="disableFormbuilder"
+          @change="(event) => { disableFormbuilder = event.target.checked;}">
+        Disable Formbuilder
+      </vscode-checkbox><br>
+      <vscode-checkbox
+          :checked="schemaReadOnly"
+          @change="(event) => { schemaReadOnly = event.target.checked;}">
+        Schema ReadOnly
+      </vscode-checkbox><br>
     </div>
 
     <FormBuilder
