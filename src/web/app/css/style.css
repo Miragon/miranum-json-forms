@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+    body {
+        background-color: var(--vscode-editor-background);
+        font-size: 16px;
+    }
+
     :root {
         --base-100: #e5e7eb;
         --base-200: #9ca3af;
@@ -36,44 +41,69 @@
         --tool-control-input-border: #eee;
     }
 
-    .dark {
-        --base-100: hsl(0 0% 35%);
-        --base-200: hsl(0 0% 25%);
-        --base-300: hsl(0 0% 15%);
+    .vscode {
+        --base-100: var(--vscode-editorHoverWidget-border);
+        --base-200: var(--vscode-editorWidget-border);
+        --base-300: var(--vscode-editorWidget-background);
 
-        --tool-control: #606e80;
-        --tool-control-secondary: #6f8075;
-        --tool-layout: #6e7580;
-        --tool-accent: #4d493c;
-        --tool-error: #4d4444;
-        --toolItem-icon:#fff;
+        --tool-control: var(--vscode-button-background);
+        --tool-control-secondary: var(--vscode-button-secondaryBackground);
+        --tool-layout: var(--vscode-input-background);
+        --tool-accent: var(--vscode-inputValidation-infoBackground);
+        --tool-error: var(--vscode-inputOption-errorBackground);
+        --toolItem-icon: var(--vscode-editor-foreground);
         --toolItem-border:rgb(100,100,100,0.6);
+        --toolBar: var(--base-100);
+        --toolBar-bg: var(--base-300);
+        --toolBar-scrollbar: var(--base-300);
+        --toolBar-tab: var(--base-100);
+        --toolBar-tab-hover: var(--base-200);
         --modal:var(--base-100);
 
         --dropArea: var(--base-200);
         --dropArea-dots: var(--base-100);
         --dropArea-dragBorder: var(--base-100);
 
-        --buttonRounded-hover:rgba(200,200,200,.2);
+        --buttonRounded-hover: var(--vscode-button-hoverBackground);
 
         --tool-categorization-tab-hover:rgb(255,255,255,0.2);
         --tool-control-input: rgb(255,255,255,0.3);
         --tool-control-input-border: rgb(0,0,0,0.5);
     }
 
-    .dark .styleA {
-        --text-color:rgba(200,200,200, 0.8);
-        --text-color-light:rgba(200,200,200, 0.9);
-        --text-color-description: rgba(200,200,200, 0.7);
-        --text-color-focused: rgba(220,220,220, 0.9);
+    .vscode .card {
+        background-color: var(--base-300);
+    }
 
-        --bg: #414040;
-        --bg-button:rgba(150,150,150, 0.5);
-        --bg-disabled:rgba(150,150,150, 0.7);
+    .vscode .card textarea {
+        background-color: var(--vscode-editor-background);
+        font-size: var(--vscode-font-size);
+    }
 
-        --border:rgba(150,150,150, 0.5);
-        --border-focus:rgba(150,150,150, 0.9);
-        --tabs-border-activ:var(--text-color-focused)
+    .vscode .card .styleA label {
+        color: var(--vscode-editor-foreground);
+        font-size: var(--vscode-font-size);
+    }
+    .vscode .card .styleA .control:focus-within label,
+    .vscode .card .styleA .control .description {
+        color: var(--vscode-inputOption-activeForeground);
+    }
+
+    .vscode .card .styleA input,
+    .vscode .card .styleA select {
+        background-color: var(--vscode-input-background);
+        color: var(--vscode-input-foreground);
+        border-color: var(--vscode-input-border);
+    }
+    .vscode .card .styleA .error {
+        color: var(--vscode-editorError-foreground);
+        font-size: calc(var(--vscode-font-size) - 2px);
+    }
+    .vscode .card .styleA input:focus,
+    .vscode .card .styleA select:focus {
+        background-color: var(--vscode-inputOption-activeBackground);
+        color: var(--vscode-inputOption-activeForeground);
+        border-color: var(--vscode-inputOption-activeBorder);
     }
 
     h1 {

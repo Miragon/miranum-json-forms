@@ -4,7 +4,7 @@
 
     <details open>
       <summary class="cursor-pointer">JSON</summary>
-      <div class="card p-4">
+      <div class="p-4 json">
         <SchemaCode
             v-model:schema="jsonFormsSchema"
             v-model:uischema="jsonFormsUiSchema"
@@ -38,11 +38,11 @@
 
       <template  v-if="jsonFormsUpdated?.errors?.length">
         Errors
-        <textarea class="w-full h-60 p-4 bg-white text-red-500 rounded" readonly disabled>{{ jsonFormsUpdated?.errors }}</textarea>
+        <textarea class="w-full h-60 p-4 text-red-500 rounded" readonly disabled>{{ jsonFormsUpdated?.errors }}</textarea>
       </template>
 
       Data
-      <textarea class="w-full h-60 p-4 bg-white rounded" readonly disabled>{{ jsonFormsUpdated?.data }}</textarea>
+      <textarea class="w-full h-60 p-4 rounded" readonly disabled>{{ jsonFormsUpdated?.data }}</textarea>
 
     </details>
 
@@ -50,14 +50,16 @@
 
 </template>
 
-<style scoped>
-body,
-details,
+<style>
+.json,
 textarea {
   background-color: var(--vscode-editor-background);
-  color: var(--vscode-editor-foreground);
 }
-
+.json textarea {
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-progressBar-background);
+  font-size: var(--vscode-font-size);
+}
 </style>
 
 
