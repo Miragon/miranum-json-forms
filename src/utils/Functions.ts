@@ -55,7 +55,7 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
                 <meta charset="utf-8" />
 
                 <meta http-equiv="Content-Security-Policy" content="default-src 'none';
-                    style-src ${webview.cspSource};
+                    style-src ${webview.cspSource} 'unsafe-inline';
                     font-src ${webview.cspSource};
                     img-src ${webview.cspSource} data:;
                     connect-src ${webview.cspSource} https://api.iconify.design/mdi.json;

@@ -1,10 +1,18 @@
 <template>
 
-  <div class="container max-w-screen-lg mx-auto p-4 flex flex-col gap-4">
+  <div class="container max-w-screen-lg mx-auto p-4 flex flex-col gap-4 vscode">
 
     <div v-if="mode === 'jsonforms-builder'">
-      Disable Formbuilder: <input type="checkbox" v-model="disableFormbuilder" /><br>
-      Schema ReadOnly: <input type="checkbox" v-model="schemaReadOnly" /><br>
+      <vscode-checkbox
+          :checked="disableFormbuilder"
+          @change="(event) => { disableFormbuilder = event.target.checked;}">
+        Disable Formbuilder
+      </vscode-checkbox><br>
+      <vscode-checkbox
+          :checked="schemaReadOnly"
+          @change="(event) => { schemaReadOnly = event.target.checked;}">
+        Schema ReadOnly
+      </vscode-checkbox><br>
     </div>
 
     <FormBuilder
@@ -204,12 +212,15 @@ onUnmounted(() => {
 
 
 <style>
-body {
-  background-color: #f3f4f5;
-}
-
 .card {
   @apply
   bg-white rounded shadow
+}
+
+.formbuilder nav {
+  box-shadow: 0px 8px 8px -8px rgb(30, 30, 30, 30%);
+  z-index:9;
+  @apply
+  sticky top-0 pt-2
 }
 </style>
