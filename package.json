@@ -93,7 +93,7 @@
                 {
                     "command": "jsonforms-renderer.togglePreview",
                     "group": "navigation",
-                    "when": "activeWebviewPanelId == 'jsonforms-renderer'"
+                    "when": "activeWebviewPanelId == 'jsonforms-builder'"
                 },
                 {
                     "command": "jsonforms-builder.toggleTextEditor",
@@ -142,6 +142,7 @@
         "patch-package": "^6.5.1",
         "postcss": "^8.4.21",
         "prettier": "2.8.4",
+        "prettier-plugin-tailwindcss": "^0.2.5",
         "tsup": "^6.2.2",
         "typescript": "^4.5.5",
         "vite": "^4.1.1"

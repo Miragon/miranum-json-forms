@@ -1,5 +1,5 @@
 <template>
-    <div class="container max-w-screen-lg mx-auto p-4 flex flex-col gap-4 vscode">
+    <div class="vscode container mx-auto flex max-w-screen-lg flex-col gap-4 p-4">
         <div v-if="mode === 'jsonforms-builder'">
             <vscode-checkbox
                 :checked="disableFormbuilder"
@@ -71,7 +71,7 @@ const jsonFormsRenderers = Object.freeze([...vanillaRenderers, ...boplusVueVanil
 const schemaReadOnly = ref(false);
 const disableFormbuilder = ref(false);
 const jsonForms = ref<FormBuilderData>();
-const mode = ref(globalViewType)
+const mode = ref(globalViewType);
 const key = ref(0);
 
 function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
@@ -217,7 +217,7 @@ onUnmounted(() => {
 
 <style>
 .card {
-    @apply bg-white rounded shadow;
+    @apply rounded bg-white shadow;
 }
 
 .formbuilder nav {

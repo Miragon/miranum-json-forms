@@ -30,13 +30,13 @@ section h4 {
 }
 
 textarea {
-    @apply w-full aspect-[8/9]
-  font-mono text-xs
-  text-yellow-100
-  bg-gray-900
+    @apply aspect-[8/9] w-full
+  resize-none appearance-none
   rounded
   border-0
-  outline-none  appearance-none resize-none;
+  bg-gray-900
+  font-mono
+  text-xs  text-yellow-100 outline-none;
 }
 </style>
 

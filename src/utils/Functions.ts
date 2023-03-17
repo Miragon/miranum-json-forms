@@ -10,19 +10,19 @@ import { FormBuilderData } from "./types";
  * Get minimum form.
  */
 export function getMinimum<T extends FormBuilderData>(): T {
-  return JSON.parse(
-    JSON.stringify({
-      schema: {
-        type: "object",
-        properties: {},
-      },
-      uischema: {
-        type: "VerticalLayout",
-        elements: [],
-      },
-      data: {},
-    })
-  );
+    return JSON.parse(
+        JSON.stringify({
+            schema: {
+                type: "object",
+                properties: {},
+            },
+            uischema: {
+                type: "VerticalLayout",
+                elements: [],
+            },
+            data: {},
+        })
+    );
 }
 
 /**
@@ -33,18 +33,18 @@ export function getMinimum<T extends FormBuilderData>(): T {
  * @returns a string which represents the html content
  */
 export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri, viewType: string): string {
-  const vueAppUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "client", "webview.mjs"));
+    const vueAppUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "client", "webview.mjs"));
 
-  const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "resources", "css", "reset.css"));
+    const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "resources", "css", "reset.css"));
 
-  const styleAppUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "client", "style.css"));
+    const styleAppUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "client", "style.css"));
 
-  const nonce = getNonce();
+    const nonce = getNonce();
 
-  // todo
-  //  unsafe-eval in script-src?
+    // todo
+    //  unsafe-eval in script-src?
 
-  return `
+    return `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -76,11 +76,11 @@ export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.
 }
 
 export function getNonce(length = 32): string {
-  let result = "";
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
+    let result = "";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
 }

@@ -2,7 +2,7 @@
     <div class="formBuilderDetails">
         <details open>
             <summary class="cursor-pointer">JSON</summary>
-            <div class="p-4 json">
+            <div class="json p-4">
                 <SchemaCode v-model:schema="jsonFormsSchema" v-model:uischema="jsonFormsUiSchema" />
                 <!--
         :TODO emit event to send updated schema
@@ -33,13 +33,13 @@
 
             <template v-if="jsonFormsUpdated?.errors?.length">
                 Errors
-                <textarea class="w-full h-60 p-4 text-red-500 rounded" readonly disabled>{{
+                <textarea class="h-60 w-full rounded p-4 text-red-500" readonly disabled>{{
                     jsonFormsUpdated?.errors
                 }}</textarea>
             </template>
 
             Data
-            <textarea class="w-full h-60 p-4 rounded" readonly disabled>{{ jsonFormsUpdated?.data }}</textarea>
+            <textarea class="h-60 w-full rounded p-4" readonly disabled>{{ jsonFormsUpdated?.data }}</textarea>
         </details>
     </div>
 </template>

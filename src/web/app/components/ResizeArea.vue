@@ -23,11 +23,11 @@
 
   h-10
 
-  bg-gray-400
-  hover:bg-gray-300
-
+  cursor-ew-resize
   rounded
-  cursor-ew-resize;
+
+  bg-gray-400
+  hover:bg-gray-300;
 }
 </style>
 
