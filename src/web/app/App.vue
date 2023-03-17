@@ -60,6 +60,7 @@ import {
 import { FormBuilderData } from "../../utils";
 import { MessageType, VscMessage } from "../../shared/types";
 
+declare const globalViewType: string;
 const stateController = new StateController();
 let isUpdateFromExtension = false;
 
@@ -70,7 +71,7 @@ const jsonFormsRenderers = Object.freeze([...vanillaRenderers, ...boplusVueVanil
 const schemaReadOnly = ref(false);
 const disableFormbuilder = ref(false);
 const jsonForms = ref<FormBuilderData>();
-const mode = ref("");
+const mode = ref(globalViewType)
 const key = ref(0);
 
 function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
@@ -79,7 +80,7 @@ function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
         uischema: uischema,
     };
     stateController.updateState({
-        mode: mode.value,
+        mode: globalViewType,
         data: { schema, uischema },
     });
 
@@ -90,40 +91,36 @@ function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
 const getDataFromExtension = debounce(receiveMessage, 50);
 function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): void {
     try {
+        isUpdateFromExtension = true;
+
         const type = message.data.type;
         const data = message.data.data;
 
         switch (type) {
             case `jsonforms-builder.${MessageType.initialize}`: {
-                isUpdateFromExtension = true;
-                mode.value = "jsonforms-builder";
                 initialize(data);
                 break;
             }
             case `jsonforms-builder.${MessageType.restore}`: {
-                isUpdateFromExtension = true;
-                mode.value = "jsonforms-builder";
                 initialize(data);
                 break;
             }
             case `jsonforms-builder.${MessageType.confirmation}`: {
+                isUpdateFromExtension = false;
                 confirm(message.data.confirm ?? false);
                 break;
             }
             case `jsonforms-builder.${MessageType.undo}`:
             case `jsonforms-builder.${MessageType.redo}`:
             case `jsonforms-builder.${MessageType.updateFromExtension}`: {
-                isUpdateFromExtension = true;
                 updateForm(data?.schema, data?.uischema);
                 break;
             }
             case `jsonforms-renderer.${MessageType.initialize}`: {
-                mode.value = "jsonforms-renderer";
                 initialize(data);
                 break;
             }
             case `jsonforms-renderer.${MessageType.restore}`: {
-                mode.value = "jsonforms-renderer";
                 initialize(data);
                 break;
             }
@@ -145,7 +142,7 @@ function updateFile(data: FormBuilderData) {
         return;
     }
     stateController.updateState({
-        mode: mode.value,
+        mode: globalViewType,
         data,
     });
     postMessage(MessageType.updateFromWebview, data);
@@ -155,14 +152,14 @@ function postMessage(type: MessageType, data?: FormBuilderData, message?: string
     switch (type) {
         case MessageType.updateFromWebview: {
             stateController.postMessage({
-                type: `jsonforms-builder.${type}`,
+                type: `${globalViewType}.${type}`,
                 data: JSON.parse(JSON.stringify(data)),
             });
             break;
         }
         default: {
             stateController.postMessage({
-                type: `jsonforms-builder.${type}`,
+                type: `${globalViewType}.${type}`,
                 message,
             });
             break;
@@ -180,6 +177,7 @@ window.confirm = async function (message: string | undefined) {
 onBeforeMount(async () => {
     window.addEventListener("message", getDataFromExtension);
     try {
+        isUpdateFromExtension = true;
         const state = stateController.getState();
         if (state && state.data) {
             postMessage(MessageType.restore, undefined, "State was restored successfully.");
