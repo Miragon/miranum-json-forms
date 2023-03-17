@@ -1,10 +1,12 @@
 {
     "name": "miranum-json-forms",
-    "displayName": "Miranum: Json Forms",
+    "displayName": "Miranum JSON Forms",
     "description": "Create and edit forms with an modern easy to use editor.",
     "license": "Apache License 2.0",
     "version": "0.1.0",
     "publisher": "miragon-gmbh",
+    "preview": true,
+    "homepage": "https://www.miranum.io/",
     "repository": {
         "type": "git",
         "url": "https://github.com/FlowSquad/miranum-json-forms.git"
@@ -19,6 +21,12 @@
     "categories": [
         "Other",
         "Visualization"
+    ],
+    "keywords": [
+        "JSON",
+        "JSON Forms",
+        "JSON Schema",
+        "Formbuilder"
     ],
     "activationEvents": [
         "onCustomEditor:jsonforms-builder",
