@@ -1,14 +1,12 @@
 .styleA {
   @apply bg-transparent;
-
 }
 
 .styleA label,
 .styleA label.label,
 .styleA label.label-element {
     @apply
-    tracking-wide text-gray-700 text-sm
-
+    tracking-wide vsc-editor-fg vsc-font-size
     transition-colors
 }
 
@@ -26,7 +24,7 @@
 
 .styleA .control:focus-within label,
 .styleA .control:focus-within label.label {
-    @apply text-gray-600
+    @apply vsc-inputOpt-active-fg
 }
 
 /*
@@ -51,18 +49,19 @@
     w-full
     py-0.5 px-2
 
-    bg-gray-100
+    vsc-input-bg
     disabled:bg-gray-200
-    bg-opacity-50 focus:bg-opacity-100
+    bg-opacity-50
+    focus:vsc-inputOpt-active-fg focus:vsc-inputOpt-active-bg
 
     rounded-sm
 
     text-base
-    text-gray-700
+    vsc-input-fg
     leading-6
 
-    border border-gray-300
-    focus:border-gray-500
+    border vsc-input-border
+    focus:vsc-inputOpt-active-border
     transition-colors
 
     outline-none  appearance-none
@@ -144,21 +143,15 @@ fieldset.styleA.group .group-item {
     /*@apply*/
 }
 
-
-
-
-
-
-
 .styleA .control .description,
 .styleA .control .error {
-    @apply block h-2 text-sm
+    @apply block h-2 vsc-font-size-desc
 }
 .styleA .control .description {
-    @apply text-gray-500
+    @apply vsc-editor-fg
 }
 .styleA .control .error {
-    @apply text-red-500
+    @apply vsc-editor-error-fg
 }
 
 /**
@@ -249,17 +242,18 @@ fieldset.styleA.group .group-item {
 
 .styleA .tabs {
     @apply
-    flex
+    flex justify-between
 
     my-2
 
-    border-b border-gray-200
+    border-b vsc-tab-border
 }
 
 .styleA .tabs button {
     min-width: 100px;
     @apply
     py-1 px-2
+    vsc-tab-fg vsc-tab-bg vsc-tab-border
 
     focus:outline-none
 
@@ -276,8 +270,8 @@ fieldset.styleA.group .group-item {
 
 .styleA .tabs button.selected {
     @apply
-    text-gray-800
-    border-gray-800
+    vsc-tab-active-fg
+    vsc-tab-active-border
 }
 .styleA .tabs button:disabled {
     @apply
