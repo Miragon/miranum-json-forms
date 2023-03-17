@@ -19,5 +19,5 @@
         "src"
         //"src/lib/types.ts"
     ],
-    "exclude": ["node_modules", "src/web"]
+    "exclude": ["src/web"]
 }

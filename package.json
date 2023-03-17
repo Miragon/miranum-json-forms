@@ -33,7 +33,7 @@
         "onCommand:jsonforms-renderer.togglePreview",
         "onCommand:jsonforms-builder.toggleTextEditor"
     ],
-    "main": "./dist/extension.js",
+    "main": "./dist/main.js",
     "contributes": {
         "customEditors": [
             {
@@ -119,12 +119,12 @@
     "scripts": {
         "publish": "vsce publish",
         "vscode:prepublish": "npm run build",
-        "build": "tsup src/extension.ts --dts --external=vscode && npm run web",
+        "build": "npm run esbuild-base -- --minify && npm run web",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
+        "esbuild": "npm run esbuild-base -- --sourcemap",
+        "watch": "npm run esbuild-base -- --sourcemap --watch",
         "web": "vite build --config src/web/vite.config.js",
-        "web-dev": "vite build --config src/web/vite.config.js --watch",
-        "watch": "tsup src/extension.ts --dts --external=vscode --sourcemap",
-        "test": "node ./out/test/runTest.js",
-        "doc": "typedoc --options ./docs/typedoc.json"
+        "web-dev": "vite build --config src/web/vite.config.js --watch"
     },
     "dependencies": {
         "@backoffice-plus/formbuilder": "0.0.25",
@@ -147,11 +147,10 @@
         "@vitejs/plugin-vue": "^4.0.0",
         "@vscode/test-electron": "^2.1.3",
         "autoprefixer": "^10.4.13",
-        "patch-package": "^6.5.1",
+        "esbuild": "^0.17.12",
         "postcss": "^8.4.21",
         "prettier": "2.8.4",
         "prettier-plugin-tailwindcss": "^0.2.5",
-        "tsup": "^6.2.2",
         "typescript": "^4.5.5",
         "vite": "^4.1.1"
     }
