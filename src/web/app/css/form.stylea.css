@@ -1,30 +1,27 @@
 .styleA {
-  @apply bg-transparent;
+    @apply bg-transparent;
 }
 
 .styleA label,
 .styleA label.label,
 .styleA label.label-element {
-    @apply
-    tracking-wide vsc-editor-fg vsc-font-size
-    transition-colors
+    @apply vsc-editor-fg vsc-font-size tracking-wide
+    transition-colors;
 }
 
 .styleA label,
 .styleA label.label {
-    @apply
-    pb-4
+    @apply pb-4;
 }
 .styleA label.label-element {
-    @apply block
-    pb-2 mt-2
-    text-base
+    @apply mt-2
+    block pb-2
+    text-base;
 }
-
 
 .styleA .control:focus-within label,
 .styleA .control:focus-within label.label {
-    @apply vsc-inputOpt-active-fg
+    @apply vsc-inputOpt-active-fg;
 }
 
 /*
@@ -37,54 +34,59 @@
 */
 
 .styleA input:not([type]),
-.styleA input:where([type="text"], [type="number"], [type="email"], [type="password"], [type="url"], [type="tel"], [type="search"], [type="xxx"], [type="xxx"]),
+.styleA input:where(
+        [type="text"],
+        [type="number"],
+        [type="email"],
+        [type="password"],
+        [type="url"],
+        [type="tel"],
+        [type="search"],
+        [type="xxx"],
+        [type="xxx"]
+    ),
 .styleA input:where([type="date"], [type="datetime-local"], [type="month"], [type="time"], [type="week"]),
 .styleA input:where([type="file"], [type="range"], [type="color"]),
 .styleA select,
 .styleA textarea,
-.styleA .tagInput
-{
-    @apply
-    block
-    w-full
-    py-0.5 px-2
+.styleA .tagInput {
+    @apply vsc-input-bg
+    focus:vsc-inputOpt-active-fg
+    focus:vsc-inputOpt-active-bg vsc-input-fg
 
-    vsc-input-bg
-    disabled:bg-gray-200
-    bg-opacity-50
-    focus:vsc-inputOpt-active-fg focus:vsc-inputOpt-active-bg
+    vsc-input-border
+    focus:vsc-inputOpt-active-border
+    block
+    w-full appearance-none
 
     rounded-sm
 
-    text-base
-    vsc-input-fg
+    border
+    bg-opacity-50
+    py-0.5
+
+    px-2 text-base
     leading-6
+    outline-none
 
-    border vsc-input-border
-    focus:vsc-inputOpt-active-border
-    transition-colors
+    transition-colors  disabled:cursor-not-allowed
 
-    outline-none  appearance-none
-
-    disabled:cursor-not-allowed
+    disabled:bg-gray-200;
 }
-.styleA select
-{
-    appearance:auto;
-    @apply p-0.5
+.styleA select {
+    appearance: auto;
+    @apply p-0.5;
 }
-
-
 
 .styleA input:where([type="file"]) {
-     @apply p-0 m-0
+    @apply m-0 p-0;
 }
 .styleA input:where([type="checkbox"], [type="radio"]) {
-    @apply p-2 m-2 pl-0 ml-0
+    @apply m-2 ml-0 p-2 pl-0;
 }
 .styleA input:where([type="range"]) {
     appearance: auto;
-    @apply p-0
+    @apply p-0;
 }
 .styleA input:where([type="color"]) {
     min-height: 40px;
@@ -92,34 +94,28 @@
 
 .styleA textarea {
     min-height: 10em;
-    @apply
-    leading-normal
+    @apply leading-normal;
 }
 
 .styleA .horizontal-layout,
-.styleA.horizontal-layout
-{
-    @apply flex flex-row w-full
+.styleA.horizontal-layout {
+    @apply flex w-full flex-row;
 }
 .styleA .horizontal-layout .horizontal-layout-item,
-.styleA.horizontal-layout .horizontal-layout-item  {
-    @apply w-full
+.styleA.horizontal-layout .horizontal-layout-item {
+    @apply w-full;
 }
 .styleA.vertical-layout,    /** root **/
-.styleA .vertical-layout
-{
-    @apply flex flex-col
+.styleA .vertical-layout {
+    @apply flex flex-col;
 }
 
 .styleA .horizontal-layout,
 .styleA.horizontal-layout,
 .styleA .vertical-layout,
-.styleA.vertical-layout   /** root **/
-{
-    @apply gap-2
+.styleA.vertical-layout   /** root **/ {
+    @apply gap-2;
 }
-
-
 
 /**
 *
@@ -128,15 +124,13 @@
 */
 .styleA fieldset.group,
 fieldset.styleA.group {
-    @apply
-    border border-gray-300
-    p-2
+    @apply border border-gray-300
+    p-2;
 }
 .styleA fieldset.group > legend,
 fieldset.styleA.group > legend {
-    @apply
-    px-2
-    w-full
+    @apply w-full
+    px-2;
 }
 .styleA fieldset.group .group-item,
 fieldset.styleA.group .group-item {
@@ -145,13 +139,13 @@ fieldset.styleA.group .group-item {
 
 .styleA .control .description,
 .styleA .control .error {
-    @apply block h-2 vsc-font-size-desc
+    @apply vsc-font-size-desc block h-2;
 }
 .styleA .control .description {
-    @apply vsc-editor-fg
+    @apply vsc-editor-fg;
 }
 .styleA .control .error {
-    @apply vsc-editor-error-fg
+    @apply vsc-editor-error-fg;
 }
 
 /**
@@ -160,30 +154,27 @@ fieldset.styleA.group .group-item {
 *
 */
 .styleA fieldset.array-list {
-    @apply
-    border border-gray-300
-    p-2
+    @apply flex flex-col
+    gap-2
 
-    flex flex-col gap-2
+    border border-gray-300 p-2;
 }
 .styleA fieldset.array-list legend {
-    @apply px-2
-    flex flex-row-reverse
+    @apply flex
+    w-full flex-row-reverse
     justify-between
-    w-full
+    px-2;
 }
 
 .styleA fieldset.array-list legend label {
-    @apply
-    uppercase tracking-wide text-gray-400 text-xs font-bold
+    @apply text-xs font-bold uppercase tracking-wide text-gray-400;
 }
 .styleA fieldset.array-list legend button {
-    @apply
-    px-2 m-0
-    rounded-full
-
+    @apply m-0 rounded-full
     bg-gray-300
-    hover:bg-green-500
+
+    px-2
+    hover:bg-green-500;
 }
 
 .styleA fieldset.array-list .array-list-no-data {
@@ -191,90 +182,79 @@ fieldset.styleA.group .group-item {
 }
 
 .styleA fieldset.array-list .array-list-item-wrapper {
-    @apply
-    p-0
-    border border-gray-300
+    @apply border
+    border-gray-300 p-0;
 }
 .styleA fieldset.array-list .array-list-item {
-    @apply p-0
+    @apply p-0;
 }
 
 .styleA fieldset.array-list .array-list-item-toolbar {
-    @apply
-    flex gap-1 items-center
+    @apply flex items-center gap-1;
 }
 .styleA fieldset.array-list .array-list-item-toolbar .array-list-item-label {
     min-height: 22px;
-    @apply
-    flex-grow
-    text-black
+    @apply flex-grow
     pl-2
+    text-black;
 }
 
 .styleA fieldset.array-list .array-list-item-toolbar button {
     line-height: unset;
-    @apply
-
-    block
-    w-6 h-6
-
-    text-xs
+    @apply block
+    h-6 w-6
 
     cursor-pointer
-    rounded-full
 
+    rounded-full
     bg-transparent
-    hover:bg-gray-400
+
+    text-xs
+    hover:bg-gray-400;
 }
-.styleA fieldset.array-list .array-list-item-toolbar button.array-list-item-move-up {}
-.styleA fieldset.array-list .array-list-item-toolbar button.array-list-item-move-down {}
+.styleA fieldset.array-list .array-list-item-toolbar button.array-list-item-move-up {
+}
+.styleA fieldset.array-list .array-list-item-toolbar button.array-list-item-move-down {
+}
 .styleA fieldset.array-list .array-list-item-toolbar button.array-list-item-delete {
-    @apply
-    hover:bg-red-500
+    @apply hover:bg-red-500;
 }
 
 .styleA fieldset.array-list .array-list-item-content {
-    @apply
-    px-2
+    @apply px-2;
 }
 
-
-
 .styleA .tabs {
-    @apply
-    flex justify-between
+    @apply vsc-tab-border my-2
 
-    my-2
+    flex
 
-    border-b vsc-tab-border
+    justify-between border-b;
 }
 
 .styleA .tabs button {
     min-width: 100px;
-    @apply
+    @apply vsc-tab-fg vsc-tab-bg
+    vsc-tab-border rounded-t-lg border-b
+
+    border-transparent
+
     py-1 px-2
-    vsc-tab-fg vsc-tab-bg vsc-tab-border
-
-    focus:outline-none
-
-    border-b border-transparent
 
     transition-colors
 
-    rounded-t-lg
-
     hover:bg-gray-400
+
     hover:bg-opacity-10
     hover:text-gray-800
+    focus:outline-none;
 }
 
 .styleA .tabs button.selected {
-    @apply
-    vsc-tab-active-fg
-    vsc-tab-active-border
+    @apply vsc-tab-active-fg
+    vsc-tab-active-border;
 }
 .styleA .tabs button:disabled {
-    @apply
-    opacity-50
-    hover:bg-opacity-0
+    @apply opacity-50
+    hover:bg-opacity-0;
 }

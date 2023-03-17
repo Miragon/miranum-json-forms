@@ -1,10 +1,8 @@
-import { isArray, mergeWith, reverse, uniqBy } from "lodash";
-import {WebviewApi} from "vscode-webview";
-import {FormBuilderData} from "../../../utils";
-import {VscMessage, VscState} from "../../../shared/types";
+import { WebviewApi } from "vscode-webview";
+import { FormBuilderData } from "../../../utils";
+import { VscMessage, VscState } from "../../../shared/types";
 
 export class StateController {
-
     private vscode: WebviewApi<VscState<FormBuilderData>>;
 
     constructor() {
@@ -19,16 +17,9 @@ export class StateController {
         this.vscode.setState(state);
     }
 
-    public updateState(state: Subset<VscState<FormBuilderData>>) {
-        function customizer(objValue: any, srcValue: any): any {
-            if (isArray(objValue)) {
-                return reverse(uniqBy(reverse(objValue.concat(srcValue)), "type"));
-            }
-        }
-
-        const newState = mergeWith(this.getState(), state, customizer);
+    public updateState(state: VscState<FormBuilderData>) {
         this.setState({
-            ...newState,
+            ...state,
         });
     }
 
@@ -36,7 +27,3 @@ export class StateController {
         this.vscode.postMessage(message);
     }
 }
-
-type Subset<K> = {
-    [attr in keyof K]?: K[attr] extends object ? Subset<K[attr]> : K[attr];
-};

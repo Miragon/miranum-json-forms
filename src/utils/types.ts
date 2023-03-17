@@ -1,4 +1,4 @@
-import { JsonSchema, UISchemaElement } from '@jsonforms/core'
+import { JsonSchema, UISchemaElement } from "@jsonforms/core";
 
 export interface FormBuilderData {
     schema?: JsonSchema;

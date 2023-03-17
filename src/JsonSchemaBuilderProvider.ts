@@ -4,12 +4,12 @@
  * @module JsonSchemaBuilderProvider
  */
 
-import * as vscode from 'vscode';
-import {TextEditorWrapper, ViewState} from "./lib";
-import {MessageType, VscMessage} from "./shared/types";
-import {FormBuilderData, getHtmlForWebview, getMinimum} from './utils';
-import {DocumentController} from "./controller";
-import {Logger, BuildInPreview, TextEditorComponent} from "./components";
+import * as vscode from "vscode";
+import { TextEditorWrapper, ViewState } from "./lib";
+import { MessageType, VscMessage } from "./shared/types";
+import { FormBuilderData, getHtmlForWebview, getMinimum } from "./utils";
+import { DocumentController } from "./controller";
+import { Logger, BuildInPreview, TextEditorComponent } from "./components";
 
 /**
  * The [Custom Text Editor](https://code.visualstudio.com/api/extension-guides/custom-editors) uses a '.form'-File as its
@@ -20,7 +20,6 @@ import {Logger, BuildInPreview, TextEditorComponent} from "./components";
  * standard vscode text editor and a preview for rendering [Json Schema](https://json-schema.org/).
  */
 export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvider {
-
     /** Unique identifier for the custom editor provider. */
     public static readonly VIEWTYPE = "jsonforms-builder";
 
@@ -41,9 +40,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
      * Register all components and controllers and set up all commands.
      * @param context The context of the extension
      */
-    constructor(
-        private readonly context: vscode.ExtensionContext
-    ) {
+    constructor(private readonly context: vscode.ExtensionContext) {
         Logger.get().clear();
 
         // initialize components
@@ -63,12 +60,11 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                     this.closePreview = false;
                 }
                 this.textEditor.toggle(this.controller.document);
-            });
-        const togglePreview = vscode.commands.registerCommand(
-            `${this.preview.viewType}.togglePreview`,
-            () => {
-                this.preview.toggle(this.controller);
-            });
+            }
+        );
+        const togglePreview = vscode.commands.registerCommand(`${this.preview.viewType}.togglePreview`, () => {
+            this.preview.toggle(this.controller);
+        });
         const toggleLogger = vscode.commands.registerCommand(
             `${JsonSchemaBuilderProvider.VIEWTYPE}.toggleLogger`,
             () => {
@@ -77,7 +73,8 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                 } else {
                     Logger.hide();
                 }
-            });
+            }
+        );
 
         this.context.subscriptions.push(togglePreview, toggleTextEditor, toggleLogger);
         // <---- Register commands -----
@@ -94,9 +91,8 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         webviewPanel: vscode.WebviewPanel,
         token: vscode.CancellationToken
     ): Promise<void> {
-
         // Disable preview mode
-        await vscode.commands.executeCommand('workbench.action.keepEditor');
+        await vscode.commands.executeCommand("workbench.action.keepEditor");
 
         const disposables: vscode.Disposable[] = [];
         let isUpdateFromWebview = false;
@@ -105,101 +101,132 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         await this.init(document);
 
         // Setup webview
-        webviewPanel.webview.options = {enableScripts: true};
-        webviewPanel.webview.html = getHtmlForWebview(webviewPanel.webview, this.context.extensionUri);
+        webviewPanel.webview.options = { enableScripts: true };
+        webviewPanel.webview.html = getHtmlForWebview(
+            webviewPanel.webview,
+            this.context.extensionUri,
+            JsonSchemaBuilderProvider.VIEWTYPE
+        );
 
         // Send content from the extension to the webview
         // todo: change signature to (message: VscMessage)
         const postMessage = async (msgType: MessageType) => {
             //if (webviewPanel.visible) {
-                let data: FormBuilderData | undefined;
-                switch (msgType) {
-                    case MessageType.restore: {
-                        data = (isBuffer) ? this.controller.content : undefined;
-                        break;
-                    }
-                    default: {
-                        data = this.controller.content;
-                        break;
-                    }
+            let data: FormBuilderData | undefined;
+            switch (msgType) {
+                case MessageType.restore: {
+                    data = isBuffer ? this.controller.content : undefined;
+                    break;
                 }
+                default: {
+                    data = this.controller.content;
+                    break;
+                }
+            }
 
-                try {
-                    if (await webviewPanel.webview.postMessage({
+            try {
+                if (
+                    await webviewPanel.webview.postMessage({
                         type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${msgType}`,
                         data,
-                    })) {
-                        if (msgType === MessageType.restore) {
-                            isBuffer = false;
-                        }
-                    } else {
-                        Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, `Could not post message (Viewtype: ${webviewPanel.visible})`);
+                    })
+                ) {
+                    if (msgType === MessageType.restore) {
+                        isBuffer = false;
                     }
-                } catch (error) {
-                    if (!document.isClosed) {
-                        const message = (error instanceof Error)
-                            ? error.message
-                            : `Could not post message to ${webviewPanel}`;
-                        Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, message);
-                    }
-                }
-            //}
-        }
-
-        // Receive messages from the webview
-        webviewPanel.webview.onDidReceiveMessage(async (event: VscMessage<FormBuilderData>) => {
-            try {
-                switch (event.type) {
-                    case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.initialize}`: {
-                        Logger.info("[Miranum.JsonForms.Webview]", `(Webview: ${webviewPanel.title})`, event.message ?? "");
-                        postMessage(MessageType.initialize);
-                        break;
-                    }
-                    case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.restore}`: {
-                        Logger.info("[Miranum.JsonForms.Webview]", `(Webview: ${webviewPanel.title})`, event.message ?? "");
-                        postMessage(MessageType.restore);
-                        break;
-                    }
-                    case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.updateFromWebview}`: {
-                        isUpdateFromWebview = true;
-                        if (event.data) {
-                            await this.controller.writeToDocument(event.data);
-                        }
-                        break;
-                    }
-                    case `${JsonSchemaBuilderProvider.VIEWTYPE}.confirmation`: {
-                        vscode.window.showInformationMessage(
-                            event.message ?? "Confirm",
-                            ...['Yes', 'No']
-                        ).then((input) => {
-                            const response = (input === "Yes");
-                            webviewPanel.webview.postMessage({
-                                type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.confirmation}`,
-                                confirm: response
-                            });
-                        }, () => {
-                            webviewPanel.webview.postMessage({
-                                type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.confirmation}`,
-                                confirm: false
-                            });
-                        });
-                        break;
-                    }
-                    case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.info}`: {
-                        Logger.info("[Miranum.JsonForms.Webview]", `(Webview: ${webviewPanel.title})`, event.message ?? "");
-                        break;
-                    }
-                    case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.error}`: {
-                        Logger.error("[Miranum.JsonForms.Webview]", `(Webview: ${webviewPanel.title})`, event.message ?? "");
-                        break;
-                    }
+                } else {
+                    Logger.error(
+                        "[Miranum.JsonForms]",
+                        `(Webview: ${webviewPanel.title})`,
+                        `Could not post message (Viewtype: ${webviewPanel.visible})`
+                    );
                 }
             } catch (error) {
-                isUpdateFromWebview = false;
-                const message = (error instanceof Error) ? error.message : `${error}`;
-                Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, message);
+                if (!document.isClosed) {
+                    const message =
+                        error instanceof Error ? error.message : `Could not post message to ${webviewPanel}`;
+                    Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, message);
+                }
             }
-        }, null, disposables);
+            //}
+        };
+
+        // Receive messages from the webview
+        webviewPanel.webview.onDidReceiveMessage(
+            async (event: VscMessage<FormBuilderData>) => {
+                try {
+                    switch (event.type) {
+                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.initialize}`: {
+                            Logger.info(
+                                "[Miranum.JsonForms.Webview]",
+                                `(Webview: ${webviewPanel.title})`,
+                                event.message ?? ""
+                            );
+                            postMessage(MessageType.initialize);
+                            break;
+                        }
+                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.restore}`: {
+                            Logger.info(
+                                "[Miranum.JsonForms.Webview]",
+                                `(Webview: ${webviewPanel.title})`,
+                                event.message ?? ""
+                            );
+                            postMessage(MessageType.restore);
+                            break;
+                        }
+                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.updateFromWebview}`: {
+                            isUpdateFromWebview = true;
+                            if (event.data) {
+                                await this.controller.writeToDocument(event.data);
+                            }
+                            break;
+                        }
+                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.confirmation`: {
+                            vscode.window
+                                .showInformationMessage(event.message ?? "Confirm", ...["Yes", "No"])
+                                .then(
+                                    (input) => {
+                                        const response = input === "Yes";
+                                        webviewPanel.webview.postMessage({
+                                            type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.confirmation}`,
+                                            confirm: response,
+                                        });
+                                    },
+                                    () => {
+                                        webviewPanel.webview.postMessage({
+                                            type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.confirmation}`,
+                                            confirm: false,
+                                        });
+                                    }
+                                );
+                            break;
+                        }
+                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.info}`: {
+                            Logger.info(
+                                "[Miranum.JsonForms.Webview]",
+                                `(Webview: ${webviewPanel.title})`,
+                                event.message ?? ""
+                            );
+                            break;
+                        }
+                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.error}`: {
+                            Logger.error(
+                                "[Miranum.JsonForms.Webview]",
+                                `(Webview: ${webviewPanel.title})`,
+                                event.message ?? ""
+                            );
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    isUpdateFromWebview = false;
+                    const message = error instanceof Error ? error.message : `${error}`;
+                    Logger.error("[Miranum.JsonForms]", `(Webview: ${webviewPanel.title})`, message);
+                }
+            },
+            null,
+            disposables
+        );
 
         /**
          * When changes are made inside the webview a message to the extension will be sent with the new data.
@@ -210,81 +237,95 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
          * to the webview. For example if the changes are made inside a separate editor then the data will be sent to
          * the webview to synchronize it with the current content of the model.
          */
-        vscode.workspace.onDidChangeTextDocument(e => {
-            if (e.document.uri.toString() === document.uri.toString() &&
-                e.contentChanges.length !== 0 && !isUpdateFromWebview) {
-
-                if (!e.document.getText()) {
-                    // e.g. when user deletes all lines in text editor
-                    this.controller.writeToDocument(getMinimum<FormBuilderData>());
-                }
-
-                // If the webview is in the background then no messages can be sent to it.
-                // So we have to remember that we need to update its content the next time the webview regain its focus.
-                if (!webviewPanel.visible) {
-                    isBuffer = true;
-                    return;
-                }
-
-                // Update the webviews content.
-                switch (e.reason) {
-                    case 1: {
-                        postMessage(MessageType.undo);
-                        break;
+        vscode.workspace.onDidChangeTextDocument(
+            (e) => {
+                if (
+                    e.document.uri.toString() === document.uri.toString() &&
+                    e.contentChanges.length !== 0 &&
+                    !isUpdateFromWebview
+                ) {
+                    if (!e.document.getText()) {
+                        // e.g. when user deletes all lines in text editor
+                        this.controller.writeToDocument(getMinimum<FormBuilderData>());
                     }
-                    case 2: {
-                        postMessage(MessageType.redo);
-                        break;
+
+                    // If the webview is in the background then no messages can be sent to it.
+                    // So we have to remember that we need to update its content the next time the webview regain its focus.
+                    if (!webviewPanel.visible) {
+                        isBuffer = true;
+                        return;
                     }
-                    case undefined: {
-                        postMessage(MessageType.updateFromExtension);
-                        break;
+
+                    // Update the webviews content.
+                    switch (e.reason) {
+                        case 1: {
+                            postMessage(MessageType.undo);
+                            break;
+                        }
+                        case 2: {
+                            postMessage(MessageType.redo);
+                            break;
+                        }
+                        case undefined: {
+                            postMessage(MessageType.updateFromExtension);
+                            break;
+                        }
                     }
                 }
-            }
-            isUpdateFromWebview = false;    // reset
-        }, null, disposables);
+                isUpdateFromWebview = false; // reset
+            },
+            null,
+            disposables
+        );
 
         // Called when the view state changes (e.g. user switch the tab)
-        webviewPanel.onDidChangeViewState((wp) => {
-            try {
-                switch (true) {
-                    /* ------- Panel is active/visible ------- */
-                    case wp.webviewPanel.active: {
-                        this.controller.document = document;
-                        if (!this.preview.isOpen && this.preview.lastViewState === ViewState.open) {
-                            this.preview.open(this.controller);
-                        }
+        webviewPanel.onDidChangeViewState(
+            (wp) => {
+                try {
+                    switch (true) {
+                        /* ------- Panel is active/visible ------- */
+                        case wp.webviewPanel.active: {
+                            this.controller.document = document;
+                            if (!this.preview.isOpen && this.preview.lastViewState === ViewState.open) {
+                                this.preview.open(this.controller);
+                            }
 
-                        /* falls through */
-                    }
-                    case wp.webviewPanel.visible: {
-                        // If changes has been made while the webview was not visible no messages could have been sent to the
-                        // webview. So we have to update the webview if it gets its focus back.
-                        if (isBuffer) {
-                            postMessage(MessageType.updateFromExtension);
-                            isBuffer = false;
+                            /* falls through */
                         }
-                        break;
-                    }
-                    /* ------- Panel is NOT active/visible ------- */
-                    case !wp.webviewPanel.active: {
-                        if (!this.preview.active && this.closePreview) {
-                            this.preview.close();
+                        case wp.webviewPanel.visible: {
+                            // If changes has been made while the webview was not visible no messages could have been sent to the
+                            // webview. So we have to update the webview if it gets its focus back.
+                            if (isBuffer) {
+                                postMessage(MessageType.updateFromExtension);
+                                isBuffer = false;
+                            }
+                            break;
                         }
-                        this.closePreview = true; // reset
+                        /* ------- Panel is NOT active/visible ------- */
+                        case !wp.webviewPanel.active: {
+                            if (!this.preview.active && this.closePreview) {
+                                this.preview.close();
+                            }
+                            this.closePreview = true; // reset
+                        }
                     }
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : `${error}`;
+                    Logger.error("[Miranum.JsonForms]", `(Webview: ${wp.webviewPanel.title})`, message);
                 }
-            } catch (error) {
-                const message = (error instanceof Error) ? error.message : `${error}`;
-                Logger.error("[Miranum.JsonForms]", `(Webview: ${wp.webviewPanel.title})`, message);
-            }
-        }, null, disposables);
+            },
+            null,
+            disposables
+        );
 
         // CleanUp after Custom Editor was closed.
         webviewPanel.onDidDispose(() => {
             JsonSchemaBuilderProvider.counter--;
-            vscode.commands.executeCommand('setContext', `${JsonSchemaBuilderProvider.VIEWTYPE}.openCustomEditors`, JsonSchemaBuilderProvider.counter);
+            vscode.commands.executeCommand(
+                "setContext",
+                `${JsonSchemaBuilderProvider.VIEWTYPE}.openCustomEditors`,
+                JsonSchemaBuilderProvider.counter
+            );
 
             this.textEditor.close(this.controller.document.fileName);
             this.preview.close();
@@ -301,7 +342,11 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         // Necessary set up for toggle command
         // only enable the command if a custom editor is open
         JsonSchemaBuilderProvider.counter++;
-        vscode.commands.executeCommand('setContext', `${JsonSchemaBuilderProvider.VIEWTYPE}.openCustomEditors`, JsonSchemaBuilderProvider.counter);
+        vscode.commands.executeCommand(
+            "setContext",
+            `${JsonSchemaBuilderProvider.VIEWTYPE}.openCustomEditors`,
+            JsonSchemaBuilderProvider.counter
+        );
 
         // set the document
         try {
@@ -312,12 +357,10 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                 this.preview.close();
             }
             this.preview.open(this.controller);
-
         } catch (error) {
-            const message = (error instanceof Error) ? error.message : `${error}`;
+            const message = error instanceof Error ? error.message : `${error}`;
             Logger.error("[Miranum.JsonForms]", `(${document.fileName})`, message);
         }
-
     }
 
     /** @hidden */

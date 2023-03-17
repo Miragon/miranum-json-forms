@@ -13,7 +13,9 @@ export class Logger {
             return this._logger;
         } else {
             if (channel) {
-                return this._logger = vscode.window.createOutputChannel(channel, { log: true });
+                return (this._logger = vscode.window.createOutputChannel(channel, {
+                    log: true,
+                }));
             } else {
                 throw new Error("[Miranum.Modeler.Logger] Please set the output channel");
             }
