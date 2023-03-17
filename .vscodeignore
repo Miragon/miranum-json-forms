@@ -1,9 +1,10 @@
 .vscode/**
-.vscode-test/**
 .github
 .gitignore
 .idea
+.prettierignore
 
+diagrams/
 src/**
 node_modules/
 examples/**

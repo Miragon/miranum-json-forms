@@ -19,7 +19,7 @@ import { Logger, BuildInPreview, TextEditorComponent } from "./components";
  * The provider also register a [command](https://code.visualstudio.com/api/extension-guides/command) for toggling the
  * standard vscode text editor and a preview for rendering [Json Schema](https://json-schema.org/).
  */
-export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvider {
+export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
     /** Unique identifier for the custom editor provider. */
     public static readonly VIEWTYPE = "jsonforms-builder";
 
@@ -54,7 +54,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
 
         // ----- Register commands ---->
         const toggleTextEditor = vscode.commands.registerCommand(
-            `${JsonSchemaBuilderProvider.VIEWTYPE}.toggleTextEditor`,
+            `${JsonFormsBuilder.VIEWTYPE}.toggleTextEditor`,
             () => {
                 if (!this.textEditor.isOpen) {
                     this.closePreview = false;
@@ -65,16 +65,13 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         const togglePreview = vscode.commands.registerCommand(`${this.preview.viewType}.togglePreview`, () => {
             this.preview.toggle(this.controller);
         });
-        const toggleLogger = vscode.commands.registerCommand(
-            `${JsonSchemaBuilderProvider.VIEWTYPE}.toggleLogger`,
-            () => {
-                if (!Logger.isOpen) {
-                    Logger.show();
-                } else {
-                    Logger.hide();
-                }
+        const toggleLogger = vscode.commands.registerCommand(`${JsonFormsBuilder.VIEWTYPE}.toggleLogger`, () => {
+            if (!Logger.isOpen) {
+                Logger.show();
+            } else {
+                Logger.hide();
             }
-        );
+        });
 
         this.context.subscriptions.push(togglePreview, toggleTextEditor, toggleLogger);
         // <---- Register commands -----
@@ -105,7 +102,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
         webviewPanel.webview.html = getHtmlForWebview(
             webviewPanel.webview,
             this.context.extensionUri,
-            JsonSchemaBuilderProvider.VIEWTYPE
+            JsonFormsBuilder.VIEWTYPE
         );
 
         // Send content from the extension to the webview
@@ -127,7 +124,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
             try {
                 if (
                     await webviewPanel.webview.postMessage({
-                        type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${msgType}`,
+                        type: `${JsonFormsBuilder.VIEWTYPE}.${msgType}`,
                         data,
                     })
                 ) {
@@ -156,7 +153,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
             async (event: VscMessage<FormBuilderData>) => {
                 try {
                     switch (event.type) {
-                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.initialize}`: {
+                        case `${JsonFormsBuilder.VIEWTYPE}.${MessageType.initialize}`: {
                             Logger.info(
                                 "[Miranum.JsonForms.Webview]",
                                 `(Webview: ${webviewPanel.title})`,
@@ -165,7 +162,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                             postMessage(MessageType.initialize);
                             break;
                         }
-                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.restore}`: {
+                        case `${JsonFormsBuilder.VIEWTYPE}.${MessageType.restore}`: {
                             Logger.info(
                                 "[Miranum.JsonForms.Webview]",
                                 `(Webview: ${webviewPanel.title})`,
@@ -174,34 +171,34 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                             postMessage(MessageType.restore);
                             break;
                         }
-                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.updateFromWebview}`: {
+                        case `${JsonFormsBuilder.VIEWTYPE}.${MessageType.updateFromWebview}`: {
                             isUpdateFromWebview = true;
                             if (event.data) {
                                 await this.controller.writeToDocument(event.data);
                             }
                             break;
                         }
-                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.confirmation`: {
+                        case `${JsonFormsBuilder.VIEWTYPE}.confirmation`: {
                             vscode.window
                                 .showInformationMessage(event.message ?? "Confirm", ...["Yes", "No"])
                                 .then(
                                     (input) => {
                                         const response = input === "Yes";
                                         webviewPanel.webview.postMessage({
-                                            type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.confirmation}`,
+                                            type: `${JsonFormsBuilder.VIEWTYPE}.${MessageType.confirmation}`,
                                             confirm: response,
                                         });
                                     },
                                     () => {
                                         webviewPanel.webview.postMessage({
-                                            type: `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.confirmation}`,
+                                            type: `${JsonFormsBuilder.VIEWTYPE}.${MessageType.confirmation}`,
                                             confirm: false,
                                         });
                                     }
                                 );
                             break;
                         }
-                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.info}`: {
+                        case `${JsonFormsBuilder.VIEWTYPE}.${MessageType.info}`: {
                             Logger.info(
                                 "[Miranum.JsonForms.Webview]",
                                 `(Webview: ${webviewPanel.title})`,
@@ -209,7 +206,7 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
                             );
                             break;
                         }
-                        case `${JsonSchemaBuilderProvider.VIEWTYPE}.${MessageType.error}`: {
+                        case `${JsonFormsBuilder.VIEWTYPE}.${MessageType.error}`: {
                             Logger.error(
                                 "[Miranum.JsonForms.Webview]",
                                 `(Webview: ${webviewPanel.title})`,
@@ -320,11 +317,11 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
 
         // CleanUp after Custom Editor was closed.
         webviewPanel.onDidDispose(() => {
-            JsonSchemaBuilderProvider.counter--;
+            JsonFormsBuilder.counter--;
             vscode.commands.executeCommand(
                 "setContext",
-                `${JsonSchemaBuilderProvider.VIEWTYPE}.openCustomEditors`,
-                JsonSchemaBuilderProvider.counter
+                `${JsonFormsBuilder.VIEWTYPE}.openCustomEditors`,
+                JsonFormsBuilder.counter
             );
 
             this.textEditor.close(this.controller.document.fileName);
@@ -341,11 +338,11 @@ export class JsonSchemaBuilderProvider implements vscode.CustomTextEditorProvide
     private async init(document: vscode.TextDocument) {
         // Necessary set up for toggle command
         // only enable the command if a custom editor is open
-        JsonSchemaBuilderProvider.counter++;
+        JsonFormsBuilder.counter++;
         vscode.commands.executeCommand(
             "setContext",
-            `${JsonSchemaBuilderProvider.VIEWTYPE}.openCustomEditors`,
-            JsonSchemaBuilderProvider.counter
+            `${JsonFormsBuilder.VIEWTYPE}.openCustomEditors`,
+            JsonFormsBuilder.counter
         );
 
         // set the document
