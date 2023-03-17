@@ -1,3 +1,3 @@
 export * from "./BuildInPreview";
 export * from "./TextEditorComponent";
-export * from "./Logger"
+export * from "./Logger";

@@ -1,10 +1,9 @@
 import { isArray, mergeWith, reverse, uniqBy } from "lodash";
-import {WebviewApi} from "vscode-webview";
-import {FormBuilderData} from "../../../utils";
-import {VscMessage, VscState} from "../../../shared/types";
+import { WebviewApi } from "vscode-webview";
+import { FormBuilderData } from "../../../utils";
+import { VscMessage, VscState } from "../../../shared/types";
 
 export class StateController {
-
     private vscode: WebviewApi<VscState<FormBuilderData>>;
 
     constructor() {

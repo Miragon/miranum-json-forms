@@ -3,9 +3,9 @@
  * @module Extension
  */
 
-import * as vscode from 'vscode';
-import {JsonSchemaBuilderProvider} from './JsonSchemaBuilderProvider';
-import {Logger} from "./components";
+import * as vscode from "vscode";
+import { JsonSchemaBuilderProvider } from "./JsonSchemaBuilderProvider";
+import { Logger } from "./components";
 
 /**
  * Function called by vscode when the user opens a .form-file and no JsonSchemaBuilderProvider is registered.
@@ -14,23 +14,24 @@ import {Logger} from "./components";
  */
 export function activate(context: vscode.ExtensionContext) {
     // To handle .form-files as .json-files we add or create a new config in the user settings (global).
-    const associations = vscode.workspace.getConfiguration('files').get<{ [k: string]: string }>('associations');
+    const associations = vscode.workspace.getConfiguration("files").get<{ [k: string]: string }>("associations");
     if (associations) {
-        if (!('*.jsonform' in associations)) {
+        if (!("*.jsonform" in associations)) {
             const newAssociation = associations;
-            newAssociation['*.jsonform'] = 'json';
-            vscode.workspace.getConfiguration('files').update('associations', newAssociation, true);
+            newAssociation["*.jsonform"] = "json";
+            vscode.workspace.getConfiguration("files").update("associations", newAssociation, true);
         }
     } else {
         // If the configuration is not set at all we create it.
-        vscode.workspace.getConfiguration('files').update('associations', {'*.jsonform': 'json'}, true);
+        vscode.workspace.getConfiguration("files").update("associations", { "*.jsonform": "json" }, true);
     }
 
     // Create custom text editor
-    context.subscriptions.push(Logger.get("Miranum: JsonForms"))
-    context.subscriptions.push(vscode.window.registerCustomEditorProvider(
-        JsonSchemaBuilderProvider.VIEWTYPE,
-        new JsonSchemaBuilderProvider(context),
-        { webviewOptions: { retainContextWhenHidden: true } }
-    ));
+    context.subscriptions.push(Logger.get("Miranum: JsonForms"));
+    context.subscriptions.push(
+        vscode.window.registerCustomEditorProvider(
+            JsonSchemaBuilderProvider.VIEWTYPE,
+            new JsonSchemaBuilderProvider(context)
+        )
+    );
 }

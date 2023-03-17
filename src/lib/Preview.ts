@@ -1,30 +1,29 @@
 import * as vscode from "vscode";
-import {Observer, UIComponent} from "./types";
-import {Disposable, Uri, Webview, WebviewPanel} from "vscode";
+import { Observer, UIComponent } from "./types";
+import { Disposable, Uri, Webview, WebviewPanel } from "vscode";
 
 export enum CloseCaller {
-    'explicit' = 'explicit',
-    'implicit' = 'implicit',
-    'undefined' = ''
+    "explicit" = "explicit",
+    "implicit" = "implicit",
+    "undefined" = "",
 }
 
 export enum ViewState {
-    'open' = 'open',
-    'closed' = 'closed'
+    "open" = "open",
+    "closed" = "closed",
 }
 
 interface WebviewObject {
-    webviewPanel: WebviewPanel,
-    disposables: Disposable[]
+    webviewPanel: WebviewPanel;
+    disposables: Disposable[];
 }
 
 export interface WebviewOptions {
-    title: string,
-    icon: Uri,
+    title: string;
+    icon: Uri;
 }
 
 export abstract class Preview<T> implements Observer, UIComponent<T> {
-
     public abstract readonly viewType: string;
     protected abstract readonly extensionUri: Uri;
     protected abstract webviewOptions: WebviewOptions;
@@ -36,8 +35,7 @@ export abstract class Preview<T> implements Observer, UIComponent<T> {
 
     public abstract update(value: any): void;
     protected abstract getHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string;
-    protected abstract setEventHandlers(webviewPanel: WebviewPanel, ...data: T[]): Disposable[]
-
+    protected abstract setEventHandlers(webviewPanel: WebviewPanel, ...data: T[]): Disposable[];
 
     public get isOpen(): boolean {
         return this._isOpen;
@@ -95,16 +93,12 @@ export abstract class Preview<T> implements Observer, UIComponent<T> {
             this._isOpen = true;
 
             // Setup webview
-            const webviewPanel = vscode.window.createWebviewPanel(
-                this.viewType,
-                this.webviewOptions.title,
-                {
-                    preserveFocus: true,
-                    viewColumn: vscode.ViewColumn.Beside
-                }
-            );
+            const webviewPanel = vscode.window.createWebviewPanel(this.viewType, this.webviewOptions.title, {
+                preserveFocus: true,
+                viewColumn: vscode.ViewColumn.Beside,
+            });
             webviewPanel.iconPath = this.webviewOptions.icon;
-            webviewPanel.webview.options = {enableScripts: true};
+            webviewPanel.webview.options = { enableScripts: true };
             webviewPanel.webview.html = this.getHtml(webviewPanel.webview, this.extensionUri);
             const disposables = this.setEventHandlers(webviewPanel, ...data);
 
@@ -118,9 +112,8 @@ export abstract class Preview<T> implements Observer, UIComponent<T> {
             // so our active preview window is always on index 0
             this.webviews.unshift({
                 webviewPanel,
-                disposables
-            })
-
+                disposables,
+            });
         } catch (error) {
             throw error;
         }
@@ -171,4 +164,3 @@ export abstract class Preview<T> implements Observer, UIComponent<T> {
         }
     }
 }
-

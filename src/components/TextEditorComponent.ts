@@ -4,13 +4,12 @@
  * @module TextEditorComponent
  */
 
-import {TextEditorShowOption, TextEditorWrapper} from "../lib";
+import { TextEditorShowOption, TextEditorWrapper } from "../lib";
 import * as vscode from "vscode";
-import {ConfigurationChangeEvent, ExtensionContext} from "vscode";
-import {Logger} from "./Logger";
+import { ConfigurationChangeEvent, ExtensionContext } from "vscode";
+import { Logger } from "./Logger";
 
 export class TextEditorComponent extends TextEditorWrapper {
-
     public readonly viewType = "jsonforms-textEditor";
     private static instance: TextEditorComponent;
     /** The default option how the text editor will be displayed. */
@@ -36,13 +35,15 @@ export class TextEditorComponent extends TextEditorWrapper {
      * @param context
      */
     public setShowOption(context: ExtensionContext) {
-        const config = vscode.workspace.getConfiguration('jsonSchemaBuilder').get<string>('toggleTextEditor', 'Group');
+        const config = vscode.workspace
+            .getConfiguration("jsonSchemaBuilder")
+            .get<string>("toggleTextEditor", "Group");
         switch (true) {
-            case config === 'Group': {
+            case config === "Group": {
                 this.showOption = TextEditorShowOption.Group;
                 break;
             }
-            case config === 'Tab': {
+            case config === "Tab": {
                 this.showOption = TextEditorShowOption.Tab;
                 break;
             }
@@ -50,14 +51,16 @@ export class TextEditorComponent extends TextEditorWrapper {
 
         // Event when user change the config
         const changeConfig = vscode.workspace.onDidChangeConfiguration((event: ConfigurationChangeEvent) => {
-            if (event.affectsConfiguration('jsonSchemaBuilder.toggleTextEditor')) {
-                const config = vscode.workspace.getConfiguration('jsonSchemaBuilder').get<string>('toggleTextEditor', 'Group');
+            if (event.affectsConfiguration("jsonSchemaBuilder.toggleTextEditor")) {
+                const config = vscode.workspace
+                    .getConfiguration("jsonSchemaBuilder")
+                    .get<string>("toggleTextEditor", "Group");
                 switch (true) {
-                    case config === 'Group': {
+                    case config === "Group": {
                         this.showOption = TextEditorShowOption.Group;
                         break;
                     }
-                    case config === 'Tab': {
+                    case config === "Tab": {
                         this.showOption = TextEditorShowOption.Tab;
                         break;
                     }

@@ -1,0 +1,10 @@
+# Add files here to ignore them from prettier formatting
+
+/.idea
+/.github
+/dist
+/node_modules
+
+package-lock.json
+CODE_OF_CONDUCT.md
+README.md

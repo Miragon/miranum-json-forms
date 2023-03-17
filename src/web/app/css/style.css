@@ -11,7 +11,7 @@
     :root {
         --base-100: #e5e7eb;
         --base-200: #9ca3af;
-        --base-300: #454545FF;
+        --base-300: #454545ff;
 
         --error: #911212;
 
@@ -33,7 +33,7 @@
         --dropArea-dots: var(--base-200);
         --dropArea-dragBorder: var(--base-300);
 
-        --buttonRounded-hover: rgba(200, 200, 200, .5);
+        --buttonRounded-hover: rgba(200, 200, 200, 0.5);
 
         --tool-categorization-tab-hover: rgb(255, 255, 255, 0.3);
         --tool-reference-ref: var(--base-100);
@@ -52,13 +52,13 @@
         --tool-accent: var(--vscode-inputValidation-infoBackground);
         --tool-error: var(--vscode-inputOption-errorBackground);
         --toolItem-icon: var(--vscode-editor-foreground);
-        --toolItem-border:rgb(100,100,100,0.6);
+        --toolItem-border: rgb(100, 100, 100, 0.6);
         --toolBar: var(--base-100);
         --toolBar-bg: var(--base-300);
         --toolBar-scrollbar: var(--base-300);
         --toolBar-tab: var(--base-100);
         --toolBar-tab-hover: var(--base-200);
-        --modal:var(--base-100);
+        --modal: var(--base-100);
 
         --dropArea: var(--base-200);
         --dropArea-dots: var(--base-100);
@@ -66,9 +66,9 @@
 
         --buttonRounded-hover: var(--vscode-button-hoverBackground);
 
-        --tool-categorization-tab-hover:rgb(255,255,255,0.2);
-        --tool-control-input: rgb(255,255,255,0.3);
-        --tool-control-input-border: rgb(0,0,0,0.5);
+        --tool-categorization-tab-hover: rgb(255, 255, 255, 0.2);
+        --tool-control-input: rgb(255, 255, 255, 0.3);
+        --tool-control-input-border: rgb(0, 0, 0, 0.5);
     }
 
     .vscode .card {
@@ -107,16 +107,13 @@
     }
 
     h1 {
-        @apply
-        text-xl sm:text-2xl
+        @apply text-xl sm:text-2xl;
     }
 
     h2 {
-        @apply
-        text-lg sm:text-xl
+        @apply text-lg sm:text-xl;
     }
 }
 
 @layer components {
-
 }
