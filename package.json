@@ -7,6 +7,10 @@
     "publisher": "miragon-gmbh",
     "preview": true,
     "homepage": "https://www.miranum.io/",
+    "galleryBanner": {
+        "color": "#F0F8FF",
+        "theme": "light"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/FlowSquad/miranum-json-forms.git"
@@ -17,16 +21,18 @@
     "engines": {
         "vscode": "^1.76.0"
     },
-    "icon": "images/komet.png",
+    "icon": "images/miranum_logo.png",
+    "extensionPack": [
+        "miragon-gmbh.miranum-console",
+        "miragon-gmbh.miranum-json-forms",
+        "miragon-gmbh.miranum-vs-code-forms",
+        "miragon-gmbh.vs-code-bpmn-modeler"
+    ],
     "categories": [
-        "Other",
-        "Visualization"
+        "Other", "Visualization"
     ],
     "keywords": [
-        "JSON",
-        "JSON Forms",
-        "JSON Schema",
-        "Formbuilder"
+        "JSON", "JSON Forms", "JSON Schema", "Formbuilder"
     ],
     "activationEvents": [
         "onCustomEditor:jsonforms-builder",
