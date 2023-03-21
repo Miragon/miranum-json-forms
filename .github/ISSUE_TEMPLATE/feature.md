@@ -2,7 +2,7 @@
 name: Feature
 about: Create a Feature for Miranum Json Forms
 title: '[Feature] - <your-name-here>'
-labels: 'connect'
+labels: 'ide'
 
 ---
 
