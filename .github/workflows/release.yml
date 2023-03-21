@@ -27,6 +27,7 @@ jobs:
         with:
           name: miranum-json-forms
           path: |
+            src/
             dist/
             images/
             resources/
