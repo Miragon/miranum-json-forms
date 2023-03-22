@@ -69,6 +69,10 @@ code .
 Open `Extension Host` with `F5` and open the example folder.
 
 ### Development
+```shell
+npm run esbuild-watch
+```
+
 The `web` folder contains the necessary files for building the webapp we use for the webview.  
 So it is possible to develop the webview detached from the extension.  
 For bundling the webview we use `vite`.  

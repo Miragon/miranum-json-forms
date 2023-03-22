@@ -8,11 +8,8 @@ export enum TextEditorShowOption {
 }
 
 export abstract class TextEditorWrapper implements Observer, UIComponent<TextDocument> {
-    protected abstract showOption: TextEditorShowOption;
     private _textEditor?: TextEditor;
     private _isOpen = false;
-
-    public abstract setShowOption(context: ExtensionContext): void;
 
     public get isOpen(): boolean {
         return this._isOpen;
@@ -108,15 +105,8 @@ export abstract class TextEditorWrapper implements Observer, UIComponent<TextDoc
         }
     }
 
-    private getShowOptions(): vscode.TextDocumentShowOptions {
-        switch (this.showOption) {
-            case "Group": {
-                return {
-                    preserveFocus: false,
-                    preview: true,
-                    viewColumn: vscode.ViewColumn.Beside,
-                };
-            }
+    private getShowOptions(showOption = "Group"): vscode.TextDocumentShowOptions {
+        switch (showOption) {
             case "Tab": {
                 return {
                     preserveFocus: false,
@@ -125,7 +115,12 @@ export abstract class TextEditorWrapper implements Observer, UIComponent<TextDoc
                 };
             }
             default: {
-                return {};
+                // Opens text editor in a new tab-group
+                return {
+                    preserveFocus: false,
+                    preview: true,
+                    viewColumn: vscode.ViewColumn.Beside,
+                };
             }
         }
     }

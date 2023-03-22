@@ -29,45 +29,4 @@ export class TextEditorComponent extends TextEditorWrapper {
         }
         return this.instance;
     }
-
-    /**
-     * Sets the {@link showOption} according to the settings and register an event if the settings changes.
-     * @param context
-     */
-    public setShowOption(context: ExtensionContext) {
-        const config = vscode.workspace
-            .getConfiguration("jsonSchemaBuilder")
-            .get<string>("toggleTextEditor", "Group");
-        switch (true) {
-            case config === "Group": {
-                this.showOption = TextEditorShowOption.Group;
-                break;
-            }
-            case config === "Tab": {
-                this.showOption = TextEditorShowOption.Tab;
-                break;
-            }
-        }
-
-        // Event when user change the config
-        const changeConfig = vscode.workspace.onDidChangeConfiguration((event: ConfigurationChangeEvent) => {
-            if (event.affectsConfiguration("jsonSchemaBuilder.toggleTextEditor")) {
-                const config = vscode.workspace
-                    .getConfiguration("jsonSchemaBuilder")
-                    .get<string>("toggleTextEditor", "Group");
-                switch (true) {
-                    case config === "Group": {
-                        this.showOption = TextEditorShowOption.Group;
-                        break;
-                    }
-                    case config === "Tab": {
-                        this.showOption = TextEditorShowOption.Tab;
-                        break;
-                    }
-                }
-            }
-        });
-
-        context.subscriptions.push(changeConfig);
-    }
 }

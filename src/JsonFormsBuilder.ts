@@ -45,7 +45,6 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
 
         // initialize components
         this.textEditor = TextEditorComponent.getInstance();
-        this.textEditor.setShowOption(context);
         this.preview = new BuildInPreview(this.context.extensionUri);
 
         // initialize controller and subscribe the components to it
