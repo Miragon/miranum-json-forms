@@ -2,16 +2,6 @@
     <div class="vscode container mx-auto flex max-w-screen-lg flex-col gap-4 p-4">
         <div v-if="mode === 'jsonforms-builder'">
             <vscode-checkbox
-                :checked="disableFormbuilder"
-                @change="
-                    (event) => {
-                        disableFormbuilder = event.target.checked;
-                    }
-                "
-            >
-                Disable Formbuilder </vscode-checkbox
-            ><br />
-            <vscode-checkbox
                 :checked="schemaReadOnly"
                 @change="
                     (event) => {
@@ -29,12 +19,10 @@
             :jsonFormsRenderers="jsonFormsRenderers"
             :schemaReadOnly="schemaReadOnly"
             :tools="tools"
-            v-if="!disableFormbuilder"
             v-show="mode === 'jsonforms-builder'"
             @schemaUpdated="sendChangesToExtension"
         />
         <FormBuilderDetails
-            :key="disableFormbuilder ? 1 : 0"
             :jsonForms="jsonForms"
             v-if="mode === 'jsonforms-renderer'"
         />
@@ -69,7 +57,6 @@ const tools = [...defaultTools];
 const jsonFormsRenderers = Object.freeze([...vanillaRenderers, ...boplusVueVanillaRenderers]);
 
 const schemaReadOnly = ref(false);
-const disableFormbuilder = ref(false);
 const jsonForms = ref<FormBuilderData>();
 const mode = ref(globalViewType);
 const key = ref(0);
