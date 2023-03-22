@@ -9,10 +9,14 @@
             "name": "Run Extension",
             "type": "extensionHost",
             "request": "launch",
-            "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceFolder}"],
-            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-            "preLaunchTask": "${defaultBuildTask}",
-            "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
+            "args": [
+                "--disable-extensions",
+                "--extensionDevelopmentPath=${workspaceFolder}"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
+            "preLaunchTask": "${defaultBuildTask}"
         },
         {
             "name": "Extension Tests",
@@ -22,7 +26,9 @@
                 "--extensionDevelopmentPath=${workspaceFolder}",
                 "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index"
             ],
-            "outFiles": ["${workspaceFolder}/dist/test/**/*.js"],
+            "outFiles": [
+                "${workspaceFolder}/dist/test/**/*.js"
+            ],
             "preLaunchTask": "${defaultBuildTask}"
         }
     ]

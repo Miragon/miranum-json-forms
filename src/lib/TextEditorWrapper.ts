@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { ExtensionContext, TextDocument, TextEditor } from "vscode";
+import { TextDocument, TextEditor } from "vscode";
 import { Observer, UIComponent } from "./types";
 
 export enum TextEditorShowOption {

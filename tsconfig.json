@@ -7,17 +7,14 @@
         "sourceMap": true,
         "rootDir": ".",
         "strict": true,
-        /* enable all strict type-checking options */ "types": ["node"],
+        /* enable all strict type-checking options */
+        "types": ["node"],
         "skipLibCheck": true,
         /* Additional Checks */
         // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
         // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
         // "noUnusedParameters": true,  /* Report errors on unused parameters. */
-        "allowSyntheticDefaultImports": true
     },
-    "include": [
-        "src"
-        //"src/lib/types.ts"
-    ],
+    "include": ["src"],
     "exclude": ["src/web"]
 }
