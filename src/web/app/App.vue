@@ -2,16 +2,6 @@
     <div class="vscode container mx-auto flex max-w-screen-lg flex-col gap-4 p-4">
         <div v-if="mode === 'jsonforms-builder'">
             <vscode-checkbox
-                :checked="disableFormbuilder"
-                @change="
-                    (event) => {
-                        disableFormbuilder = event.target.checked;
-                    }
-                "
-            >
-                Disable Formbuilder </vscode-checkbox
-            ><br />
-            <vscode-checkbox
                 :checked="schemaReadOnly"
                 @change="
                     (event) => {
@@ -19,8 +9,10 @@
                     }
                 "
             >
-                Schema ReadOnly </vscode-checkbox
-            ><br />
+                Schema ReadOnly
+            </vscode-checkbox
+            >
+            <br />
         </div>
 
         <FormBuilder
@@ -29,12 +21,10 @@
             :jsonFormsRenderers="jsonFormsRenderers"
             :schemaReadOnly="schemaReadOnly"
             :tools="tools"
-            v-if="!disableFormbuilder"
             v-show="mode === 'jsonforms-builder'"
             @schemaUpdated="sendChangesToExtension"
         />
         <FormBuilderDetails
-            :key="disableFormbuilder ? 1 : 0"
             :jsonForms="jsonForms"
             v-if="mode === 'jsonforms-renderer'"
         />
@@ -55,7 +45,7 @@ import {
     initialize,
     initialized,
     instanceOfFormBuilderData,
-    StateController,
+    StateController
 } from "@/composables";
 import { FormBuilderData } from "../../utils";
 import { MessageType, VscMessage } from "../../shared/types";
@@ -69,7 +59,6 @@ const tools = [...defaultTools];
 const jsonFormsRenderers = Object.freeze([...vanillaRenderers, ...boplusVueVanillaRenderers]);
 
 const schemaReadOnly = ref(false);
-const disableFormbuilder = ref(false);
 const jsonForms = ref<FormBuilderData>();
 const mode = ref(globalViewType);
 const key = ref(0);
@@ -77,11 +66,11 @@ const key = ref(0);
 function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
     jsonForms.value = {
         schema: schema,
-        uischema: uischema,
+        uischema: uischema
     };
     stateController.updateState({
         mode: globalViewType,
-        data: { schema, uischema },
+        data: { schema, uischema }
     });
 
     // todo: Is there a better way to reload the component?
@@ -89,6 +78,7 @@ function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
 }
 
 const getDataFromExtension = debounce(receiveMessage, 50);
+
 function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): void {
     try {
         isUpdateFromExtension = true;
@@ -136,6 +126,7 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
 }
 
 const sendChangesToExtension = debounce(updateFile, 100);
+
 function updateFile(data: FormBuilderData) {
     if (isUpdateFromExtension) {
         isUpdateFromExtension = false;
@@ -143,7 +134,7 @@ function updateFile(data: FormBuilderData) {
     }
     stateController.updateState({
         mode: globalViewType,
-        data,
+        data
     });
     postMessage(MessageType.updateFromWebview, data);
 }
@@ -153,14 +144,14 @@ function postMessage(type: MessageType, data?: FormBuilderData, message?: string
         case MessageType.updateFromWebview: {
             stateController.postMessage({
                 type: `${globalViewType}.${type}`,
-                data: JSON.parse(JSON.stringify(data)),
+                data: JSON.parse(JSON.stringify(data))
             });
             break;
         }
         default: {
             stateController.postMessage({
                 type: `${globalViewType}.${type}`,
-                message,
+                message
             });
             break;
         }
@@ -168,7 +159,7 @@ function postMessage(type: MessageType, data?: FormBuilderData, message?: string
 }
 
 // @ts-ignore
-window.confirm = async function (message: string | undefined) {
+window.confirm = async function(message: string | undefined) {
     const msg = message ? message : "";
     postMessage(MessageType.confirmation, undefined, msg);
     return await confirmed();

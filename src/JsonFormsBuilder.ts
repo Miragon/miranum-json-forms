@@ -45,7 +45,6 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
 
         // initialize components
         this.textEditor = TextEditorComponent.getInstance();
-        this.textEditor.setShowOption(context);
         this.preview = new BuildInPreview(this.context.extensionUri);
 
         // initialize controller and subscribe the components to it
@@ -286,16 +285,9 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                             if (!this.preview.isOpen && this.preview.lastViewState === ViewState.open) {
                                 this.preview.open(this.controller);
                             }
-
                             /* falls through */
                         }
                         case wp.webviewPanel.visible: {
-                            // If changes has been made while the webview was not visible no messages could have been sent to the
-                            // webview. So we have to update the webview if it gets its focus back.
-                            if (isBuffer) {
-                                postMessage(MessageType.updateFromExtension);
-                                isBuffer = false;
-                            }
                             break;
                         }
                         /* ------- Panel is NOT active/visible ------- */

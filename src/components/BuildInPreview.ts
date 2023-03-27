@@ -31,7 +31,8 @@ export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
             if (await this.webview.postMessage(message)) {
                 this.isBuffer = false;
             } else {
-                throw Error(`Couldn't update preview (${this.title}).`);
+                this.isBuffer = true;
+                throw Error(`Couldn't update preview. (ViewState: ${this.visible})`);
             }
         } catch (error) {
             this.isBuffer = true;
@@ -55,30 +56,35 @@ export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
     ): Disposable[] {
         const disposables: Disposable[] = [];
 
-        vscode.workspace.onDidChangeTextDocument((event) => {
+        vscode.workspace.onDidChangeTextDocument(async (event) => {
             if (
                 event.document.uri.toString() === document.document.uri.toString() &&
                 event.contentChanges.length !== 0
             ) {
-                this.update({
-                    type: `${this.viewType}.${MessageType.updateFromExtension}`,
-                    data: document.content,
-                });
+                try {
+                    await this.update({
+                        type: `${this.viewType}.${MessageType.updateFromExtension}`,
+                        data: document.content,
+                    });
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : `${error}`;
+                    Logger.error("[Miranum.JsonForms.Preview]", `(Webview: ${webviewPanel.title})`, message);
+                }
             }
         });
 
-        webviewPanel.webview.onDidReceiveMessage((message: VscMessage<FormBuilderData>) => {
+        webviewPanel.webview.onDidReceiveMessage(async (message: VscMessage<FormBuilderData>) => {
             try {
                 switch (message.type) {
                     case `${this.viewType}.${MessageType.initialize}`: {
-                        this.update({
+                        await this.update({
                             type: `${this.viewType}.${MessageType.initialize}`,
                             data: document.content,
                         });
                         break;
                     }
                     case `${this.viewType}.${MessageType.restore}`: {
-                        this.update({
+                        await this.update({
                             type: `${this.viewType}.${MessageType.restore}`,
                             data: this.isBuffer ? document.content : undefined,
                         });
@@ -90,23 +96,6 @@ export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
                 Logger.error("[Miranum.JsonForms.Preview]", `(Webview: ${webviewPanel.title})`, message);
             }
         });
-
-        webviewPanel.onDidChangeViewState(
-            (event) => {
-                switch (true) {
-                    case event.webviewPanel?.visible: {
-                        if (this.isBuffer) {
-                            this.update({
-                                type: `${this.viewType}.${MessageType.restore}`,
-                                data: document.content,
-                            });
-                        }
-                    }
-                }
-            },
-            null,
-            disposables
-        );
 
         webviewPanel.onDidDispose(
             () => {

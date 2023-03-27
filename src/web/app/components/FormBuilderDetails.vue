@@ -1,18 +1,6 @@
 <template>
     <div class="formBuilderDetails">
         <details open>
-            <summary class="cursor-pointer">JSON</summary>
-            <div class="json p-4">
-                <SchemaCode v-model:schema="jsonFormsSchema" v-model:uischema="jsonFormsUiSchema" />
-                <!--
-        :TODO emit event to send updated schema
-            @update:schema="updateEditor()"
-            @update:uischema="updateEditor()"
-           --->
-            </div>
-        </details>
-
-        <details open>
             <summary class="cursor-pointer">Preview</summary>
             <ResizeArea>
                 <div class="card p-4" style="min-height: 106px">
@@ -62,7 +50,6 @@ import { onMounted } from "vue";
 import { JsonForms } from "@jsonforms/vue";
 import { createAjv } from "@jsonforms/core";
 import { createI18nTranslate, useJsonforms } from "@backoffice-plus/formbuilder";
-import SchemaCode from "./SchemaCode.vue";
 import ResizeArea from "./ResizeArea.vue";
 import { vanillaRenderers } from "@jsonforms/vue-vanilla";
 import { boplusVueVanillaRenderers } from "@backoffice-plus/formbuilder";

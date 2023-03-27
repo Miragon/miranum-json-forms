@@ -21,7 +21,7 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
     private _document?: TextDocument;
 
     public constructor() {
-        Logger.info("[Miranum.JsonForms.DocumentContr] DocumentController was created.");
+        Logger.info("[Miranum.JsonForms.DocumentController] DocumentController was created.");
     }
 
     /**
@@ -30,7 +30,7 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
      */
     public subscribe(...observers: Observer[]): void {
         this.observers = this.observers.concat(observers);
-        Logger.info("[Miranum.JsonForms.DocumentContr]", `${observers.length} Observer(s) subscribed.`);
+        Logger.info("[Miranum.JsonForms.DocumentController]", `${observers.length} Observer(s) subscribed.`);
     }
 
     public unsubscribe(...observers: Observer[]): void {
@@ -48,7 +48,7 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
                 this.document.save();
             }
         }
-        Logger.info("[Miranum.JsonForms.DocumentContr]", "Initial document was set.");
+        Logger.info("[Miranum.JsonForms.DocumentController]", "Initial document was set.");
     }
 
     /**
@@ -78,20 +78,20 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
         }
     }
 
-    public notify() {
+    public async notify() {
         for (const observer of this.observers) {
             try {
                 if (observer instanceof BuildInPreview) {
-                    observer.update({
+                    await observer.update({
                         type: `${observer.viewType}.${MessageType.updateFromExtension}`,
                         data: this.content,
                     });
                 } else if (observer instanceof TextEditorComponent) {
-                    observer.update(this.document);
+                    await observer.update(this.document);
                 }
             } catch (error) {
                 const message = error instanceof Error ? error.message : "Couldn't update webview.";
-                Logger.error("[Miranum.JsonForms.DocumentContr]", message);
+                Logger.error("[Miranum.JsonForms.DocumentController]", message);
             }
         }
     }
