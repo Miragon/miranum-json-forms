@@ -227,17 +227,22 @@ fieldset.styleA.group .group-item {
 }
 
 .styleA .tabs {
+    padding: 4px;
+
     @apply vsc-tab-border my-2
-
     flex
+    rounded-lg
+    vsc-input-bg
+}
 
-    justify-between border-b;
+.styleA .tabs div {
+    margin-right: 5px;
 }
 
 .styleA .tabs button {
     min-width: 100px;
     @apply vsc-tab-fg vsc-tab-bg
-    vsc-tab-border rounded-t-lg border-b
+    vsc-tab-border rounded-lg border-solid border-2
 
     border-transparent
 
