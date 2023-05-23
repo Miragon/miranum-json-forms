@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Update dependencies (#58)
 
+### Fixed
+
+* Correction of tabs placement in preview (#59)
+
 
 
 [unreleased]: https://github.com/Miragon/miranum-json-forms/compare/release/v0.1.2...HEAD
