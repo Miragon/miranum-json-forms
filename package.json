@@ -2,7 +2,7 @@
     "name": "miranum-json-forms",
     "displayName": "Miranum JSON Forms",
     "description": "Create and edit forms with an modern easy to use editor.",
-    "license": "Apache License 2.0",
+    "license": "SEE LICENSE IN LICENSE.txt",
     "version": "0.1.2",
     "publisher": "miragon-gmbh",
     "preview": true,
@@ -11,12 +11,24 @@
         "color": "#F0F8FF",
         "theme": "light"
     },
+    "badges": [
+        {
+            "url": "https://img.shields.io/badge/Follow-@miragon__io-1DA1F2?style=social&logo=twitter&logoColor=1DA1F2",
+            "href": "https://twitter.com/miragon_io",
+            "description": "Our Twitter profile."
+        },
+        {
+            "url": "https://img.shields.io/badge/Follow-miragon-blue?style=social&logo=linkedin&logoColor=blue&url=https://www.linkedin.com/company/miragon-io",
+            "href": "https://www.linkedin.com/company/miragon-io",
+            "description": "Our LinkedIn profile."
+        }
+    ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/FlowSquad/miranum-json-forms.git"
+        "url": "https://github.com/Miragon/miranum-json-forms.git"
     },
     "bugs": {
-        "url": "https://github.com/FlowSquad/miranum-json-forms/issues"
+        "url": "https://github.com/Miragon/miranum-json-forms/issues"
     },
     "engines": {
         "vscode": "^1.76.0"
@@ -132,26 +144,26 @@
         "@jsonforms/vue": "^3.0.0",
         "@jsonforms/vue-vanilla": "^3.0.0",
         "@vscode/webview-ui-toolkit": "^1.2.2",
-        "@vueuse/core": "^9.13.0",
-        "core-js": "^3.29.1",
+        "@vueuse/core": "^10.1.2",
+        "core-js": "^3.30.2",
         "lodash": "^4.17.21",
-        "tailwindcss": "^3.2.4",
-        "vue": "^3.2.13",
+        "tailwindcss": "^3.3.2",
+        "vue": "^3.3.4",
         "vue-class-component": "^8.0.0-0"
     },
     "devDependencies": {
-        "@types/lodash": "^4.14.191",
+        "@types/lodash": "^4.14.194",
         "@types/node": "^18.15.10",
         "@types/vscode": "^1.76.0",
         "@types/vscode-webview": "^1.57.1",
-        "@vitejs/plugin-vue": "^4.1.0",
-        "@vscode/test-electron": "^2.3.0",
+        "@vitejs/plugin-vue": "^4.2.3",
+        "@vscode/test-electron": "^2.3.2",
         "autoprefixer": "^10.4.14",
-        "esbuild": "^0.17.14",
-        "postcss": "^8.4.21",
-        "prettier": "2.8.7",
-        "prettier-plugin-tailwindcss": "^0.2.5",
-        "typescript": "^4.5.5",
-        "vite": "^4.1.1"
+        "esbuild": "^0.17.19",
+        "postcss": "^8.4.23",
+        "prettier": "2.8.8",
+        "prettier-plugin-tailwindcss": "^0.3.0",
+        "typescript": "^5.0.4",
+        "vite": "^4.3.8"
     }
 }

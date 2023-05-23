@@ -12,15 +12,21 @@
 <br />
 <div align="center">
     <a href="#">
-        <img src="https://raw.githubusercontent.com/FlowSquad/miranum-ide/main/images/miranum_logo.png" alt="Logo" height="120">
+        <img src="https://raw.githubusercontent.com/Miragon/miranum-ide/main/images/miranum_logo.png" alt="Logo" height="120">
     </a>
     <h3 ><a href="https://miranum.com/">Miranum IDE</a> <i>by <a href="https://miragon.io/">Miragon</a></i></h3>
+    <a href="https://twitter.com/miragon_io" target="_blank" rel="noreferrer noopener nofollow">
+        <img src="https://img.shields.io/badge/follow-@miragon__io-1DA1F2?logo=twitter&style=social" alt="Twitter Follow">
+    </a>
+    <a href="https://www.linkedin.com/company/miragon-io" target="_blank" rel="noreferrer noopener nofollow">
+        <img src="https://img.shields.io/badge/Follow-miragon-blue?style=social&logo=linkedin&logoColor=blue" alt="LinkedIn Follow">
+    </a>
     <p>
         <i>One IDE for everything!</i>
         <br />
-        <a href="https://github.com/FlowSquad/miranum-json-forms/issues">Report Bug</a>
+        <a href="https://github.com/Miragon/miranum-json-forms/issues">Report Bug</a>
         ·
-        <a href="https://github.com/FlowSquad/miranum-json-forms/pulls">Request Feature</a>
+        <a href="https://github.com/Miragon/miranum-json-forms/pulls">Request Feature</a>
     </p>
 </div>
 
@@ -62,16 +68,16 @@ Distributed under the [Apache License Version 2.0](LICENSE).
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/FlowSquad/miranum-json-forms.svg?style=for-the-badge
-[contributors-url]: https://github.com/FlowSquad/miranum-json-forms/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/FlowSquad/miranum-json-forms.svg?style=for-the-badge
-[forks-url]: https://github.com/FlowSquad/miranum-json-forms/network/members
-[stars-shield]: https://img.shields.io/github/stars/FlowSquad/miranum-json-forms.svg?style=for-the-badge
-[stars-url]: https://github.com/FlowSquad/miranum-json-forms/stargazers
-[issues-shield]: https://img.shields.io/github/issues/FlowSquad/miranum-json-forms.svg?style=for-the-badge
-[issues-url]: https://github.com/FlowSquad/miranum-json-forms/issues
-[license-shield]: https://img.shields.io/github/license/FlowSquad/miranum-json-forms.svg?style=for-the-badge
-[license-url]: https://github.com/FlowSquad/miranum-json-forms/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/Miragon/miranum-json-forms.svg?style=for-the-badge
+[contributors-url]: https://github.com/Miragon/miranum-json-forms/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Miragon/miranum-json-forms.svg?style=for-the-badge
+[forks-url]: https://github.com/Miragon/miranum-json-forms/network/members
+[stars-shield]: https://img.shields.io/github/stars/Miragon/miranum-json-forms.svg?style=for-the-badge
+[stars-url]: https://github.com/Miragon/miranum-json-forms/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Miragon/miranum-json-forms.svg?style=for-the-badge
+[issues-url]: https://github.com/Miragon/miranum-json-forms/issues
+[license-shield]: https://img.shields.io/github/license/Miragon/miranum-json-forms.svg?style=for-the-badge
+[license-url]: https://github.com/Miragon/miranum-json-forms/blob/main/LICENSE
 
 [version-shield]: https://img.shields.io/visual-studio-marketplace/v/miragon-gmbh.miranum-json-forms
 [version-url]: https://marketplace.visualstudio.com/items?itemName=miragon-gmbh.miranum-json-forms

@@ -15,7 +15,7 @@ import { Logger, BuildInPreview, TextEditorComponent } from "./components";
  * The [Custom Text Editor](https://code.visualstudio.com/api/extension-guides/custom-editors) uses a '.form'-File as its
  * data model and synchronize changes with the [webview](https://code.visualstudio.com/api/extension-guides/webview).
  * The webview is build with [Vue.js](https://vuejs.org/) and uses the
- * [DigiWF Form Builder](https://github.com/FlowSquad/digiwf-core/tree/dev/digiwf-apps/packages/components/digiwf-form-builder).
+ * [DigiWF Form Builder](https://github.com/Miragon/digiwf-core/tree/dev/digiwf-apps/packages/components/digiwf-form-builder).
  * The provider also register a [command](https://code.visualstudio.com/api/extension-guides/command) for toggling the
  * standard vscode text editor and a preview for rendering [Json Schema](https://json-schema.org/).
  */
