@@ -1,6 +1,6 @@
 # Getting started
 
-> **_NOTE:_** At some point in the future, this repository will be migrated to our [main repository](https://github.com/FlowSquad/miranum-ide).
+> **_NOTE:_** At some point in the future, this repository will be migrated to our [main repository](https://github.com/Miragon/miranum-ide).
  
 ### Built With
 
@@ -56,7 +56,7 @@ Don't forget to give the project a star! Thanks again!
 
 ### Quickstart
 ```shell
-git clone https://github.com/FlowSquad/miranum-json-forms.git
+git clone https://github.com/Miragon/miranum-json-forms.git
 cd miranum-json-forms
 ```
 ```shell
