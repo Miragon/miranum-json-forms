@@ -34,6 +34,7 @@ jobs:
             .vscodeignore
             LICENSE
             README.md
+            CHANGELOG.md
             package.json
 
   create-release:
