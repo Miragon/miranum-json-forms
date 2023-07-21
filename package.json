@@ -164,6 +164,6 @@
         "prettier": "2.8.8",
         "prettier-plugin-tailwindcss": "^0.3.0",
         "typescript": "^5.0.4",
-        "vite": "^4.3.8"
+        "vite": "^4.4.5"
     }
 }
