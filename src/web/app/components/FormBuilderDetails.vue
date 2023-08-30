@@ -1,96 +1,119 @@
+<script setup lang="ts">
+import { ref, toRaw, watch } from "vue";
+import { JsonForms } from "@jsonforms/vue";
+import { createAjv } from "@jsonforms/core";
+import { vanillaRenderers } from "@jsonforms/vue-vanilla";
+
+import { boplusVueVanillaRenderers, createI18nTranslate } from "@backoffice-plus/formbuilder";
+import ResizeArea from "./ResizeArea.vue";
+import { translationsErrors as localeCatalogue } from "../translations/de";
+import { FormBuilderData } from "../../../utils";
+
+interface Props {
+    jsonForm: FormBuilderData | undefined;
+}
+
+const props = defineProps<Props>();
+
+const jsonFormsSchema = ref(props.jsonForm?.schema);
+const jsonFormsUiSchema = ref(props.jsonForm?.uischema);
+const jsonFormsData = ref({});
+const jsonFormsUpdated = ref<{ data?: any; errors?: any }>({
+    data: undefined,
+    errors: undefined,
+});
+
+const jsonFormRenderesMore = Object.freeze([...vanillaRenderers, ...boplusVueVanillaRenderers]);
+
+watch(
+    () => props.jsonForm,
+    (value) => {
+        jsonFormsSchema.value = value?.schema;
+        jsonFormsUiSchema.value = value?.uischema;
+
+        const isArray = "array" === jsonFormsSchema.value?.type;
+
+        jsonFormsData.value = props.jsonForm ?? (isArray ? [] : {});
+    },
+);
+
+/**
+ * @see https://ajv.js.org/options.html#advanced-options
+ */
+const ajv = createAjv({
+    validateSchema: false, //ignore $schema
+    addUsedSchema: false, //ignore $id
+    //missingRefs : 'ignore',
+    //inlineRefs: false,
+}); //is needed because reactive :schema & :uischema will throw error
+
+function extractData(update: any) {
+    const props = ["schema", "uischema"];
+    const data: any = toRaw(update.data);
+    const errors: [any] = toRaw(update.errors);
+
+    // TODO: parallelize this
+    let newData: any = {};
+    for (const key in data) {
+        if (!props.includes(key)) {
+            newData[key] = data[key];
+        }
+    }
+
+    let newErrors = [];
+    for (const error of errors) {
+        newErrors.push({
+            message: error.message,
+            schemaPath: error.schemaPath,
+        });
+    }
+
+    jsonFormsUpdated.value.data = newData;
+    jsonFormsUpdated.value.errors = newErrors;
+}
+</script>
+
 <template>
-    <div class="formBuilderDetails">
-        <details open>
-            <summary class="cursor-pointer">Preview</summary>
+    <div class="formBuilderDetails flex flex-col-reverse gap-4">
+        <details v-if="false !== jsonFormsUiSchema" open>
+            <summary class="cursor-pointer">JsonForms Preview</summary>
             <ResizeArea>
-                <div class="card p-4" style="min-height: 106px">
-                    <JsonForms
-                        :class="'styleA'"
-                        :schema="jsonFormsSchema"
-                        :uischema="jsonFormsUiSchema"
-                        :data="jsonFormsData"
-                        :renderers="jsonFormRenderesMore"
-                        :ajv="ajv"
-                        :i18n="{ translate: createI18nTranslate(localeCatalogue) }"
-                        v-if="jsonFormsSchema"
-                        :key="newKey"
-                        @change="(r) => (jsonFormsUpdated = r)"
-                    />
+                <div class="card styleA p-4" style="min-height: 106px">
+                    <Suspense>
+                        <JsonForms
+                            :schema="jsonFormsSchema"
+                            :uischema="jsonFormsUiSchema"
+                            :data="jsonFormsData"
+                            :renderers="jsonFormRenderesMore"
+                            :ajv="ajv"
+                            :i18n="{ translate: createI18nTranslate(localeCatalogue) }"
+                            v-if="jsonFormsSchema && jsonFormsUiSchema"
+                            @change="(r) => extractData(r)"
+                        />
+                        <template #fallback> JsonForms Loading... </template>
+                    </Suspense>
                 </div>
             </ResizeArea>
 
-            <template v-if="jsonFormsUpdated?.errors?.length">
-                Errors
-                <textarea class="h-60 w-full rounded p-4 text-red-500" readonly disabled>{{
-                    jsonFormsUpdated?.errors
-                }}</textarea>
-            </template>
-
-            Data
-            <textarea class="h-60 w-full rounded p-4" readonly disabled>{{ jsonFormsUpdated?.data }}</textarea>
+            <details open class="pt-4">
+                <summary class="cursor-pointer">Data</summary>
+                <div class="styleA flex gap-4">
+                    <textarea class="h-60 p-4" readonly disabled>{{ jsonFormsUpdated.data }}</textarea>
+                    <textarea class="h-60 p-4 text-red-600" readonly disabled>{{
+                        jsonFormsUpdated.errors
+                    }}</textarea>
+                </div>
+            </details>
         </details>
     </div>
 </template>
 
 <style>
-.json,
-textarea {
-    background-color: var(--vscode-editor-background);
-}
-.json textarea {
-    background-color: var(--vscode-editor-background);
-    color: var(--vscode-progressBar-background);
-    font-size: var(--vscode-font-size);
+.outputField {
+    @apply h-60 w-full
+  rounded
+  border
+  border-gray-300/50 bg-transparent
+  p-4;
 }
 </style>
-
-<script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import { onMounted } from "vue";
-import { JsonForms } from "@jsonforms/vue";
-import { createAjv } from "@jsonforms/core";
-import { createI18nTranslate, useJsonforms } from "@backoffice-plus/formbuilder";
-import ResizeArea from "./ResizeArea.vue";
-import { vanillaRenderers } from "@jsonforms/vue-vanilla";
-import { boplusVueVanillaRenderers } from "@backoffice-plus/formbuilder";
-
-const localeCatalogue = {};
-
-const props = defineProps({
-    jsonForms: Object, //read from store
-});
-
-const { schema, uischema } = useJsonforms();
-const jsonFormsSchema = schema;
-const jsonFormsUiSchema = uischema;
-const jsonFormsData = ref({});
-const jsonFormsUpdated = ref({});
-
-const newKey = computed(() => JSON.stringify([schema.value, uischema.value]));
-
-const jsonFormRenderesMore = Object.freeze([...vanillaRenderers, ...boplusVueVanillaRenderers]);
-
-watch(
-    () => props.jsonForms,
-    () => {
-        jsonFormsSchema.value = props.jsonForms?.schema;
-        jsonFormsUiSchema.value = props.jsonForms?.uischema;
-        jsonFormsData.value = props.jsonForms?.data ?? {};
-    }
-);
-
-onMounted(() => {
-    // jsonFormsSchema.value = props.jsonForms?.schema;
-    // jsonFormsUiSchema.value = props.jsonForms?.uischema;
-    // jsonFormsData.value = props.jsonForms?.data ?? {};
-    // emitter.on('formBuilderSchemaUpdated', (jsonForms) => {
-    //   jsonFormsSchema.value = jsonForms?.schema;
-    //   jsonFormsUiSchema.value = jsonForms?.uischema;
-    // });
-});
-// onBeforeUnmount(() => {
-//   emitter.off('formBuilderSchemaUpdated');
-// })
-
-const ajv = createAjv(); //is needed because reactive :schema & :uischema will throw error
-</script>

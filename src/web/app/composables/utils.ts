@@ -1,21 +1,38 @@
 import { FormBuilderData } from "../../../utils";
 
-export let confirm: any = null;
-export function confirmed() {
-    return new Promise((resolve) => {
-        confirm = (response: boolean) => {
-            resolve(response);
-        };
-    });
-}
+// export let confirm: any = null;
+// export function confirmed() {
+//     return new Promise((resolve) => {
+//         confirm = (response: boolean) => {
+//             resolve(response);
+//         };
+//     });
+// }
 
-export let initialize: any = null;
-export function initialized() {
-    return new Promise((resolve) => {
-        initialize = (response: FormBuilderData | undefined) => {
+/**
+ * Create a way to resolve a Promise manually.
+ * @returns - {
+ *     wait - Returns the Promise to await
+ *     done - Resolves the Promise returned by wait
+ * }
+ */
+export function createResolver() {
+    let resolver: (r: FormBuilderData | boolean | undefined) => void;
+    let promise = new Promise<FormBuilderData | boolean | undefined>((resolve) => {
+        resolver = (response: FormBuilderData | boolean | undefined) => {
             resolve(response);
         };
     });
+
+    function wait() {
+        return promise;
+    }
+
+    function done(data: FormBuilderData | boolean | undefined) {
+        resolver(data);
+    }
+
+    return { wait, done };
 }
 
 export function instanceOfFormBuilderData(object: any): object is FormBuilderData {

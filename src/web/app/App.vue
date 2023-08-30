@@ -1,76 +1,58 @@
-<template>
-    <div class="vscode container mx-auto flex max-w-screen-lg flex-col gap-4 p-4">
-        <div v-if="mode === 'jsonforms-builder'">
-            <vscode-checkbox
-                :checked="schemaReadOnly"
-                @change="
-                    (event) => {
-                        schemaReadOnly = event.target.checked;
-                    }
-                "
-            >
-                Schema ReadOnly
-            </vscode-checkbox
-            >
-            <br />
-        </div>
-
-        <FormBuilder
-            :key="key + (schemaReadOnly ? 1 : 0)"
-            :jsonForms="jsonForms"
-            :jsonFormsRenderers="jsonFormsRenderers"
-            :schemaReadOnly="schemaReadOnly"
-            :tools="tools"
-            v-show="mode === 'jsonforms-builder'"
-            @schemaUpdated="sendChangesToExtension"
-        />
-        <FormBuilderDetails
-            :jsonForms="jsonForms"
-            v-if="mode === 'jsonforms-renderer'"
-        />
-    </div>
-</template>
-
 <script setup lang="ts">
+import AppFormBuilder from "@/components/AppFormBuilder.vue";
+import FormBuilderDetails from "@/components/FormBuilderDetails.vue";
+
+import { createResolver, instanceOfFormBuilderData, StateController } from "@/composables";
+import { VsCode } from "@/composables/types";
+import { MockedStateController } from "@/composables/MockedStateController";
+import { MessageType, VscMessage } from "../../shared/types";
 import { onBeforeMount, onUnmounted, ref } from "vue";
-import { boplusVueVanillaRenderers, defaultTools, FormBuilder } from "@backoffice-plus/formbuilder";
-import { JsonSchema, UISchemaElement } from "@jsonforms/core";
-import { vanillaRenderers } from "@jsonforms/vue-vanilla";
+import { FormBuilderData } from "../../utils";
+import { JsonSchema, Layout } from "@jsonforms/core";
 import { debounce } from "lodash";
 
-import FormBuilderDetails from "./components/FormBuilderDetails.vue";
-import {
-    confirm,
-    confirmed,
-    initialize,
-    initialized,
-    instanceOfFormBuilderData,
-    StateController
-} from "@/composables";
-import { FormBuilderData } from "../../utils";
-import { MessageType, VscMessage } from "../../shared/types";
-
+//
+// Globals
+//
 declare const globalViewType: string;
-const stateController = new StateController();
+declare const process: { env: { NODE_ENV: string } };
+
+const resolver = createResolver();
+
+let stateController: VsCode;
+if (process.env.NODE_ENV === "development") {
+    stateController = new MockedStateController();
+} else {
+    stateController = new StateController();
+
+    // @ts-ignore
+    window.confirm = async function (message: string | undefined) {
+        const msg = message ? message : "";
+        postMessage(MessageType.confirmation, undefined, msg);
+        return await resolver.wait();
+    };
+}
+
 let isUpdateFromExtension = false;
 
-const tools = [...defaultTools];
-
-const jsonFormsRenderers = Object.freeze([...vanillaRenderers, ...boplusVueVanillaRenderers]);
+const jsonForms = ref<FormBuilderData>();
+const jsonFormsPreview = ref<FormBuilderData>(); // only for development
 
 const schemaReadOnly = ref(false);
-const jsonForms = ref<FormBuilderData>();
 const mode = ref(globalViewType);
 const key = ref(0);
 
-function updateForm(schema?: JsonSchema, uischema?: UISchemaElement): void {
+//
+// Logic
+//
+function updateForm(schema?: JsonSchema, uischema?: Layout): void {
     jsonForms.value = {
         schema: schema,
-        uischema: uischema
+        uischema: uischema,
     };
     stateController.updateState({
         mode: globalViewType,
-        data: { schema, uischema }
+        data: { schema, uischema },
     });
 
     // todo: Is there a better way to reload the component?
@@ -87,34 +69,22 @@ function receiveMessage(message: MessageEvent<VscMessage<FormBuilderData>>): voi
         const data = message.data.data;
 
         switch (type) {
-            case `jsonforms-builder.${MessageType.initialize}`: {
-                initialize(data);
+            case `${globalViewType}.${MessageType.initialize}`: {
+                resolver.done(data);
                 break;
             }
-            case `jsonforms-builder.${MessageType.restore}`: {
-                initialize(data);
+            case `${globalViewType}.${MessageType.restore}`: {
+                resolver.done(data);
                 break;
             }
-            case `jsonforms-builder.${MessageType.confirmation}`: {
+            case `${globalViewType}.${MessageType.confirmation}`: {
                 isUpdateFromExtension = false;
-                confirm(message.data.confirm ?? false);
+                resolver.done(message.data.confirm ?? false);
                 break;
             }
-            case `jsonforms-builder.${MessageType.undo}`:
-            case `jsonforms-builder.${MessageType.redo}`:
-            case `jsonforms-builder.${MessageType.updateFromExtension}`: {
-                updateForm(data?.schema, data?.uischema);
-                break;
-            }
-            case `jsonforms-renderer.${MessageType.initialize}`: {
-                initialize(data);
-                break;
-            }
-            case `jsonforms-renderer.${MessageType.restore}`: {
-                initialize(data);
-                break;
-            }
-            case `jsonforms-renderer.${MessageType.updateFromExtension}`: {
+            case `${globalViewType}.${MessageType.undo}`:
+            case `${globalViewType}.${MessageType.redo}`:
+            case `${globalViewType}.${MessageType.msgFromExtension}`: {
                 updateForm(data?.schema, data?.uischema);
                 break;
             }
@@ -132,38 +102,39 @@ function updateFile(data: FormBuilderData) {
         isUpdateFromExtension = false;
         return;
     }
+
+    if (process.env.NODE_ENV === "development") {
+        jsonFormsPreview.value = {
+            schema: data.schema,
+            uischema: data.uischema,
+        };
+    }
+
     stateController.updateState({
         mode: globalViewType,
-        data
+        data: data,
     });
-    postMessage(MessageType.updateFromWebview, data);
+    postMessage(MessageType.msgFromWebview, data);
 }
 
 function postMessage(type: MessageType, data?: FormBuilderData, message?: string): void {
     switch (type) {
-        case MessageType.updateFromWebview: {
+        case MessageType.msgFromWebview: {
             stateController.postMessage({
                 type: `${globalViewType}.${type}`,
-                data: JSON.parse(JSON.stringify(data))
+                data,
             });
             break;
         }
         default: {
             stateController.postMessage({
                 type: `${globalViewType}.${type}`,
-                message
+                logger: message,
             });
             break;
         }
     }
 }
-
-// @ts-ignore
-window.confirm = async function(message: string | undefined) {
-    const msg = message ? message : "";
-    postMessage(MessageType.confirmation, undefined, msg);
-    return await confirmed();
-};
 
 onBeforeMount(async () => {
     window.addEventListener("message", getDataFromExtension);
@@ -175,7 +146,7 @@ onBeforeMount(async () => {
             mode.value = state.mode;
             let schema = state.data.schema;
             let uischema = state.data.uischema;
-            const newData = await initialized(); // await the response form the backend
+            const newData = await resolver.wait(); // await the response form the backend
             if (newData && instanceOfFormBuilderData(newData)) {
                 // we only get new data when the user made changes while the webview was destroyed
                 if (newData.schema) {
@@ -188,7 +159,7 @@ onBeforeMount(async () => {
             updateForm(schema, uischema);
         } else {
             postMessage(MessageType.initialize, undefined, "Webview was loaded successfully.");
-            const data = await initialized(); // await the response form the backend
+            const data = await resolver.wait(); // await the response form the backend
             if (data && instanceOfFormBuilderData(data)) {
                 updateForm(data.schema, data.uischema);
             }
@@ -206,14 +177,34 @@ onUnmounted(() => {
 });
 </script>
 
-<style>
-.card {
-    @apply rounded bg-white shadow;
-}
+<template>
+    <div class="vscode container mx-auto flex max-w-screen-lg flex-col gap-4 p-4">
+        <div v-if="mode === 'jsonforms-builder' || mode === 'mock'">
+            <vscode-checkbox
+                :checked="schemaReadOnly"
+                @change="
+                    (event: any) => {
+                        schemaReadOnly = event.target.checked;
+                    }
+                "
+            >
+                Schema ReadOnly
+            </vscode-checkbox>
+            <br />
+        </div>
 
-.formbuilder nav {
-    box-shadow: 0 8px 8px -8px rgb(30, 30, 30, 30%);
-    z-index: 9;
-    @apply sticky top-0 pt-2;
-}
-</style>
+        <AppFormBuilder
+            :json-form="jsonForms"
+            :schema-read-only="schemaReadOnly"
+            @update="sendChangesToExtension"
+            v-if="mode === 'jsonforms-builder' || mode"
+        />
+
+        <FormBuilderDetails
+            :json-form="jsonFormsPreview"
+            v-if="mode === 'jsonforms-renderer' || mode === 'mock'"
+        />
+    </div>
+</template>
+
+<style></style>

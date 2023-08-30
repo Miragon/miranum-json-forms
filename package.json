@@ -35,15 +35,14 @@
     },
     "icon": "images/miranum_logo.png",
     "categories": [
-        "Other", "Visualization"
+        "Other",
+        "Visualization"
     ],
     "keywords": [
-        "JSON", "JSON Forms", "JSON Schema", "Formbuilder"
-    ],
-    "activationEvents": [
-        "onCustomEditor:jsonforms-builder",
-        "onCommand:jsonforms-renderer.togglePreview",
-        "onCommand:jsonforms-builder.toggleTextEditor"
+        "JSON",
+        "JSON Forms",
+        "JSON Schema",
+        "Formbuilder"
     ],
     "main": "./dist/main.js",
     "contributes": {
@@ -131,39 +130,40 @@
     "scripts": {
         "publish": "vsce publish",
         "vscode:prepublish": "npm run build",
-        "build": "npm run esbuild-base -- --minify && npm run web",
-        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
-        "esbuild": "npm run esbuild-base -- --sourcemap",
-        "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
-        "web": "vite build --config src/web/vite.config.js",
-        "web-dev": "vite build --config src/web/vite.config.js --watch"
+        "build": "npm run esbuild -- --minify && npm run vite -- --minify esbuild",
+        "dev": "conc -c \"cyan,yellow\" \"npm run esbuild -- --sourcemap --watch\" \"npm run vite -- --sourcemap true --watch\"",
+        "esbuild": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
+        "vite": "vite build --config src/web/vite.config.js",
+        "vite:browser": "cd ./src/web && vite --port 8080"
     },
     "dependencies": {
-        "@backoffice-plus/formbuilder": "0.0.29",
-        "@jsonforms/core": "^3.0.0",
-        "@jsonforms/vue": "^3.0.0",
-        "@jsonforms/vue-vanilla": "^3.0.0",
+        "@backoffice-plus/formbuilder": "github:peterhnm/formbuilder",
+        "@jsonforms/core": "^3.1.0",
+        "@jsonforms/examples": "^3.1.0",
+        "@jsonforms/vue": "^3.1.0",
+        "@jsonforms/vue-vanilla": "^3.1.0",
         "@vscode/webview-ui-toolkit": "^1.2.2",
-        "@vueuse/core": "^10.1.2",
-        "core-js": "^3.30.2",
+        "@vueuse/core": "^10.4.1",
+        "core-js": "^3.32.1",
         "lodash": "^4.17.21",
-        "tailwindcss": "^3.3.2",
+        "tailwindcss": "^3.3.3",
         "vue": "^3.3.4",
         "vue-class-component": "^8.0.0-0"
     },
     "devDependencies": {
-        "@types/lodash": "^4.14.194",
-        "@types/node": "^18.15.10",
-        "@types/vscode": "^1.76.0",
-        "@types/vscode-webview": "^1.57.1",
-        "@vitejs/plugin-vue": "^4.2.3",
-        "@vscode/test-electron": "^2.3.2",
-        "autoprefixer": "^10.4.14",
-        "esbuild": "^0.17.19",
-        "postcss": "^8.4.23",
-        "prettier": "2.8.8",
-        "prettier-plugin-tailwindcss": "^0.3.0",
-        "typescript": "^5.0.4",
-        "vite": "^4.3.8"
+        "@types/lodash": "^4.14.197",
+        "@types/node": "^20.5.7",
+        "@types/vscode": "^1.81.0",
+        "@types/vscode-webview": "^1.57.2",
+        "@vitejs/plugin-vue": "^4.3.4",
+        "@vscode/test-electron": "^2.3.4",
+        "autoprefixer": "^10.4.15",
+        "concurrently": "^8.2.0",
+        "esbuild": "^0.19.2",
+        "postcss": "^8.4.28",
+        "prettier": "3.0.2",
+        "prettier-plugin-tailwindcss": "^0.5.3",
+        "typescript": "^5.2.2",
+        "vite": "4.3.9"
     }
 }

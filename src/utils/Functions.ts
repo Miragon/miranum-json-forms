@@ -21,7 +21,7 @@ export function getMinimum<T extends FormBuilderData>(): T {
                 elements: [],
             },
             data: {},
-        })
+        }),
     );
 }
 

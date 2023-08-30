@@ -59,7 +59,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                     this.closePreview = false;
                 }
                 this.textEditor.toggle(this.controller.document);
-            }
+            },
         );
         const togglePreview = vscode.commands.registerCommand(`${this.preview.viewType}.togglePreview`, () => {
             this.preview.toggle(this.controller);
@@ -85,7 +85,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
     public async resolveCustomTextEditor(
         document: vscode.TextDocument,
         webviewPanel: vscode.WebviewPanel,
-        token: vscode.CancellationToken
+        token: vscode.CancellationToken,
     ): Promise<void> {
         // Disable preview mode
         await vscode.commands.executeCommand("workbench.action.keepEditor");
@@ -101,7 +101,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
         webviewPanel.webview.html = getHtmlForWebview(
             webviewPanel.webview,
             this.context.extensionUri,
-            JsonFormsBuilder.VIEWTYPE
+            JsonFormsBuilder.VIEWTYPE,
         );
 
         // Send content from the extension to the webview
@@ -134,7 +134,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                     Logger.error(
                         "[Miranum.JsonForms]",
                         `(Webview: ${webviewPanel.title})`,
-                        `Could not post message (Viewtype: ${webviewPanel.visible})`
+                        `Could not post message (Viewtype: ${webviewPanel.visible})`,
                     );
                 }
             } catch (error) {
@@ -156,7 +156,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                             Logger.info(
                                 "[Miranum.JsonForms.Webview]",
                                 `(Webview: ${webviewPanel.title})`,
-                                event.message ?? ""
+                                event.logger ?? "",
                             );
                             postMessage(MessageType.initialize);
                             break;
@@ -165,12 +165,12 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                             Logger.info(
                                 "[Miranum.JsonForms.Webview]",
                                 `(Webview: ${webviewPanel.title})`,
-                                event.message ?? ""
+                                event.logger ?? "",
                             );
                             postMessage(MessageType.restore);
                             break;
                         }
-                        case `${JsonFormsBuilder.VIEWTYPE}.${MessageType.updateFromWebview}`: {
+                        case `${JsonFormsBuilder.VIEWTYPE}.${MessageType.msgFromWebview}`: {
                             isUpdateFromWebview = true;
                             if (event.data) {
                                 await this.controller.writeToDocument(event.data);
@@ -178,30 +178,28 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                             break;
                         }
                         case `${JsonFormsBuilder.VIEWTYPE}.confirmation`: {
-                            vscode.window
-                                .showInformationMessage(event.message ?? "Confirm", ...["Yes", "No"])
-                                .then(
-                                    (input) => {
-                                        const response = input === "Yes";
-                                        webviewPanel.webview.postMessage({
-                                            type: `${JsonFormsBuilder.VIEWTYPE}.${MessageType.confirmation}`,
-                                            confirm: response,
-                                        });
-                                    },
-                                    () => {
-                                        webviewPanel.webview.postMessage({
-                                            type: `${JsonFormsBuilder.VIEWTYPE}.${MessageType.confirmation}`,
-                                            confirm: false,
-                                        });
-                                    }
-                                );
+                            vscode.window.showInformationMessage(event.logger ?? "Confirm", ...["Yes", "No"]).then(
+                                (input) => {
+                                    const response = input === "Yes";
+                                    webviewPanel.webview.postMessage({
+                                        type: `${JsonFormsBuilder.VIEWTYPE}.${MessageType.confirmation}`,
+                                        confirm: response,
+                                    });
+                                },
+                                () => {
+                                    webviewPanel.webview.postMessage({
+                                        type: `${JsonFormsBuilder.VIEWTYPE}.${MessageType.confirmation}`,
+                                        confirm: false,
+                                    });
+                                },
+                            );
                             break;
                         }
                         case `${JsonFormsBuilder.VIEWTYPE}.${MessageType.info}`: {
                             Logger.info(
                                 "[Miranum.JsonForms.Webview]",
                                 `(Webview: ${webviewPanel.title})`,
-                                event.message ?? ""
+                                event.logger ?? "",
                             );
                             break;
                         }
@@ -209,7 +207,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                             Logger.error(
                                 "[Miranum.JsonForms.Webview]",
                                 `(Webview: ${webviewPanel.title})`,
-                                event.message ?? ""
+                                event.logger ?? "",
                             );
                             break;
                         }
@@ -221,7 +219,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                 }
             },
             null,
-            disposables
+            disposables,
         );
 
         /**
@@ -263,7 +261,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                             break;
                         }
                         case undefined: {
-                            postMessage(MessageType.updateFromExtension);
+                            postMessage(MessageType.msgFromExtension);
                             break;
                         }
                     }
@@ -271,7 +269,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                 isUpdateFromWebview = false; // reset
             },
             null,
-            disposables
+            disposables,
         );
 
         // Called when the view state changes (e.g. user switch the tab)
@@ -304,7 +302,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
                 }
             },
             null,
-            disposables
+            disposables,
         );
 
         // CleanUp after Custom Editor was closed.
@@ -313,7 +311,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
             vscode.commands.executeCommand(
                 "setContext",
                 `${JsonFormsBuilder.VIEWTYPE}.openCustomEditors`,
-                JsonFormsBuilder.counter
+                JsonFormsBuilder.counter,
             );
 
             this.textEditor.close(this.controller.document.fileName);
@@ -334,7 +332,7 @@ export class JsonFormsBuilder implements vscode.CustomTextEditorProvider {
         vscode.commands.executeCommand(
             "setContext",
             `${JsonFormsBuilder.VIEWTYPE}.openCustomEditors`,
-            JsonFormsBuilder.counter
+            JsonFormsBuilder.counter,
         );
 
         // set the document

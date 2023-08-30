@@ -52,7 +52,7 @@ export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
 
     protected setEventHandlers(
         webviewPanel: WebviewPanel,
-        document: DocumentManager<FormBuilderData>
+        document: DocumentManager<FormBuilderData>,
     ): Disposable[] {
         const disposables: Disposable[] = [];
 
@@ -63,7 +63,7 @@ export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
             ) {
                 try {
                     await this.update({
-                        type: `${this.viewType}.${MessageType.updateFromExtension}`,
+                        type: `${this.viewType}.${MessageType.msgFromExtension}`,
                         data: document.content,
                     });
                 } catch (error) {
@@ -117,7 +117,7 @@ export class BuildInPreview extends Preview<DocumentManager<FormBuilderData>> {
                 this.dispose();
             },
             null,
-            disposables
+            disposables,
         );
 
         return disposables;

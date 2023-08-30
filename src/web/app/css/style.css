@@ -50,7 +50,7 @@
         --tool-control-secondary: var(--vscode-button-secondaryBackground);
         --tool-layout: var(--vscode-input-background);
         --tool-accent: var(--vscode-inputValidation-infoBackground);
-        --tool-error: var(--vscode-inputOption-errorBackground);
+        --tool-error: var(--vscode-inputValidation-errorBackground);
         --toolItem-icon: var(--vscode-editor-foreground);
         --toolItem-border: rgb(100, 100, 100, 0.6);
         --toolBar: var(--base-100);

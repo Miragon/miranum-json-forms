@@ -83,7 +83,7 @@ export class DocumentController<ContentType extends FormBuilderData> implements 
             try {
                 if (observer instanceof BuildInPreview) {
                     await observer.update({
-                        type: `${observer.viewType}.${MessageType.updateFromExtension}`,
+                        type: `${observer.viewType}.${MessageType.msgFromExtension}`,
                         data: this.content,
                     });
                 } else if (observer instanceof TextEditorComponent) {

@@ -1,36 +1,3 @@
-<template>
-    <section class="resizeArea" ref="resizeWrapper">
-        <div class="indicator z-40" ref="resizeMover" @mousedown="startDragging()"></div>
-
-        <div ref="resizeTarget" class="relative">
-            <div class="absolute inset-0 z-30" v-if="pressed" />
-
-            <slot></slot>
-        </div>
-    </section>
-</template>
-
-<style scoped>
-.resizeArea {
-    @apply relative;
-}
-.indicator {
-    transform: translate(-50%, -50%);
-    width: 5px;
-
-    @apply absolute
-  right-0 top-1/2
-
-  h-10
-
-  cursor-ew-resize
-  rounded
-
-  bg-gray-400
-  hover:bg-gray-300;
-}
-</style>
-
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from "vue";
 import { useMousePressed } from "@vueuse/core";
@@ -64,3 +31,36 @@ onMounted(() => {
 });
 onUnmounted(endDragging);
 </script>
+
+<template>
+    <section class="resizeArea" ref="resizeWrapper">
+        <div class="indicator z-40" ref="resizeMover" @mousedown="startDragging()"></div>
+
+        <div ref="resizeTarget" class="relative">
+            <div class="absolute inset-0 z-30" v-if="pressed" />
+
+            <slot></slot>
+        </div>
+    </section>
+</template>
+
+<style scoped>
+.resizeArea {
+    @apply relative;
+}
+.indicator {
+    transform: translate(-50%, -50%);
+    width: 5px;
+
+    @apply absolute
+    right-0 top-1/2
+
+    h-10
+
+    cursor-ew-resize
+    rounded
+
+    bg-gray-400
+    hover:bg-gray-300;
+}
+</style>

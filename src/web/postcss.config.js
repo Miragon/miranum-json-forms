@@ -1,7 +1,12 @@
+let configPath = "./src/web/app";
+if (process.env.NODE_ENV === "development") {
+    configPath = "./app";
+}
+
 module.exports = {
     plugins: {
         tailwindcss: {
-            content: ["./src/web/app/**/*.{vue,js,ts,jsx,tsx}"],
+            content: [`${configPath}/**/*.{vue,js,ts,jsx,tsx}`],
             theme: {
                 extend: {},
             },
