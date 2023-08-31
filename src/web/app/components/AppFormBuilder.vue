@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { boplusVueVanillaRenderers, defaultTools, FormBuilder } from "@backoffice-plus/formbuilder";
 import { formbuilderRenderers } from "@backoffice-plus/formbuilder";
 import { vanillaRenderers } from "@jsonforms/vue-vanilla";
