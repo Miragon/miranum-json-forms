@@ -54,7 +54,7 @@
 .styleA .tagInput {
     @apply vsc-input-bg
     focus:vsc-inputOpt-active-fg
-    focus:vsc-inputOpt-active-bg vsc-input-fg
+    focus:vsc-inputOpt-active-bg
 
     vsc-input-border
     focus:vsc-inputOpt-active-border
@@ -72,8 +72,6 @@
     outline-none
 
     transition-colors  disabled:cursor-not-allowed
-
-    disabled:bg-gray-200;
 }
 .styleA select {
     appearance: auto;

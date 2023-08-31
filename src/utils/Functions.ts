@@ -33,11 +33,11 @@ export function getMinimum<T extends FormBuilderData>(): T {
  * @returns a string which represents the html content
  */
 export function getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri, viewType: string): string {
-    const vueAppUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "client", "webview.mjs"));
+    const vueAppUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "client", "main.js"));
 
     const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "resources", "css", "reset.css"));
 
-    const styleAppUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "client", "style.css"));
+    const styleAppUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "client", "main.css"));
 
     const nonce = getNonce();
 

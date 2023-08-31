@@ -20,17 +20,12 @@ declare const process: { env: { NODE_ENV: string } };
 const resolver = createResolver();
 
 let stateController: VsCode;
+let developmentMode = ref(false);
 if (process.env.NODE_ENV === "development") {
+    developmentMode.value = true;
     stateController = new MockedStateController();
 } else {
     stateController = new StateController();
-
-    // @ts-ignore
-    window.confirm = async function (message: string | undefined) {
-        const msg = message ? message : "";
-        postMessage(MessageType.confirmation, undefined, msg);
-        return await resolver.wait();
-    };
 }
 
 let isUpdateFromExtension = false;
@@ -103,7 +98,7 @@ function updateFile(data: FormBuilderData) {
         return;
     }
 
-    if (process.env.NODE_ENV === "development") {
+    if (developmentMode.value) {
         jsonFormsPreview.value = {
             schema: data.schema,
             uischema: data.uischema,
@@ -197,12 +192,17 @@ onUnmounted(() => {
             :json-form="jsonForms"
             :schema-read-only="schemaReadOnly"
             @update="sendChangesToExtension"
-            v-if="mode === 'jsonforms-builder' || mode"
+            v-if="mode === 'jsonforms-builder' || mode === 'mock'"
         />
 
         <FormBuilderDetails
             :json-form="jsonFormsPreview"
-            v-if="mode === 'jsonforms-renderer' || mode === 'mock'"
+            v-if="developmentMode && (mode === 'jsonforms-renderer' || mode === 'mock')"
+        />
+
+        <FormBuilderDetails
+            :json-form="jsonForms"
+            v-if="!developmentMode && (mode === 'jsonforms-renderer' || mode === 'mock')"
         />
     </div>
 </template>
