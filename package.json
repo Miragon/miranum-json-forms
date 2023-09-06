@@ -149,7 +149,7 @@
         "vue-class-component": "^8.0.0-0"
     },
     "devDependencies": {
-        "@types/lodash": "^4.14.197",
+        "@types/lodash": "^4.14.198",
         "@types/node": "^20.5.7",
         "@types/vscode": "^1.76.0",
         "@types/vscode-webview": "^1.57.2",
