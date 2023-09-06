@@ -45,6 +45,12 @@
         "Formbuilder"
     ],
     "main": "./dist/main.js",
+    "activationEvents": [
+        "onCustomEditor:jsonforms-builder",
+        "onCommand:jsonforms-renderer.togglePreview",
+        "onCommand:jsonforms-builder.toggleTextEditor",
+        "onCommand:jsonforms-builder.toggleLogger"
+    ],
     "contributes": {
         "customEditors": [
             {
