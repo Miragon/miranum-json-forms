@@ -3,7 +3,7 @@
     "displayName": "Miranum JSON Forms",
     "description": "Create and edit forms with an modern easy to use editor.",
     "license": "SEE LICENSE IN LICENSE",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "publisher": "miragon-gmbh",
     "preview": true,
     "homepage": "https://www.miranum.io/",
@@ -45,12 +45,6 @@
         "Formbuilder"
     ],
     "main": "./dist/main.js",
-    "activationEvents": [
-        "onCustomEditor:jsonforms-builder",
-        "onCommand:jsonforms-renderer.togglePreview",
-        "onCommand:jsonforms-builder.toggleTextEditor",
-        "onCommand:jsonforms-builder.toggleLogger"
-    ],
     "contributes": {
         "customEditors": [
             {
@@ -134,8 +128,6 @@
         }
     },
     "scripts": {
-        "publish": "vsce publish",
-        "vscode:prepublish": "npm run build",
         "build": "npm run esbuild -- --minify && npm run vite -- --minify esbuild",
         "dev": "conc -c \"cyan,yellow\" \"npm run esbuild -- --sourcemap --watch\" \"npm run vite -- --sourcemap true --watch\"",
         "esbuild": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",

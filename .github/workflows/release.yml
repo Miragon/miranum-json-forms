@@ -27,7 +27,6 @@ jobs:
         with:
           name: miranum-json-forms
           path: |
-            src/
             dist/
             images/
             resources/
@@ -36,6 +35,7 @@ jobs:
             README.md
             CHANGELOG.md
             package.json
+            package-lock.json
 
   create-release:
     if: github.event.inputs.release-tag
@@ -81,6 +81,8 @@ jobs:
           name: miranum-json-forms
       - name: Prepare
         run: npm install && npm install -g @vscode/vsce@latest
+      - name: Build vsix
+        run: vsce package --out miranum-json-forms.vsix
       - name: Publish extension
         run: vsce publish
         env:
